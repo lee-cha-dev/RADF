@@ -15,6 +15,13 @@ const metrics = [
     dependsOn: ["order_id"],
     query: { op: "COUNT", field: "order_id" },
   }),
+  createMetric({
+    id: "average_order_value",
+    label: "Average Order Value",
+    format: "currency",
+    dependsOn: ["order_value"],
+    query: { op: "AVG", field: "order_value" },
+  }),
 ];
 
 export default metrics;
