@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useRoutes } from 'react-router-dom';
 import routes from './routes.jsx';
+import ErrorBoundary from './framework/core/layout/ErrorBoundary.jsx';
 
 const THEME_CLASS = {
   light: 'radf-theme-light',
@@ -26,6 +27,10 @@ function App() {
     setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
   };
 
+  const handleResetApp = () => {
+    window.location.reload();
+  };
+
   return (
     <div className="radf-app">
       <header className="radf-app__header">
@@ -37,7 +42,15 @@ function App() {
           {toggleLabel}
         </button>
       </header>
-      <main className="radf-app__content">{routing}</main>
+      <main className="radf-app__content">
+        <ErrorBoundary
+          title="Dashboard failed to load"
+          message="The dashboard encountered an unexpected error. Reload the page to retry."
+          onReset={handleResetApp}
+        >
+          {routing}
+        </ErrorBoundary>
+      </main>
     </div>
   );
 }

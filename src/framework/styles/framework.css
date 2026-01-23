@@ -84,3 +84,37 @@ button {
   margin: 0;
   color: var(--radf-color-muted);
 }
+
+.radf-error-boundary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--radf-space-7);
+  background: var(--radf-color-surface);
+  border: 1px solid var(--radf-color-border);
+  border-radius: var(--radf-radius-md);
+  box-shadow: var(--radf-shadow-soft);
+  min-height: 320px;
+}
+
+.radf-error-boundary__content {
+  text-align: center;
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--radf-space-3);
+}
+
+.radf-error-boundary__title {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.radf-error-boundary__message {
+  margin: 0;
+  color: var(--radf-color-muted);
+}
+
+.radf-error-boundary__action {
+  align-self: center;
+}

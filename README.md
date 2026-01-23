@@ -401,6 +401,43 @@ You should not need to edit framework internals for typical dashboards.
 
 ---
 
+## Developer Docs (Docs & Hardening)
+
+### How to Add a New Dashboard
+1. Create a new folder under `src/app/dashboards/<name>/`.
+2. Add dataset + semantic definitions:
+   * `<name>.dataset.js`
+   * `<name>.metrics.js`
+   * `<name>.dimensions.js`
+3. Add a dashboard config file: `<name>.dashboard.js` with layout + panel config.
+4. (Optional) add local styling in `<name>.css` and import it from your dashboard page.
+5. Register the dashboard in the app router (or a registry) so it can be navigated to.
+
+Reference implementation: `src/app/dashboards/example/`. 
+
+### How to Add a Metric or Dimension
+1. Open your dashboard's `*.metrics.js` or `*.dimensions.js` file.
+2. Use the helper creators in `src/framework/core/model/`:
+   * `createMetric({ id, label, format, query | compute, ... })`
+   * `createDimension({ id, label, type, hierarchy, formatter })`
+3. Export the new definitions and include them in your dataset's field catalog.
+4. Update panel configs to reference the new IDs in `measures` / `dimensions`.
+
+### How to Add a Chart Panel
+1. Create a new chart component in `src/framework/core/viz/charts/` (Recharts only).
+2. Add a registry entry in `src/framework/core/registry/registerCharts.js`.
+3. Ensure your panel only receives `data`, `encodings`, and `options` props.
+4. Add a panel config with `panelType: "viz"` and `vizType` pointing to your registry key.
+
+### How to Add an Insight Analyzer
+1. Create a new analyzer in `src/framework/core/insights/analyzers/`.
+2. Export a function that receives `{ rows, meta, querySpec, dashboardState }`.
+3. Return a list of insight objects: `{ id, title, severity, narrative, ... }`.
+4. Register it in `src/framework/core/registry/registerInsights.js`.
+5. Add an insights panel in your dashboard config with `panelType: "insights"`.
+
+---
+
 ## Guardrails Checklist (Before Merging Any Branch)
 
 * [ ] No TypeScript files or TS config
