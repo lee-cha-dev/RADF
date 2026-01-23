@@ -10,6 +10,7 @@ import './framework/styles/framework.css';
 import './framework/styles/components/grid.css';
 import './framework/styles/components/panel.css';
 import './framework/styles/components/charts.css';
+import './framework/styles/components/filters.css';
 
 const rootElement = document.getElementById('root');
 

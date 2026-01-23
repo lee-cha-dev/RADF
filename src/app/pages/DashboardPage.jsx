@@ -1,12 +1,23 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import GridLayout from '../../framework/core/layout/GridLayout.jsx';
 import Panel from '../../framework/core/layout/Panel.jsx';
 import VizRenderer from '../../framework/core/viz/VizRenderer.jsx';
 import { buildQuerySpec } from '../../framework/core/query/buildQuerySpec.js';
 import { useQuery } from '../../framework/core/query/useQuery.js';
 import { MockDataProvider } from '../../framework/core/query/MockDataProvider.js';
+import DashboardProvider from '../../framework/core/dashboard/DashboardProvider.jsx';
+import { useDashboardActions } from '../../framework/core/dashboard/useDashboardActions.js';
+import { useDashboardState } from '../../framework/core/dashboard/useDashboardState.js';
+import {
+  buildCrossFilterSelectionFromEvent,
+  isSelectionDuplicate,
+} from '../../framework/core/interactions/crossFilter.js';
+import SelectionChips from '../../framework/core/interactions/SelectionChips.jsx';
 
-const VizPanel = ({ panelConfig, dashboardState }) => {
+const VizPanel = ({ panelConfig }) => {
+  const dashboardState = useDashboardState();
+  const { addSelection } = useDashboardActions();
+
   const querySpec = useMemo(
     () => buildQuerySpec(panelConfig, dashboardState),
     [panelConfig, dashboardState]
@@ -15,6 +26,53 @@ const VizPanel = ({ panelConfig, dashboardState }) => {
   const { data, loading, error } = useQuery(querySpec, {
     provider: MockDataProvider,
   });
+
+  const crossFilterConfig = panelConfig.interactions?.crossFilter;
+  const crossFilterField =
+    typeof crossFilterConfig === 'object' ? crossFilterConfig.field : null;
+  const crossFilterLabel =
+    typeof crossFilterConfig === 'object' ? crossFilterConfig.label : null;
+  const selections = dashboardState.selections;
+
+  const handleCrossFilterClick = useCallback(
+    (event) => {
+      if (!crossFilterConfig) {
+        return;
+      }
+      const selection = buildCrossFilterSelectionFromEvent({
+        event,
+        panelId: panelConfig.id,
+        field: crossFilterField || panelConfig.encodings?.x,
+        label: crossFilterLabel || panelConfig.title,
+      });
+      if (!selection) {
+        return;
+      }
+      if (isSelectionDuplicate(selections, selection)) {
+        return;
+      }
+      addSelection(selection);
+    },
+    [
+      addSelection,
+      crossFilterConfig,
+      crossFilterField,
+      crossFilterLabel,
+      panelConfig.encodings?.x,
+      panelConfig.id,
+      panelConfig.title,
+      selections,
+    ]
+  );
+
+  const handlers = useMemo(() => {
+    if (!crossFilterConfig) {
+      return {};
+    }
+    return {
+      onClick: handleCrossFilterClick,
+    };
+  }, [crossFilterConfig, handleCrossFilterClick]);
 
   const isEmpty = !loading && !error && (!data || data.length === 0);
   const status = loading ? 'loading' : error ? 'error' : 'ready';
@@ -33,22 +91,15 @@ const VizPanel = ({ panelConfig, dashboardState }) => {
         data={data || []}
         encodings={panelConfig.encodings}
         options={panelConfig.options}
-        handlers={panelConfig.handlers}
+        handlers={handlers}
       />
     </Panel>
   );
 };
 
-function DashboardPage() {
-  const dashboardState = useMemo(
-    () => ({
-      datasetId: 'mock-dataset',
-      globalFilters: [],
-      selections: [],
-      drillPath: [],
-    }),
-    []
-  );
+const DashboardContent = () => {
+  const { selections } = useDashboardState();
+  const { clearSelections, removeSelection } = useDashboardActions();
 
   const panels = useMemo(
     () => [
@@ -95,6 +146,12 @@ function DashboardPage() {
         },
         encodings: { x: 'category', y: 'metric_value' },
         options: { tooltip: true, legend: false },
+        interactions: {
+          crossFilter: {
+            field: 'category',
+            label: 'Category',
+          },
+        },
       },
     ],
     []
@@ -103,11 +160,16 @@ function DashboardPage() {
   return (
     <section className="radf-dashboard">
       <h1 className="radf-dashboard__title">Dashboard Layout Preview</h1>
+      <SelectionChips
+        selections={selections}
+        onClear={clearSelections}
+        onRemove={removeSelection}
+      />
       <GridLayout
         panels={panels}
         renderPanel={(panel) => (
           panel.panelType === 'viz' ? (
-            <VizPanel panelConfig={panel} dashboardState={dashboardState} />
+            <VizPanel panelConfig={panel} />
           ) : (
             <Panel title={panel.title} subtitle={panel.subtitle} status={panel.status}>
               {panel.content}
@@ -116,6 +178,20 @@ function DashboardPage() {
         )}
       />
     </section>
+  );
+};
+
+function DashboardPage() {
+  return (
+    <DashboardProvider
+      initialState={{
+        dashboardId: 'overview',
+        datasetId: 'mock-dataset',
+        globalFilters: [],
+      }}
+    >
+      <DashboardContent />
+    </DashboardProvider>
   );
 }
 
