@@ -5,6 +5,8 @@ import VizRenderer from '../../framework/core/viz/VizRenderer.jsx';
 import { buildQuerySpec } from '../../framework/core/query/buildQuerySpec.js';
 import { useQuery } from '../../framework/core/query/useQuery.js';
 import { MockDataProvider } from '../../framework/core/query/MockDataProvider.js';
+import InsightsPanel from '../../framework/core/insights/InsightsPanel.jsx';
+import { useInsights } from '../../framework/core/insights/useInsights.js';
 import DashboardProvider from '../../framework/core/dashboard/DashboardProvider.jsx';
 import { useDashboardActions } from '../../framework/core/dashboard/useDashboardActions.js';
 import { useDashboardState } from '../../framework/core/dashboard/useDashboardState.js';
@@ -318,6 +320,42 @@ const VizPanel = ({ panelConfig }) => {
   );
 };
 
+const InsightsPanelContainer = ({ panelConfig }) => {
+  const dashboardState = useDashboardState();
+
+  const querySpec = useMemo(
+    () => buildQuerySpec(panelConfig, dashboardState),
+    [panelConfig, dashboardState]
+  );
+
+  const { data, meta, loading, error } = useQuery(querySpec, {
+    provider: MockDataProvider,
+  });
+
+  const { insights } = useInsights({
+    rows: data || [],
+    meta,
+    querySpec,
+    dashboardState,
+  });
+
+  const isEmpty = !loading && !error && insights.length === 0;
+  const status = loading ? 'loading' : error ? 'error' : 'ready';
+
+  return (
+    <Panel
+      title={panelConfig.title}
+      subtitle={panelConfig.subtitle}
+      status={status}
+      error={error}
+      isEmpty={isEmpty}
+      emptyMessage="No insights available for this panel."
+    >
+      <InsightsPanel insights={insights} />
+    </Panel>
+  );
+};
+
 const DashboardContent = () => {
   const { selections, drillPath } = useDashboardState();
   const { clearSelections, removeSelection, popDrillPath } = useDashboardActions();
@@ -395,6 +433,18 @@ const DashboardContent = () => {
           },
         },
       },
+      {
+        id: 'insights',
+        panelType: 'insights',
+        title: 'Automated Insights',
+        subtitle: 'Trend and anomaly signals from the mock dataset.',
+        layout: { x: 1, y: 4, w: 12, h: 2 },
+        datasetId: 'mock-dataset',
+        query: {
+          measures: ['metric_value'],
+          dimensions: ['date_month'],
+        },
+      },
     ],
     []
   );
@@ -419,6 +469,8 @@ const DashboardContent = () => {
         renderPanel={(panel) => (
           panel.panelType === 'viz' ? (
             <VizPanel panelConfig={panel} />
+          ) : panel.panelType === 'insights' ? (
+            <InsightsPanelContainer panelConfig={panel} />
           ) : (
             <Panel title={panel.title} subtitle={panel.subtitle} status={panel.status}>
               {panel.content}
