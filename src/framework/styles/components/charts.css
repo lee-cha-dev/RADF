@@ -3,6 +3,15 @@
   flex-direction: column;
   gap: var(--radf-space-3);
   width: 100%;
+  --radf-chart-grid: color-mix(in srgb, var(--radf-color-border), transparent 55%);
+  --radf-chart-axis: color-mix(in srgb, var(--radf-color-border), var(--radf-color-text) 18%);
+  --radf-chart-tick: color-mix(in srgb, var(--radf-color-muted), var(--radf-color-text) 18%);
+  --radf-chart-plot-bg: color-mix(in srgb, var(--radf-color-surface), var(--radf-color-bg) 20%);
+  --radf-chart-tooltip-bg: color-mix(
+    in srgb,
+    var(--radf-color-surface),
+    var(--radf-color-bg) 28%
+  );
 }
 
 .radf-chart__header {
@@ -31,6 +40,8 @@
 .radf-chart__canvas {
   width: 100%;
   min-height: 280px;
+  background: var(--radf-chart-plot-bg);
+  border-radius: var(--radf-radius-md);
 }
 
 .radf-chart__footer {
@@ -41,6 +52,22 @@
 .radf-chart__brush .recharts-brush-traveller {
   fill: var(--radf-color-accent);
   stroke: var(--radf-color-accent);
+}
+
+.radf-chart__canvas .recharts-cartesian-grid line {
+  stroke: var(--radf-chart-grid);
+}
+
+.radf-chart__canvas .recharts-cartesian-axis-line {
+  stroke: var(--radf-chart-axis);
+}
+
+.radf-chart__canvas .recharts-cartesian-axis-tick line {
+  stroke: var(--radf-chart-grid);
+}
+
+.radf-chart__canvas .recharts-cartesian-axis-tick-value {
+  fill: var(--radf-chart-tick);
 }
 
 .radf-brush {
@@ -93,8 +120,8 @@
 }
 
 .radf-chart-tooltip {
-  background: var(--radf-color-surface);
-  border: 1px solid var(--radf-color-border);
+  background: var(--radf-chart-tooltip-bg);
+  border: 1px solid color-mix(in srgb, var(--radf-color-border), transparent 25%);
   border-radius: var(--radf-radius-sm);
   box-shadow: var(--radf-shadow-soft);
   padding: var(--radf-space-3);

@@ -46,15 +46,15 @@ function LineChartPanel({ data = [], encodings = {}, options = {}, handlers = {}
     <ChartContainer>
       <ResponsiveContainer width="100%" height={280}>
         <LineChart data={data} margin={{ top: 8, right: 16, left: 0, bottom: 8 }}>
-          <CartesianGrid stroke="var(--radf-color-border)" strokeDasharray="3 3" />
+          <CartesianGrid stroke="var(--radf-chart-grid)" strokeDasharray="3 3" />
           <XAxis
             dataKey={encodings.x}
-            tick={{ fill: 'var(--radf-color-muted)', fontSize: 12 }}
-            axisLine={{ stroke: 'var(--radf-color-border)' }}
+            tick={{ fill: 'var(--radf-chart-tick)', fontSize: 12 }}
+            axisLine={{ stroke: 'var(--radf-chart-axis)' }}
           />
           <YAxis
-            tick={{ fill: 'var(--radf-color-muted)', fontSize: 12 }}
-            axisLine={{ stroke: 'var(--radf-color-border)' }}
+            tick={{ fill: 'var(--radf-chart-tick)', fontSize: 12 }}
+            axisLine={{ stroke: 'var(--radf-chart-axis)' }}
           />
           {showTooltip ? <Tooltip content={<ChartTooltip />} /> : null}
           {showLegend ? <Legend content={<ChartLegend />} /> : null}
