@@ -1,20 +1,10 @@
+import {findMeasureId} from "./analysisUtils.js";
+
 const formatNumber = (value) => {
   if (value == null || Number.isNaN(value)) {
     return '0';
   }
   return Number(value).toLocaleString(undefined, { maximumFractionDigits: 2 });
-};
-
-const findMeasureId = (rows, querySpec) => {
-  if (querySpec?.measures?.length) {
-    return querySpec.measures[0];
-  }
-  const sample = rows?.[0];
-  if (!sample) {
-    return null;
-  }
-  const numericKey = Object.keys(sample).find((key) => typeof sample[key] === 'number');
-  return numericKey || null;
 };
 
 const getValues = (rows, measureId) =>
