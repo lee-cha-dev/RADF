@@ -1,0 +1,17 @@
+:root {
+  --radf-font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+  --radf-font-size-base: 16px;
+  --radf-font-weight-semibold: 600;
+  --radf-line-height: 1.5;
+
+  --radf-space-1: 4px;
+  --radf-space-2: 8px;
+  --radf-space-3: 12px;
+  --radf-space-4: 16px;
+  --radf-space-5: 20px;
+  --radf-space-6: 24px;
+
+  --radf-radius-sm: 6px;
+  --radf-radius-md: 10px;
+  --radf-shadow-soft: 0 8px 20px rgba(15, 23, 42, 0.08);
+}
