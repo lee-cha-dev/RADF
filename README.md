@@ -1,453 +1,321 @@
-# README.md — Recharts Analytics Dashboard Framework (RADF)
+# RADF (Recharts Analytics Dashboard Framework)
 
-PowerBI-style analytics dashboards built with:
-- **React (JavaScript only)** — **NO TypeScript**
-- **Recharts** for charting
-- **Plain CSS files** — **NO Tailwind**, **NO inline styles**
-- Config-driven dashboards + semantic layer + query layer + interactions + insights
+RADF is a reusable, config-driven React framework for building PowerBI-like analytics dashboards: grids of KPI cards, trend charts, breakdowns, cross-filtering, drilldowns, and insights. It gives you a semantic layer (metrics/dimensions), a query layer, dashboard state management, and Recharts-based visualizations so you can ship consistent dashboards fast in any React app.
 
-This repo is designed so an AI can build it incrementally using the feature-branch plan.
-
----
-
-## Non-Negotiables (Hard Constraints)
-
-1. **JavaScript ONLY** (no `.ts`, no `.tsx`, no TS configs)
-2. **No Tailwind**
-3. **No inline styling** (`style={{...}}` is forbidden)
-4. All components must use `className` and reference CSS files
-5. Charts must be implemented using **Recharts**
-6. Data fetching must support **AbortController**
-7. Must prevent fetch storms: stable QuerySpec hashing + caching + memoization
+**Hard constraints (non-negotiable):**
+- **JavaScript only** (no TypeScript)
+- **No Tailwind**
+- **No inline styles** (no `style={{ ... }}`)
+- **Recharts for charts**
+- **CSS files + CSS variables** for tokens/themes
 
 ---
 
-## Project Goal
+## Quick Start (Using RADF in your app)
 
-Create a reusable dashboard framework that provides PowerBI-like capabilities:
-- Config-driven dashboards (add a new dashboard mostly by config + definitions)
-- Semantic layer (metrics/dimensions/hierarchies) reusable across dashboards
-- Query layer (QuerySpec -> provider -> transforms -> cache)
-- Interactions:
-  - cross-filtering (click a chart filters other charts)
-  - drilldown (month -> day, hierarchy navigation)
-  - brush/zoom for time-series
-- Insight engine (pluggable analyzers producing insight cards)
-- Theme system (light/dark via CSS variables)
+1) **Copy the framework code into your app**
+   - From this repo: `src/framework/`
+   - Into your app (recommended): `src/components/radf/` or `src/lib/radf/`
 
----
+2) **Copy global styles**
+   - Copy `src/framework/styles/*` into your app (either under the same `radf` folder or your global styles folder).
+   - You can keep the `styles/` folder inside the RADF path if you prefer.
 
-## Quick Start
+3) **Install Recharts**
 
 ```bash
-npm install
-npm run dev
-````
+npm install recharts
+```
 
-Expected result:
+4) **Import RADF styles in your app entry point** (`main.jsx` or `index.jsx`) in this order:
 
-* App boots to a “Framework Loaded” page initially
-* Later branches will wire in example dashboards and interactions
+```jsx
+import './components/radf/styles/tokens.css';
+import './components/radf/styles/theme.light.css';
+import './components/radf/styles/theme.dark.css';
+import './components/radf/styles/framework.css';
+import './components/radf/styles/components/grid.css';
+import './components/radf/styles/components/panel.css';
+import './components/radf/styles/components/charts.css';
+import './components/radf/styles/components/filters.css';
+import './components/radf/styles/components/insights.css';
+import './components/radf/styles/components/table.css';
+```
 
----
+5) **Register the default viz + insight modules** (once at startup):
 
-## How Work Is Organized
+```jsx
+import registerCharts from './components/radf/core/registry/registerCharts.js';
+import registerInsights from './components/radf/core/registry/registerInsights.js';
 
-All work is split into **feature branches**.
-The AI should implement branches in order, merging each branch into `main` only after its acceptance criteria are met.
+registerCharts();
+registerInsights();
+```
 
-> Branch naming: `feature/<name>`
-> Each branch has a specific deliverable scope. Do NOT implement future-branch features early unless required by the current branch.
+6) **Theme toggle (light/dark)**
+   - Themes are applied by adding a class to the root element (`document.documentElement`).
+   - `theme.light.css` and `theme.dark.css` both define `:root.radf-theme-light` and `:root.radf-theme-dark`.
 
----
+```jsx
+const THEME_CLASS = {
+  light: 'radf-theme-light',
+  dark: 'radf-theme-dark',
+};
 
-## AI Work Instructions (Branch-by-Branch)
+useEffect(() => {
+  const root = document.documentElement;
+  root.classList.remove(THEME_CLASS.light, THEME_CLASS.dark);
+  root.classList.add(THEME_CLASS[theme]);
+}, [theme]);
+```
 
-### Operating Rules for the AI
-
-* Implement ONLY the branch you are currently assigned.
-* Keep framework code **generic**: no domain-specific naming (e.g., “overtime”) inside `src/framework/`.
-* Domain/example-specific naming belongs in `src/app/dashboards/example/`.
-* No fake “business logic” metrics unless explicitly defined in example dashboard files.
-* Prefer composable functions, pure reducers, and pure transforms.
-* Memoize derived objects passed to hooks to avoid rerender/fetch loops.
-
----
-
-## Branch Plan (Execution Order)
-
-### 1) `feature/repo-bootstrap`
-
-**Objective:** Create a runnable React app skeleton with the target folder structure and CSS pipeline.
-
-**Must implement:**
-
-* React app setup (prefer Vite)
-* Base folder structure under `src/framework` and `src/app`
-* `App.jsx`, basic routing stub, `DashboardPage.jsx` placeholder
-* Global CSS imports:
-
-  * `src/framework/styles/tokens.css`
-  * `src/framework/styles/theme.light.css`
-  * `src/framework/styles/theme.dark.css`
-  * `src/framework/styles/framework.css`
-* Theme toggle should switch which theme file is applied (simple implementation OK)
-
-**Acceptance criteria:**
-
-* `npm install && npm run dev` works
-* No TS, no Tailwind, no inline styles
-* Page renders “Framework Loaded”
+> If your app already has a theme system, map it to these root classes and keep the CSS variable names intact.
 
 ---
 
-### 2) `feature/core-dashboard-provider`
+## Basic Usage Example
 
-**Objective:** Implement dashboard state container + actions + selectors.
+Below is a minimal example that wires up a dashboard page with RADF’s provider, layout, and visualization renderer. This example uses the included `MockDataProvider` for local data.
 
-**Must implement:**
+### `DashboardPage.jsx`
 
-* `DashboardProvider.jsx` (useReducer + Context)
-* `dashboardReducer.js`, `dashboardActions.js`, `dashboardSelectors.js`
-* Hooks:
+```jsx
+import React, { useMemo } from 'react';
+import DashboardProvider from '../components/radf/core/dashboard/DashboardProvider.jsx';
+import { useDashboardState } from '../components/radf/core/dashboard/useDashboardState.js';
+import GridLayout from '../components/radf/core/layout/GridLayout.jsx';
+import Panel from '../components/radf/core/layout/Panel.jsx';
+import VizRenderer from '../components/radf/core/viz/VizRenderer.jsx';
+import { buildQuerySpec } from '../components/radf/core/query/buildQuerySpec.js';
+import { useQuery } from '../components/radf/core/query/useQuery.js';
+import { MockDataProvider } from '../components/radf/core/query/MockDataProvider.js';
+import dashboardConfig from './dashboard.config.js';
 
-  * `useDashboardState.js`
-  * `useDashboardActions.js`
+const VizPanel = ({ panel }) => {
+  const dashboardState = useDashboardState();
+  const querySpec = useMemo(
+    () => buildQuerySpec(panel, dashboardState),
+    [panel, dashboardState]
+  );
 
-**State must include:**
+  const { data, loading, error } = useQuery(querySpec, {
+    provider: MockDataProvider,
+  });
 
-* `dashboardId`, `datasetId`
-* `globalFilters`
-* `selections` (cross-filters)
-* `drillPath`
-* `panelStateById`
+  const isEmpty = !loading && !error && (!data || data.length === 0);
+  const status = loading ? 'loading' : error ? 'error' : 'ready';
 
-**Acceptance criteria:**
+  return (
+    <Panel
+      title={panel.title}
+      subtitle={panel.subtitle}
+      status={status}
+      error={error}
+      isEmpty={isEmpty}
+      emptyMessage="No data returned for this panel."
+    >
+      <VizRenderer
+        vizType={panel.vizType}
+        data={data || []}
+        encodings={panel.encodings}
+        options={panel.options}
+      />
+    </Panel>
+  );
+};
 
-* Can set a global filter
-* Can add/remove a selection
-* Can push/pop drill path entries
-* Reducer is pure (no side effects)
+const DashboardContent = () => (
+  <section className="radf-dashboard">
+    <h1 className="radf-dashboard__title">{dashboardConfig.title}</h1>
+    <p className="radf-dashboard__subtitle">{dashboardConfig.subtitle}</p>
+    <GridLayout
+      panels={dashboardConfig.panels}
+      renderPanel={(panel) => (
+        <VizPanel key={panel.id} panel={panel} />
+      )}
+    />
+  </section>
+);
 
----
+function DashboardPage() {
+  return (
+    <DashboardProvider
+      initialState={{
+        dashboardId: dashboardConfig.id,
+        datasetId: dashboardConfig.datasetId,
+      }}
+    >
+      <DashboardContent />
+    </DashboardProvider>
+  );
+}
 
-### 3) `feature/semantic-layer`
+export default DashboardPage;
+```
 
-**Objective:** Define dataset/metric/dimension contracts and builder helpers.
+### `dashboard.config.js`
 
-**Must implement:**
+```js
+const dashboardConfig = {
+  id: 'sales-overview',
+  title: 'Sales Overview',
+  subtitle: 'Revenue and growth at a glance',
+  datasetId: 'sales_dataset',
+  panels: [
+    {
+      id: 'kpi-revenue',
+      panelType: 'viz',
+      vizType: 'kpi',
+      title: 'Total Revenue',
+      subtitle: 'Last 30 days',
+      layout: { x: 1, y: 1, w: 4, h: 1 },
+      datasetId: 'sales_dataset',
+      query: {
+        measures: ['total_revenue'],
+        dimensions: [],
+      },
+      encodings: { value: 'total_revenue', label: 'Total Revenue' },
+      options: { format: 'currency', caption: 'All regions' },
+    },
+    {
+      id: 'trend-revenue',
+      panelType: 'viz',
+      vizType: 'line',
+      title: 'Revenue Trend',
+      subtitle: 'Monthly revenue',
+      layout: { x: 1, y: 2, w: 8, h: 2 },
+      datasetId: 'sales_dataset',
+      query: {
+        measures: ['total_revenue'],
+        dimensions: ['order_month'],
+      },
+      encodings: { x: 'order_month', y: 'total_revenue' },
+      options: { tooltip: true, legend: false },
+    },
+  ],
+};
 
-* `createDataset.js`, `createMetric.js`, `createDimension.js`
-* `hierarchies.js`, `fieldTypes.js`
-* Example definitions under `src/app/dashboards/example/`:
+export default dashboardConfig;
+```
 
-  * `example.dataset.js`
-  * `example.metrics.js`
-  * `example.dimensions.js`
+### Minimal `MockDataProvider` usage
 
-**Acceptance criteria:**
-
-* Dataset exposes stable IDs and field catalog
-* Metrics/dimensions are plain JS objects (optionally with JSDoc)
-
----
-
-### 4) `feature/query-layer-foundation`
-
-**Objective:** Implement QuerySpec, builder, normalization, hashing.
-
-**Must implement:**
-
-* `QuerySpec.js` helpers/schema conventions
-* `buildQuerySpec.js`
-* `normalizeQuerySpec.js`
-* `hashQuerySpec.js` (stable: key order cannot change hash)
-* `cache.js` basic in-memory cache object
-
-**Acceptance criteria:**
-
-* Identical semantic queries always produce identical hash
-* QuerySpec merges:
-
-  * globalFilters
-  * selections
-  * drillPath
-  * panel query
-* No refetch storms caused by object identity churn (memoize QuerySpec construction)
-
----
-
-### 5) `feature/data-provider-and-useQuery`
-
-**Objective:** DataProvider abstraction + MockDataProvider + `useQuery`.
-
-**Must implement:**
-
-* `DataProvider.js` interface-like module
-* Mock provider (runnable demo data)
-* `useQuery.js`:
-
-  * uses cache by hash
-  * supports AbortController cancellation
-  * supports SWR behavior (serve cached, then refresh if stale)
-
-**Acceptance criteria:**
-
-* Rapid filter changes abort previous request
-* Cached responses prevent repeated identical network calls
-* Mock provider returns deterministic output for same QuerySpec
-
----
-
-### 6) `feature/transforms`
-
-**Objective:** Pure reusable transforms.
-
-**Must implement:**
-
-* `transforms/index.js`
-* `sort.js`, `pivot.js`, `rolling.js`, `yoy.js`
-
-**Acceptance criteria:**
-
-* Transforms are pure functions
-* Panel configs can declare transforms
-
----
-
-### 7) `feature/layout-panels`
-
-**Objective:** Grid layout + panel chrome.
-
-**Must implement:**
-
-* `GridLayout.jsx`, `Panel.jsx`, `PanelHeader.jsx`, `PanelBody.jsx`
-* UI state components:
-
-  * `LoadingState.jsx`, `EmptyState.jsx`, `ErrorState.jsx`
-* CSS:
-
-  * `grid.css`, `panel.css`
-
-**Acceptance criteria:**
-
-* Dashboard config places panels correctly
-* Panel chrome is consistent
-* All styling in CSS files
+RADF includes a mock provider you can use during integration. For production, supply your own provider (see “Data Providers” below).
 
 ---
 
-### 8) `feature/viz-registry-and-core-charts`
+## How to Add a Dashboard
 
-**Objective:** VizRenderer + registry + initial Recharts panels.
+1) **Create semantic layer files** (dataset + metrics + dimensions):
+   - `your-dashboard.dataset.js`
+   - `your-dashboard.metrics.js`
+   - `your-dashboard.dimensions.js`
+2) **Create a dashboard config** with layout + panels (`your-dashboard.dashboard.js`).
+3) **Load the config on your page** and pass it into `DashboardProvider` and `GridLayout`.
 
-**Must implement:**
-
-* `registry.js`, `registerCharts.js`
-* `VizRenderer.jsx`
-* Recharts panels:
-
-  * `LineChartPanel.jsx`
-  * `BarChartPanel.jsx`
-* Common components:
-
-  * `ChartContainer.jsx`, `ChartTooltip.jsx`, `ChartLegend.jsx`
-* CSS: `charts.css`
-
-**Acceptance criteria:**
-
-* Panels render data provided by hooks/controllers
-* Charts do not fetch data
-* Tooltips/legend are consistent
+Reference the example dashboard in `src/app/dashboards/example/` for structure.
 
 ---
 
-### 9) `feature/interactions-crossfilter`
+## How to Add a Panel
 
-**Objective:** Cross-filtering end-to-end.
+1) Pick a `vizType` registered in `core/registry/registerCharts.js` (`kpi`, `line`, `bar`, etc.).
+2) Define the `query` object:
+   - `measures: []`
+   - `dimensions: []`
+3) Provide `encodings` that map query fields to chart axes.
+4) (Optional) Configure interactions:
 
-**Must implement:**
-
-* `crossFilter.js` utilities
-* Chart click handlers emit selection filters
-* Selection chips UI (recommended but can be minimal)
-
-**Acceptance criteria:**
-
-* Click bar filters line panel
-* Clear selection removes cross-filter and triggers refetch correctly
-
----
-
-### 10) `feature/interactions-drilldown`
-
-**Objective:** Drilldown + drillPath.
-
-**Must implement:**
-
-* `drilldown.js` utilities
-* Panel config supports:
-
-  * `interactions.drilldown: { dimension, to }`
-* Breadcrumb UI (recommended)
-
-**Acceptance criteria:**
-
-* Drilldown changes dimension grain and filters appropriately
-* Breadcrumb allows stepping back
+```js
+interactions: {
+  crossFilter: { field: 'region', label: 'Region' },
+  drilldown: { dimension: 'order_month', to: 'order_day' },
+  brushZoom: { field: 'order_day', applyToGlobal: true }
+}
+```
 
 ---
 
-### 11) `feature/interactions-brushzoom`
+## How to Add Metrics & Dimensions
 
-**Objective:** Brush/zoom for time-series.
+RADF’s semantic layer lives in `core/model/` and lets you define reusable business logic.
 
-**Must implement:**
+```js
+import { createMetric } from './components/radf/core/model/createMetric.js';
+import { createDimension } from './components/radf/core/model/createDimension.js';
 
-* `brushZoom.js`
-* Recharts Brush in line panel
-* Debounced commit, optional “Apply to global range”
+export const totalRevenue = createMetric({
+  id: 'total_revenue',
+  label: 'Total Revenue',
+  format: 'currency',
+  query: { field: 'revenue', op: 'SUM' },
+});
 
-**Acceptance criteria:**
+export const orderMonth = createDimension({
+  id: 'order_month',
+  label: 'Order Month',
+  type: 'date',
+  hierarchy: ['order_year', 'order_quarter', 'order_month', 'order_day'],
+});
+```
 
-* Brush adjusts visible window
-* Optional: applies global filter without stormy dispatches
-
----
-
-### 12) `feature/insight-engine`
-
-**Objective:** Pluggable insight analyzers + insight panel.
-
-**Must implement:**
-
-* `InsightEngine.js`, `useInsights.js`
-* Analyzers:
-
-  * `trend.js` (required)
-  * `anomaly.js` (optional initial)
-  * `topDrivers.js` (optional initial)
-* `InsightsPanel` rendering cards
-* CSS: `insights.css`
-
-**Acceptance criteria:**
-
-* Insights derived from panel data and query meta
-* At least one analyzer produces meaningful output
+**Hierarchies power drilldowns.** If you define `hierarchy` on a dimension, drilldown interactions can step through the levels in order.
 
 ---
 
-### 13) `feature/example-dashboard`
+## Data Providers
 
-**Objective:** Complete example dashboard proving the framework.
+RADF queries data through a `DataProvider` object with an `execute` method:
 
-**Must implement:**
+```js
+const myProvider = {
+  async execute(querySpec, { signal }) {
+    // querySpec includes datasetId, measures, dimensions, filters, etc.
+    const response = await fetch('/api/query', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(querySpec),
+      signal,
+    });
 
-* `example.dashboard.js` with layout and panel configs
-* A dashboard page that loads this config and renders:
+    const json = await response.json();
+    return { rows: json.rows, meta: json.meta };
+  },
+};
+```
 
-  * KPI
-  * line trend
-  * bar breakdown
-  * insights panel
-* Filter bar UI (date range + selection chips)
-* Theme toggle wired
-
-**Acceptance criteria:**
-
-* Cross-filter works
-* Drilldown works
-* Insights show
-* Theme works
-* MockDataProvider makes it runnable
-
----
-
-### 14) `feature/docs-and-hardening`
-
-**Objective:** Documentation + guardrails.
-
-**Must implement:**
-
-* Docs in `/docs` or README sections:
-
-  * How to add dashboard
-  * How to add metric/dimension
-  * How to add chart panel
-  * How to add insight analyzer
-* Error boundaries (recommended)
-* Optional tests for transforms and hashing
-
-**Acceptance criteria:**
-
-* A new dashboard can be added following docs without modifying core framework
+**Key requirements:**
+- Must accept `execute(querySpec, { signal })` (AbortController is required).
+- `useQuery` caches results based on a stable QuerySpec hash; it will reuse cached responses and refetch when stale.
 
 ---
 
-## How to Add a New Dashboard (Target UX)
+## Theming & Styling
 
-When the framework is complete:
-
-1. Create folder: `src/app/dashboards/<name>/`
-2. Add:
-
-   * `<name>.dataset.js`
-   * `<name>.metrics.js`
-   * `<name>.dimensions.js`
-   * `<name>.dashboard.js`
-3. Register dashboard in app router (or dashboard registry)
-
-You should not need to edit framework internals for typical dashboards.
+- **Tokens + themes:** `styles/tokens.css` defines spacing, typography, radii, and base tokens. Theme files (`theme.light.css`, `theme.dark.css`) define the color palette via CSS variables.
+- **Custom palettes:** override variables in your theme file (or define a new theme file) without changing component CSS.
+- **Panel elevation & borders:** look in `styles/components/panel.css` and `styles/framework.css` for shadow and border variables.
 
 ---
 
-## Developer Docs (Docs & Hardening)
+## Constraints / Known Limitations
 
-### How to Add a New Dashboard
-1. Create a new folder under `src/app/dashboards/<name>/`.
-2. Add dataset + semantic definitions:
-   * `<name>.dataset.js`
-   * `<name>.metrics.js`
-   * `<name>.dimensions.js`
-3. Add a dashboard config file: `<name>.dashboard.js` with layout + panel config.
-4. (Optional) add local styling in `<name>.css` and import it from your dashboard page.
-5. Register the dashboard in the app router (or a registry) so it can be navigated to.
-
-Reference implementation: `src/app/dashboards/example/`. 
-
-### How to Add a Metric or Dimension
-1. Open your dashboard's `*.metrics.js` or `*.dimensions.js` file.
-2. Use the helper creators in `src/framework/core/model/`:
-   * `createMetric({ id, label, format, query | compute, ... })`
-   * `createDimension({ id, label, type, hierarchy, formatter })`
-3. Export the new definitions and include them in your dataset's field catalog.
-4. Update panel configs to reference the new IDs in `measures` / `dimensions`.
-
-### How to Add a Chart Panel
-1. Create a new chart component in `src/framework/core/viz/charts/` (Recharts only).
-2. Add a registry entry in `src/framework/core/registry/registerCharts.js`.
-3. Ensure your panel only receives `data`, `encodings`, and `options` props.
-4. Add a panel config with `panelType: "viz"` and `vizType` pointing to your registry key.
-
-### How to Add an Insight Analyzer
-1. Create a new analyzer in `src/framework/core/insights/analyzers/`.
-2. Export a function that receives `{ rows, meta, querySpec, dashboardState }`.
-3. Return a list of insight objects: `{ id, title, severity, narrative, ... }`.
-4. Register it in `src/framework/core/registry/registerInsights.js`.
-5. Add an insights panel in your dashboard config with `panelType: "insights"`.
+- JavaScript only (no TypeScript)
+- No Tailwind
+- No inline styles
+- Recharts determines chart capabilities and limits
 
 ---
 
-## Guardrails Checklist (Before Merging Any Branch)
+## Repo structure (consumer relevant)
 
-* [ ] No TypeScript files or TS config
-* [ ] No Tailwind
-* [ ] No inline styles
-* [ ] Reducers are pure
-* [ ] QuerySpec hashing stable
-* [ ] Requests abort correctly
-* [ ] Components and styles follow folder conventions
-* [ ] Example remains runnable
+Only a few folders matter when you embed RADF into your app:
+
+- `core/dashboard/` — Provider, reducer, selectors, hooks
+- `core/query/` — QuerySpec, hashing, caching, `useQuery`, DataProvider contract
+- `core/viz/` — `VizRenderer` + registered chart panels
+- `core/layout/` — Grid, panel chrome, loading/empty/error states
+- `styles/` — tokens, themes, and component CSS
 
 ---
 
