@@ -77,7 +77,6 @@ textarea:focus-visible,
 .radf-app__content {
   padding: 0 var(--radf-space-6) var(--radf-space-8);
   width: 100%;
-  max-width: 1260px;
   margin: 0 auto;
 }
 
