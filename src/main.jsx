@@ -13,6 +13,7 @@ import './framework/styles/components/panel.css';
 import './framework/styles/components/charts.css';
 import './framework/styles/components/filters.css';
 import './framework/styles/components/insights.css';
+import './framework/styles/components/table.css';
 
 const rootElement = document.getElementById('root');
 

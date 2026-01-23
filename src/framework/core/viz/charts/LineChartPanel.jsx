@@ -46,15 +46,15 @@ function LineChartPanel({ data = [], encodings = {}, options = {}, handlers = {}
     <ChartContainer>
       <ResponsiveContainer width="100%" height={280}>
         <LineChart data={data} margin={{ top: 8, right: 16, left: 0, bottom: 8 }}>
-          <CartesianGrid stroke="var(--radf-color-border)" strokeDasharray="3 3" />
+          <CartesianGrid stroke="var(--radf-chart-grid)" strokeDasharray="3 3" />
           <XAxis
             dataKey={encodings.x}
-            tick={{ fill: 'var(--radf-color-muted)', fontSize: 12 }}
-            axisLine={{ stroke: 'var(--radf-color-border)' }}
+            tick={{ fill: 'var(--radf-text-muted)', fontSize: 12 }}
+            axisLine={{ stroke: 'var(--radf-border-divider)' }}
           />
           <YAxis
-            tick={{ fill: 'var(--radf-color-muted)', fontSize: 12 }}
-            axisLine={{ stroke: 'var(--radf-color-border)' }}
+            tick={{ fill: 'var(--radf-text-muted)', fontSize: 12 }}
+            axisLine={{ stroke: 'var(--radf-border-divider)' }}
           />
           {showTooltip ? <Tooltip content={<ChartTooltip />} /> : null}
           {showLegend ? <Legend content={<ChartLegend />} /> : null}
@@ -76,7 +76,7 @@ function LineChartPanel({ data = [], encodings = {}, options = {}, handlers = {}
               dataKey={encodings.x}
               height={24}
               travellerWidth={12}
-              stroke="var(--radf-color-accent)"
+              stroke="var(--radf-accent-primary)"
               startIndex={brushStartIndex}
               endIndex={brushEndIndex}
               onChange={(range) => {

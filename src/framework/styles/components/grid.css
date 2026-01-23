@@ -1,8 +1,9 @@
 .radf-grid {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
-  grid-auto-rows: minmax(160px, auto);
-  gap: var(--radf-space-4);
+  grid-auto-rows: minmax(180px, auto);
+  gap: var(--radf-space-5);
+  align-items: stretch;
 }
 
 .radf-grid__item {

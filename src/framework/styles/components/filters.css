@@ -5,14 +5,15 @@
   gap: 12px;
   margin: 0 0 16px;
   padding: 12px 16px;
-  border: 1px solid var(--radf-color-border);
-  border-radius: 12px;
-  background: var(--radf-color-surface);
+  border: 1px solid var(--radf-border-subtle, var(--radf-color-border));
+  border-radius: 14px;
+  background: var(--radf-surface-1);
+  box-shadow: var(--radf-shadow-low);
 }
 
 .radf-selection-bar__title {
   font-weight: 600;
-  color: var(--radf-color-text);
+  color: var(--radf-text-primary, var(--radf-color-text));
 }
 
 .radf-selection-bar__chips {
@@ -25,36 +26,37 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 10px;
-  border: 1px solid var(--radf-color-border);
+  padding: 6px 12px;
+  border: 1px solid transparent;
   border-radius: 999px;
-  background: var(--radf-color-surface-alt);
-  color: var(--radf-color-text);
+  background: var(--radf-accent-primary-soft);
+  color: var(--radf-accent-primary);
   font-size: 12px;
   cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .radf-selection-chip__label {
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .radf-selection-chip__remove {
   font-weight: 700;
-  color: var(--radf-color-muted);
+  color: var(--radf-text-muted, var(--radf-color-muted));
 }
 
 .radf-selection-bar__clear {
   margin-left: auto;
   border: none;
   background: none;
-  color: var(--radf-color-accent);
+  color: var(--radf-accent-primary);
   font-weight: 600;
   cursor: pointer;
 }
 
 .radf-selection-bar__clear:hover,
 .radf-selection-chip:hover {
-  filter: brightness(0.98);
+  transform: translateY(-1px);
 }
 
 .radf-drill {
@@ -63,15 +65,16 @@
   align-items: center;
   gap: 10px;
   margin: 0 0 16px;
-  padding: 10px 14px;
-  border-radius: 12px;
-  border: 1px dashed var(--radf-color-border);
-  background: var(--radf-color-surface-alt);
+  padding: 12px 16px;
+  border-radius: 14px;
+  border: 1px solid var(--radf-border-subtle, var(--radf-color-border));
+  background: var(--radf-surface-1);
+  box-shadow: var(--radf-shadow-low);
 }
 
 .radf-drill__title {
   font-weight: 600;
-  color: var(--radf-color-text);
+  color: var(--radf-text-primary, var(--radf-color-text));
 }
 
 .radf-drill__crumbs {
@@ -81,25 +84,27 @@
 }
 
 .radf-drill__crumb {
-  border: 1px solid var(--radf-color-border);
-  background: var(--radf-color-surface);
+  border: 1px solid var(--radf-border-subtle, var(--radf-color-border));
+  background: var(--radf-surface-2);
   border-radius: 999px;
   padding: 6px 12px;
   font-size: 12px;
-  color: var(--radf-color-text);
+  color: var(--radf-text-secondary, var(--radf-color-text));
   cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
 
 .radf-drill__crumb:hover {
-  border-color: var(--radf-color-accent);
-  color: var(--radf-color-accent);
+  border-color: var(--radf-accent-primary);
+  color: var(--radf-accent-primary);
+  transform: translateY(-1px);
 }
 
 .radf-drill__reset {
   margin-left: auto;
   border: none;
   background: none;
-  color: var(--radf-color-accent);
+  color: var(--radf-accent-primary);
   font-weight: 600;
   cursor: pointer;
 }

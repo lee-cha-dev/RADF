@@ -1,9 +1,12 @@
 const chartColorVars = [
-  'var(--radf-chart-color-1)',
-  'var(--radf-chart-color-2)',
-  'var(--radf-chart-color-3)',
-  'var(--radf-chart-color-4)',
-  'var(--radf-chart-color-5)',
+  'var(--radf-chart-series-1)',
+  'var(--radf-chart-series-2)',
+  'var(--radf-chart-series-3)',
+  'var(--radf-chart-series-4)',
+  'var(--radf-chart-series-5)',
+  'var(--radf-chart-series-6)',
+  'var(--radf-chart-series-7)',
+  'var(--radf-chart-series-8)',
 ];
 
 export const getChartColor = (index) => {

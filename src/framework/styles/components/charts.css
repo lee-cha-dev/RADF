@@ -9,6 +9,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: var(--radf-space-3);
 }
 
 .radf-chart__heading {
@@ -20,27 +21,38 @@
 .radf-chart__title {
   margin: 0;
   font-weight: var(--radf-font-weight-semibold);
+  color: var(--radf-text-secondary, var(--radf-color-text));
 }
 
 .radf-chart__subtitle {
   margin: 0;
-  color: var(--radf-color-muted);
+  color: var(--radf-text-muted, var(--radf-color-muted));
   font-size: 0.85rem;
 }
 
 .radf-chart__canvas {
   width: 100%;
   min-height: 280px;
+  background: var(--radf-surface-well, var(--radf-color-surface));
+  border: 1px solid var(--radf-border-subtle, var(--radf-color-border));
+  border-radius: var(--radf-radius-md);
+  padding: var(--radf-space-3);
+  box-shadow: var(--radf-shadow-inset);
+}
+
+.radf-chart__canvas .recharts-responsive-container {
+  width: 100%;
+  height: 100%;
 }
 
 .radf-chart__footer {
   font-size: 0.8rem;
-  color: var(--radf-color-muted);
+  color: var(--radf-text-muted, var(--radf-color-muted));
 }
 
 .radf-chart__brush .recharts-brush-traveller {
-  fill: var(--radf-color-accent);
-  stroke: var(--radf-color-accent);
+  fill: var(--radf-accent-primary);
+  stroke: var(--radf-accent-primary);
 }
 
 .radf-brush {
@@ -59,11 +71,11 @@
 
 .radf-brush__label {
   font-weight: var(--radf-font-weight-semibold);
-  color: var(--radf-color-text);
+  color: var(--radf-text-primary, var(--radf-color-text));
 }
 
 .radf-brush__value {
-  color: var(--radf-color-muted);
+  color: var(--radf-text-muted, var(--radf-color-muted));
 }
 
 .radf-brush__actions {
@@ -73,18 +85,27 @@
 }
 
 .radf-brush__button {
-  border: 1px solid var(--radf-color-border);
-  background: var(--radf-color-surface);
-  color: var(--radf-color-text);
+  border: 1px solid var(--radf-border-subtle, var(--radf-color-border));
+  background: var(--radf-surface-1);
+  color: var(--radf-text-primary, var(--radf-color-text));
   border-radius: 999px;
   padding: 6px 12px;
   font-size: 0.8rem;
   cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease, transform 0.2s ease,
+    box-shadow 0.2s ease;
+  box-shadow: var(--radf-shadow-low);
 }
 
 .radf-brush__button--primary {
-  border-color: var(--radf-color-accent);
-  color: var(--radf-color-accent);
+  border-color: transparent;
+  background: var(--radf-accent-primary-soft);
+  color: var(--radf-accent-primary);
+}
+
+.radf-brush__button:hover {
+  border-color: var(--radf-border-strong, var(--radf-color-border));
+  transform: translateY(-1px);
 }
 
 .radf-brush__button:disabled {
@@ -93,10 +114,10 @@
 }
 
 .radf-chart-tooltip {
-  background: var(--radf-color-surface);
-  border: 1px solid var(--radf-color-border);
-  border-radius: var(--radf-radius-sm);
-  box-shadow: var(--radf-shadow-soft);
+  background: var(--radf-surface-overlay, var(--radf-color-surface));
+  border: 1px solid var(--radf-border-subtle, var(--radf-color-border));
+  border-radius: var(--radf-radius-md);
+  box-shadow: var(--radf-shadow-high);
   padding: var(--radf-space-3);
   min-width: 160px;
 }
@@ -104,6 +125,7 @@
 .radf-chart-tooltip__label {
   margin: 0 0 var(--radf-space-2);
   font-weight: var(--radf-font-weight-semibold);
+  color: var(--radf-text-primary, var(--radf-color-text));
 }
 
 .radf-chart-tooltip__list {
@@ -132,7 +154,7 @@
 }
 
 .radf-chart-tooltip__name {
-  color: var(--radf-color-muted);
+  color: var(--radf-text-muted, var(--radf-color-muted));
 }
 
 .radf-chart-tooltip__value {
@@ -146,7 +168,7 @@
   gap: var(--radf-space-3);
   padding: 0;
   margin: var(--radf-space-2) 0 0;
-  color: var(--radf-color-muted);
+  color: var(--radf-text-muted, var(--radf-color-muted));
   font-size: 0.85rem;
 }
 
@@ -156,18 +178,23 @@
   gap: var(--radf-space-2);
 }
 
+.radf-chart-legend__label {
+  color: var(--radf-text-secondary, var(--radf-color-text));
+  font-weight: 500;
+}
+
 .radf-viz__missing {
-  border: 1px dashed var(--radf-color-border);
+  border: 1px dashed var(--radf-border-subtle, var(--radf-color-border));
   border-radius: var(--radf-radius-sm);
   padding: var(--radf-space-4);
   text-align: center;
-  color: var(--radf-color-muted);
+  color: var(--radf-text-muted, var(--radf-color-muted));
 }
 
 .radf-viz__missing-title {
   margin: 0 0 var(--radf-space-1);
   font-weight: var(--radf-font-weight-semibold);
-  color: var(--radf-color-text);
+  color: var(--radf-text-primary, var(--radf-color-text));
 }
 
 .radf-viz__missing-text {
@@ -180,46 +207,59 @@
   flex-direction: column;
   gap: var(--radf-space-2);
   padding: var(--radf-space-4);
-  border-radius: var(--radf-radius-md);
-  background: var(--radf-color-surface);
-  border: 1px solid var(--radf-color-border);
+  border-radius: var(--radf-radius-lg);
+  background: var(--radf-panel-gradient, var(--radf-color-surface));
+  border: 1px solid var(--radf-border-subtle, var(--radf-color-border));
+  box-shadow: var(--radf-shadow-low);
 }
 
 .radf-kpi__label {
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-size: 0.7rem;
-  color: var(--radf-color-muted);
+  color: var(--radf-text-muted, var(--radf-color-muted));
   font-weight: var(--radf-font-weight-semibold);
 }
 
 .radf-kpi__value {
   font-size: 2rem;
-  font-weight: var(--radf-font-weight-semibold);
-  color: var(--radf-color-text);
+  font-weight: var(--radf-font-weight-bold);
+  color: var(--radf-text-primary, var(--radf-color-text));
 }
 
 .radf-kpi__caption {
   font-size: 0.85rem;
-  color: var(--radf-color-muted);
+  color: var(--radf-text-muted, var(--radf-color-muted));
 }
 
 .radf-chart-color-0 {
-  background: var(--radf-chart-color-1);
+  background: var(--radf-chart-series-1);
 }
 
 .radf-chart-color-1 {
-  background: var(--radf-chart-color-2);
+  background: var(--radf-chart-series-2);
 }
 
 .radf-chart-color-2 {
-  background: var(--radf-chart-color-3);
+  background: var(--radf-chart-series-3);
 }
 
 .radf-chart-color-3 {
-  background: var(--radf-chart-color-4);
+  background: var(--radf-chart-series-4);
 }
 
 .radf-chart-color-4 {
-  background: var(--radf-chart-color-5);
+  background: var(--radf-chart-series-5);
+}
+
+.radf-chart-color-5 {
+  background: var(--radf-chart-series-6);
+}
+
+.radf-chart-color-6 {
+  background: var(--radf-chart-series-7);
+}
+
+.radf-chart-color-7 {
+  background: var(--radf-chart-series-8);
 }

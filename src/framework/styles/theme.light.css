@@ -1,30 +1,125 @@
 :root.radf-theme-light {
-  --radf-color-bg: #f6f7fb;
-  --radf-color-surface: #ffffff;
-  --radf-color-text: #0f172a;
-  --radf-color-muted: #475569;
-  --radf-color-border: #e2e8f0;
-  --radf-color-accent: #2563eb;
-  --radf-color-accent-weak: #dbeafe;
-  --radf-chart-color-1: #2563eb;
-  --radf-chart-color-2: #38bdf8;
-  --radf-chart-color-3: #f97316;
-  --radf-chart-color-4: #14b8a6;
-  --radf-chart-color-5: #f43f5e;
+  --radf-surface-bg: #f3f5fb;
+  --radf-surface-1: #ffffff;
+  --radf-surface-2: #f9fafc;
+  --radf-surface-3: #eef2f7;
+  --radf-surface-well: #f5f7fb;
+  --radf-surface-overlay: #ffffff;
+  --radf-surface-muted: #eef2f7;
+
+  --radf-border-subtle: #e2e8f0;
+  --radf-border-strong: #cbd5f5;
+  --radf-border-divider: #d8dee9;
+  --radf-border-focus: #2563eb;
+
+  --radf-text-primary: #0f172a;
+  --radf-text-secondary: #1f2937;
+  --radf-text-muted: #64748b;
+  --radf-text-inverse: #f8fafc;
+
+  --radf-accent-primary: #2563eb;
+  --radf-accent-secondary: #14b8a6;
+  --radf-accent-success: #16a34a;
+  --radf-accent-warning: #d97706;
+  --radf-accent-danger: #dc2626;
+  --radf-accent-primary-soft: rgba(37, 99, 235, 0.12);
+  --radf-accent-secondary-soft: rgba(20, 184, 166, 0.12);
+
+  --radf-shadow-low: 0 1px 2px rgba(15, 23, 42, 0.08), 0 1px 1px rgba(15, 23, 42, 0.04);
+  --radf-shadow-med: 0 10px 24px rgba(15, 23, 42, 0.12), 0 4px 10px rgba(15, 23, 42, 0.08);
+  --radf-shadow-high: 0 20px 45px rgba(15, 23, 42, 0.16), 0 8px 20px rgba(15, 23, 42, 0.1);
+  --radf-shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.7), inset 0 -1px 0 rgba(15, 23, 42, 0.03);
+
+  --radf-app-gradient: radial-gradient(circle at top, rgba(37, 99, 235, 0.08), transparent 55%),
+    linear-gradient(180deg, #f7f9fe 0%, #eef2f7 100%);
+  --radf-panel-gradient: linear-gradient(180deg, #ffffff 0%, #f5f7fb 100%);
+  --radf-panel-header-gradient: linear-gradient(180deg, #f7f9ff 0%, #eef2f7 100%);
+
+  --radf-chart-grid: rgba(148, 163, 184, 0.35);
+  --radf-chart-series-1: #2563eb;
+  --radf-chart-series-2: #8b5cf6;
+  --radf-chart-series-3: #14b8a6;
+  --radf-chart-series-4: #f97316;
+  --radf-chart-series-5: #0ea5e9;
+  --radf-chart-series-6: #22c55e;
+  --radf-chart-series-7: #e11d48;
+  --radf-chart-series-8: #f59e0b;
+
+  --radf-color-bg: var(--radf-surface-bg);
+  --radf-color-surface: var(--radf-surface-2);
+  --radf-color-surface-alt: var(--radf-surface-1);
+  --radf-color-text: var(--radf-text-primary);
+  --radf-color-muted: var(--radf-text-muted);
+  --radf-color-border: var(--radf-border-subtle);
+  --radf-color-accent: var(--radf-accent-primary);
+  --radf-color-accent-weak: var(--radf-accent-primary-soft);
+
+  --radf-chart-color-1: var(--radf-chart-series-1);
+  --radf-chart-color-2: var(--radf-chart-series-2);
+  --radf-chart-color-3: var(--radf-chart-series-3);
+  --radf-chart-color-4: var(--radf-chart-series-4);
+  --radf-chart-color-5: var(--radf-chart-series-5);
 }
 
 :root.fecc-theme-light {
-  --radf-color-bg: #f8f9fa;
-  --radf-color-surface: #ffffff;
-  --radf-color-surface-alt: #e9ecef;
-  --radf-color-text: #0f172a;
-  --radf-color-muted: #64748b;
-  --radf-color-border: #d1d5db;
-  --radf-color-accent: #186329;
-  --radf-color-accent-weak: #f0fdf4;
-  --radf-chart-color-1: #186329;
-  --radf-chart-color-2: #22833f;
-  --radf-chart-color-3: #f97316;
-  --radf-chart-color-4: #16a34a;
-  --radf-chart-color-5: #dc2626;
+  --radf-surface-bg: #f4f6fb;
+  --radf-surface-1: #ffffff;
+  --radf-surface-2: #f8fafc;
+  --radf-surface-3: #eef2f6;
+  --radf-surface-well: #f3f6fb;
+  --radf-surface-overlay: #ffffff;
+  --radf-surface-muted: #eef2f6;
+
+  --radf-border-subtle: #e2e8f0;
+  --radf-border-strong: #cbd5f0;
+  --radf-border-divider: #d7dde8;
+  --radf-border-focus: #1b5f34;
+
+  --radf-text-primary: #0f172a;
+  --radf-text-secondary: #1f2937;
+  --radf-text-muted: #64748b;
+  --radf-text-inverse: #f8fafc;
+
+  --radf-accent-primary: #1b5f34;
+  --radf-accent-secondary: #0ea5e9;
+  --radf-accent-success: #16a34a;
+  --radf-accent-warning: #d97706;
+  --radf-accent-danger: #dc2626;
+  --radf-accent-primary-soft: rgba(27, 95, 52, 0.12);
+  --radf-accent-secondary-soft: rgba(14, 165, 233, 0.12);
+
+  --radf-shadow-low: 0 1px 2px rgba(15, 23, 42, 0.08), 0 1px 1px rgba(15, 23, 42, 0.04);
+  --radf-shadow-med: 0 10px 24px rgba(15, 23, 42, 0.12), 0 4px 10px rgba(15, 23, 42, 0.08);
+  --radf-shadow-high: 0 20px 45px rgba(15, 23, 42, 0.16), 0 8px 20px rgba(15, 23, 42, 0.1);
+  --radf-shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.7), inset 0 -1px 0 rgba(15, 23, 42, 0.03);
+
+  --radf-app-gradient: radial-gradient(circle at top, rgba(27, 95, 52, 0.08), transparent 55%),
+    linear-gradient(180deg, #f7f9fe 0%, #eef2f7 100%);
+  --radf-panel-gradient: linear-gradient(180deg, #ffffff 0%, #f5f7fb 100%);
+  --radf-panel-header-gradient: linear-gradient(180deg, #f6f8ff 0%, #eef2f7 100%);
+
+  --radf-chart-grid: rgba(148, 163, 184, 0.35);
+  --radf-chart-series-1: #1b5f34;
+  --radf-chart-series-2: #2563eb;
+  --radf-chart-series-3: #f97316;
+  --radf-chart-series-4: #0ea5e9;
+  --radf-chart-series-5: #8b5cf6;
+  --radf-chart-series-6: #22c55e;
+  --radf-chart-series-7: #e11d48;
+  --radf-chart-series-8: #f59e0b;
+
+  --radf-color-bg: var(--radf-surface-bg);
+  --radf-color-surface: var(--radf-surface-2);
+  --radf-color-surface-alt: var(--radf-surface-1);
+  --radf-color-text: var(--radf-text-primary);
+  --radf-color-muted: var(--radf-text-muted);
+  --radf-color-border: var(--radf-border-subtle);
+  --radf-color-accent: var(--radf-accent-primary);
+  --radf-color-accent-weak: var(--radf-accent-primary-soft);
+
+  --radf-chart-color-1: var(--radf-chart-series-1);
+  --radf-chart-color-2: var(--radf-chart-series-2);
+  --radf-chart-color-3: var(--radf-chart-series-3);
+  --radf-chart-color-4: var(--radf-chart-series-4);
+  --radf-chart-color-5: var(--radf-chart-series-5);
 }
