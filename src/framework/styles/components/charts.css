@@ -181,7 +181,7 @@
   gap: var(--radf-space-2);
   padding: var(--radf-space-4);
   border-radius: var(--radf-radius-md);
-  background: var(--radf-color-surface-alt);
+  background: var(--radf-color-surface);
   border: 1px solid var(--radf-color-border);
 }
 
