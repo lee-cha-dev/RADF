@@ -12,3 +12,19 @@
   --radf-chart-color-4: #22d3ee;
   --radf-chart-color-5: #f472b6;
 }
+
+:root.fecc-theme-dark {
+  --radf-color-bg: #292c34;
+  --radf-color-surface: #1f2128;
+  --radf-color-surface-alt: #111827;
+  --radf-color-text: #f8fafc;
+  --radf-color-muted: #94a3b8;
+  --radf-color-border: #4b5563;
+  --radf-color-accent: #22833f;
+  --radf-color-accent-weak: rgba(34, 131, 63, 0.15);
+  --radf-chart-color-1: #22833f;
+  --radf-chart-color-2: #22c55e;
+  --radf-chart-color-3: #fbbf24;
+  --radf-chart-color-4: #16a34a;
+  --radf-chart-color-5: #ef4444;
+}
