@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useRef, useEffect } from 'react';
 import GridLayout from '../../framework/core/layout/GridLayout.jsx';
 import Panel from '../../framework/core/layout/Panel.jsx';
 import VizRenderer from '../../framework/core/viz/VizRenderer.jsx';
@@ -19,10 +19,19 @@ import {
   applyDrilldownToDimensions,
 } from '../../framework/core/interactions/drilldown.js';
 import DrillBreadcrumbs from '../../framework/core/interactions/DrillBreadcrumbs.jsx';
+import {
+  buildBrushFilter,
+  formatBrushRangeLabel,
+  getBrushRange,
+  removeBrushFilter,
+  upsertBrushFilter,
+} from '../../framework/core/interactions/brushZoom.js';
 
 const VizPanel = ({ panelConfig }) => {
   const dashboardState = useDashboardState();
-  const { addSelection, pushDrillPath } = useDashboardActions();
+  const { addSelection, pushDrillPath, setPanelState, setGlobalFilters } =
+    useDashboardActions();
+  const brushDebounceRef = useRef(null);
 
   const querySpec = useMemo(
     () => buildQuerySpec(panelConfig, dashboardState),
@@ -40,12 +49,27 @@ const VizPanel = ({ panelConfig }) => {
     typeof crossFilterConfig === 'object' ? crossFilterConfig.label : null;
   const selections = dashboardState.selections;
   const drillPath = dashboardState.drillPath;
+  const panelStateById = dashboardState.panelStateById;
+  const globalFilters = dashboardState.globalFilters;
 
   const drilldownConfig = panelConfig.interactions?.drilldown;
   const drilldownDimension =
     typeof drilldownConfig === 'object' ? drilldownConfig.dimension : null;
   const drilldownTo =
     typeof drilldownConfig === 'object' ? drilldownConfig.to : null;
+
+  const brushZoomConfig = panelConfig.interactions?.brushZoom;
+  const brushZoomEnabled = Boolean(brushZoomConfig);
+  const brushField =
+    typeof brushZoomConfig === 'object' ? brushZoomConfig.field : null;
+  const brushLabel =
+    typeof brushZoomConfig === 'object' ? brushZoomConfig.label : 'Visible range';
+  const brushApplyToGlobal =
+    typeof brushZoomConfig === 'object' ? brushZoomConfig.applyToGlobal : false;
+  const brushDebounceMs =
+    typeof brushZoomConfig === 'object' && brushZoomConfig.debounceMs != null
+      ? brushZoomConfig.debounceMs
+      : 140;
 
   const handleCrossFilterClick = useCallback(
     (event) => {
@@ -110,25 +134,61 @@ const VizPanel = ({ panelConfig }) => {
     ]
   );
 
+  useEffect(() => {
+    return () => {
+      if (brushDebounceRef.current) {
+        clearTimeout(brushDebounceRef.current);
+      }
+    };
+  }, []);
+
+  const handleBrushChange = useCallback(
+    ({ startIndex, endIndex, data, dataKey }) => {
+      if (!brushZoomEnabled) {
+        return;
+      }
+      const range = getBrushRange({
+        data,
+        startIndex,
+        endIndex,
+        xKey: dataKey,
+      });
+      if (!range) {
+        return;
+      }
+      if (brushDebounceRef.current) {
+        clearTimeout(brushDebounceRef.current);
+      }
+      brushDebounceRef.current = setTimeout(() => {
+        setPanelState(panelConfig.id, { brush: range });
+      }, brushDebounceMs);
+    },
+    [brushDebounceMs, brushZoomEnabled, panelConfig.id, setPanelState]
+  );
+
   const handlers = useMemo(() => {
-    if (!crossFilterConfig && !drilldownConfig) {
-      return {};
-    }
-    return {
-      onClick: (event) => {
+    const nextHandlers = {};
+    if (crossFilterConfig || drilldownConfig) {
+      nextHandlers.onClick = (event) => {
         if (crossFilterConfig) {
           handleCrossFilterClick(event);
         }
         if (drilldownConfig) {
           handleDrilldownClick(event);
         }
-      },
-    };
+      };
+    }
+    if (brushZoomEnabled) {
+      nextHandlers.onBrushChange = handleBrushChange;
+    }
+    return nextHandlers;
   }, [
     crossFilterConfig,
     drilldownConfig,
     handleCrossFilterClick,
     handleDrilldownClick,
+    brushZoomEnabled,
+    handleBrushChange,
   ]);
 
   const resolvedEncodings = useMemo(() => {
@@ -149,8 +209,93 @@ const VizPanel = ({ panelConfig }) => {
     };
   }, [panelConfig.encodings, drillPath, drilldownConfig]);
 
+  const brushState = panelStateById[panelConfig.id]?.brush || null;
+  const brushRangeLabel = formatBrushRangeLabel(brushState);
+  const brushFieldKey = brushField || resolvedEncodings?.x;
+
+  const handleBrushReset = useCallback(() => {
+    if (!brushZoomEnabled) {
+      return;
+    }
+    setPanelState(panelConfig.id, { brush: null });
+    if (brushApplyToGlobal && brushFieldKey) {
+      setGlobalFilters(removeBrushFilter(globalFilters, brushFieldKey));
+    }
+  }, [
+    brushApplyToGlobal,
+    brushFieldKey,
+    brushZoomEnabled,
+    globalFilters,
+    panelConfig.id,
+    setGlobalFilters,
+    setPanelState,
+  ]);
+
+  const handleBrushApply = useCallback(() => {
+    if (!brushApplyToGlobal || !brushState || !brushFieldKey) {
+      return;
+    }
+    const filter = buildBrushFilter({
+      field: brushFieldKey,
+      range: brushState,
+    });
+    if (!filter) {
+      return;
+    }
+    setGlobalFilters(upsertBrushFilter(globalFilters, filter));
+  }, [
+    brushApplyToGlobal,
+    brushFieldKey,
+    brushState,
+    globalFilters,
+    setGlobalFilters,
+  ]);
+
+  const panelFooter = brushZoomEnabled ? (
+    <div className="radf-brush">
+      <div className="radf-brush__range">
+        <span className="radf-brush__label">{brushLabel}</span>
+        <span className="radf-brush__value">{brushRangeLabel}</span>
+      </div>
+      <div className="radf-brush__actions">
+        {brushState ? (
+          <button
+            className="radf-brush__button"
+            type="button"
+            onClick={handleBrushReset}
+          >
+            Reset
+          </button>
+        ) : null}
+        {brushApplyToGlobal ? (
+          <button
+            className="radf-brush__button radf-brush__button--primary"
+            type="button"
+            onClick={handleBrushApply}
+            disabled={!brushState}
+          >
+            Apply to global range
+          </button>
+        ) : null}
+      </div>
+    </div>
+  ) : null;
+
   const isEmpty = !loading && !error && (!data || data.length === 0);
   const status = loading ? 'loading' : error ? 'error' : 'ready';
+  const chartOptions = useMemo(
+    () => ({
+      ...panelConfig.options,
+      brush: brushZoomEnabled
+        ? {
+            enabled: true,
+            startIndex: brushState?.startIndex,
+            endIndex: brushState?.endIndex,
+          }
+        : undefined,
+    }),
+    [brushState?.endIndex, brushState?.startIndex, brushZoomEnabled, panelConfig.options]
+  );
 
   return (
     <Panel
@@ -160,12 +305,13 @@ const VizPanel = ({ panelConfig }) => {
       error={error}
       isEmpty={isEmpty}
       emptyMessage="No data returned for this panel."
+      footer={panelFooter}
     >
       <VizRenderer
         vizType={panelConfig.vizType}
         data={data || []}
         encodings={resolvedEncodings}
-        options={panelConfig.options}
+        options={chartOptions}
         handlers={handlers}
       />
     </Panel>
@@ -221,6 +367,10 @@ const DashboardContent = () => {
           drilldown: {
             dimension: 'date_month',
             to: 'date_day',
+          },
+          brushZoom: {
+            label: 'Visible date window',
+            applyToGlobal: true,
           },
         },
       },

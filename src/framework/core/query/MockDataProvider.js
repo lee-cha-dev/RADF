@@ -76,6 +76,26 @@ const formatDate = (date) => date.toISOString().slice(0, 10);
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
+const resolveTimeRangeFromFilters = (filters) => {
+  const list = ensureArray(filters);
+  const betweenFilter = list.find(
+    (filter) =>
+      filter &&
+      filter.op === 'BETWEEN' &&
+      Array.isArray(filter.values) &&
+      filter.values.length >= 2 &&
+      (filter.field?.includes('date') || filter.field?.includes('day'))
+  );
+  if (!betweenFilter) {
+    return null;
+  }
+  const [start, end] = betweenFilter.values;
+  if (!start && !end) {
+    return null;
+  }
+  return { start: start ?? null, end: end ?? null };
+};
+
 const dimensionDefaults = {
   category: ['Alpha', 'Beta', 'Gamma', 'Delta'],
   region: ['North', 'South', 'East', 'West'],
@@ -159,10 +179,13 @@ const mockExecute = async (querySpec, { signal } = {}) => {
 
   const measures = ensureArray(querySpec.measures);
   const dimensions = ensureArray(querySpec.dimensions);
+  const timeRange =
+    normalizeTimeRange(querySpec.timeRange) ??
+    resolveTimeRangeFromFilters(querySpec.filters);
   const rows = generateRows({
     measures,
     dimensions,
-    timeRange: querySpec.timeRange,
+    timeRange,
     random,
   });
 
