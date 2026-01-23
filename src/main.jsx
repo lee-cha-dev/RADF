@@ -7,6 +7,7 @@ import registerInsights from './framework/core/registry/registerInsights.js';
 import './framework/styles/tokens.css';
 import './framework/styles/theme.light.css';
 import './framework/styles/theme.dark.css';
+import './framework/styles/palettes.css';
 import './framework/styles/framework.css';
 import './framework/styles/components/grid.css';
 import './framework/styles/components/panel.css';

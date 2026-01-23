@@ -13,7 +13,7 @@ import {
 import ChartContainer from '../common/ChartContainer.jsx';
 import ChartTooltip from '../common/ChartTooltip.jsx';
 import ChartLegend from '../common/ChartLegend.jsx';
-import { getChartColor } from '../common/chartColors';
+import { getChartColorByKey } from '../common/chartColors';
 
 const resolveSeriesKeys = (encodings, data) => {
   if (!encodings) {
@@ -63,7 +63,7 @@ function LineChartPanel({ data = [], encodings = {}, options = {}, handlers = {}
               key={key}
               type="monotone"
               dataKey={key}
-              stroke={getChartColor(index)}
+              stroke={getChartColorByKey(key)}
               strokeWidth={2}
               dot={{ r: 3 }}
               activeDot={{ r: 5, onClick: handlers.onClick }}

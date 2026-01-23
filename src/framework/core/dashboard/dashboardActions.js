@@ -7,6 +7,7 @@ export const DashboardActionTypes = {
   PUSH_DRILL: 'dashboard/PUSH_DRILL',
   POP_DRILL: 'dashboard/POP_DRILL',
   SET_PANEL_STATE: 'dashboard/SET_PANEL_STATE',
+  SET_PALETTE_ID: 'dashboard/SET_PALETTE_ID',
 };
 
 export const setDashboardContext = ({ dashboardId, datasetId }) => ({
@@ -45,4 +46,9 @@ export const popDrillPath = () => ({
 export const setPanelState = (panelId, nextState) => ({
   type: DashboardActionTypes.SET_PANEL_STATE,
   payload: { panelId, nextState },
+});
+
+export const setPaletteId = (paletteId) => ({
+  type: DashboardActionTypes.SET_PALETTE_ID,
+  payload: { paletteId },
 });

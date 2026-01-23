@@ -95,6 +95,7 @@ const exampleDashboard = {
       subtitle: 'Cross-filter by clicking a region.',
       layout: { x: 9, y: 2, w: 4, h: 2 },
       vizType: 'bar',
+      paletteId: 'okabe-ito',
       datasetId: 'example_dataset',
       query: {
         measures: ['total_revenue'],

@@ -6,6 +6,7 @@ function Panel({
   title,
   subtitle,
   actions,
+  className,
   status,
   error,
   isEmpty,
@@ -13,8 +14,9 @@ function Panel({
   footer,
   children,
 }) {
+  const panelClassName = ['radf-panel', className].filter(Boolean).join(' ');
   return (
-    <section className="radf-panel">
+    <section className={panelClassName}>
       <PanelHeader title={title} subtitle={subtitle} actions={actions} />
       <PanelBody
         status={status}
