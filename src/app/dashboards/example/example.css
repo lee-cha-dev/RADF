@@ -1,0 +1,112 @@
+.radf-example-dashboard__header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--radf-space-2);
+  margin-bottom: var(--radf-space-4);
+}
+
+.radf-example-dashboard__subtitle {
+  margin: 0;
+  color: var(--radf-color-muted);
+}
+
+.radf-filter-bar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--radf-space-3);
+  margin: var(--radf-space-4) 0;
+  padding: var(--radf-space-4);
+  border-radius: var(--radf-radius-md);
+  border: 1px solid var(--radf-color-border);
+  background: var(--radf-color-surface-alt);
+}
+
+.radf-filter-bar__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--radf-space-2);
+}
+
+.radf-filter-bar__label {
+  font-weight: var(--radf-font-weight-semibold);
+  color: var(--radf-color-text);
+}
+
+.radf-filter-bar__inputs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--radf-space-2);
+}
+
+.radf-filter-bar__input {
+  border: 1px solid var(--radf-color-border);
+  background: var(--radf-color-surface);
+  color: var(--radf-color-text);
+  border-radius: var(--radf-radius-sm);
+  padding: 6px 10px;
+  font-size: 0.85rem;
+}
+
+.radf-filter-bar__separator {
+  color: var(--radf-color-muted);
+  font-size: 0.85rem;
+}
+
+.radf-filter-bar__button {
+  border: 1px solid var(--radf-color-accent);
+  background: var(--radf-color-surface);
+  color: var(--radf-color-accent);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.radf-filter-bar__button--ghost {
+  border-color: var(--radf-color-border);
+  color: var(--radf-color-text);
+}
+
+.radf-filter-bar__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--radf-space-2);
+}
+
+.radf-filter-bar__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border: 1px solid var(--radf-color-border);
+  border-radius: 999px;
+  background: var(--radf-color-surface);
+  color: var(--radf-color-text);
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.radf-filter-bar__chip-label {
+  font-weight: 500;
+}
+
+.radf-filter-bar__chip-remove {
+  color: var(--radf-color-muted);
+  font-weight: 700;
+}
+
+.radf-filter-bar__clear {
+  align-self: flex-start;
+  border: none;
+  background: none;
+  color: var(--radf-color-accent);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+@media (max-width: 720px) {
+  .radf-filter-bar__inputs {
+    align-items: flex-start;
+  }
+}
