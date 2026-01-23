@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  Brush,
   CartesianGrid,
   Line,
   LineChart,
@@ -34,6 +35,12 @@ function LineChartPanel({ data = [], encodings = {}, options = {}, handlers = {}
   const seriesKeys = resolveSeriesKeys(encodings, data);
   const showLegend = options.legend !== false && seriesKeys.length > 1;
   const showTooltip = options.tooltip !== false;
+  const brushConfig = options.brush || {};
+  const brushEnabled = Boolean(brushConfig.enabled) && data.length > 1;
+  const brushStartIndex =
+    typeof brushConfig.startIndex === 'number' ? brushConfig.startIndex : undefined;
+  const brushEndIndex =
+    typeof brushConfig.endIndex === 'number' ? brushConfig.endIndex : undefined;
 
   return (
     <ChartContainer>
@@ -63,6 +70,26 @@ function LineChartPanel({ data = [], encodings = {}, options = {}, handlers = {}
               onClick={handlers.onClick}
             />
           ))}
+          {brushEnabled ? (
+            <Brush
+              className="radf-chart__brush"
+              dataKey={encodings.x}
+              height={24}
+              travellerWidth={12}
+              stroke="var(--radf-color-accent)"
+              startIndex={brushStartIndex}
+              endIndex={brushEndIndex}
+              onChange={(range) => {
+                if (handlers.onBrushChange) {
+                  handlers.onBrushChange({
+                    ...range,
+                    data,
+                    dataKey: encodings.x,
+                  });
+                }
+              }}
+            />
+          ) : null}
         </LineChart>
       </ResponsiveContainer>
     </ChartContainer>
