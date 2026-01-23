@@ -233,33 +233,49 @@
 }
 
 .radf-chart-color-0 {
-  background: var(--radf-chart-series-1);
+  background: var(--radf-series-1);
 }
 
 .radf-chart-color-1 {
-  background: var(--radf-chart-series-2);
+  background: var(--radf-series-2);
 }
 
 .radf-chart-color-2 {
-  background: var(--radf-chart-series-3);
+  background: var(--radf-series-3);
 }
 
 .radf-chart-color-3 {
-  background: var(--radf-chart-series-4);
+  background: var(--radf-series-4);
 }
 
 .radf-chart-color-4 {
-  background: var(--radf-chart-series-5);
+  background: var(--radf-series-5);
 }
 
 .radf-chart-color-5 {
-  background: var(--radf-chart-series-6);
+  background: var(--radf-series-6);
 }
 
 .radf-chart-color-6 {
-  background: var(--radf-chart-series-7);
+  background: var(--radf-series-7);
 }
 
 .radf-chart-color-7 {
-  background: var(--radf-chart-series-8);
+  background: var(--radf-series-8);
+}
+
+.radf-chart-color-8 {
+  background: var(--radf-series-9);
+}
+
+.radf-chart-color-9 {
+  background: var(--radf-series-10);
+}
+
+.radf-chart-color-10 {
+  background: var(--radf-series-11);
+}
+
+.radf-chart-color-11 {
+  background: var(--radf-series-12);
 }

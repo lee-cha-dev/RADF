@@ -7,6 +7,7 @@ import {
   upsertBrushFilter,
 } from '../../../framework/core/interactions/brushZoom';
 import { getSelectionLabel } from '../../../framework/core/interactions/crossFilter';
+import { PALETTES } from '../../../framework/core/viz/palettes/paletteRegistry';
 
 const getDateFilter = (filters, field) =>
   (filters || []).find((filter) => filter.field === field && filter.op === 'BETWEEN');
@@ -29,8 +30,8 @@ const buildRangeFromFilter = (filter) => {
 };
 
 function ExampleFilterBar({ dateField }) {
-  const { globalFilters, selections } = useDashboardState();
-  const { setGlobalFilters, clearSelections, removeSelection } =
+  const { globalFilters, selections, selectedPaletteId } = useDashboardState();
+  const { setGlobalFilters, clearSelections, removeSelection, setPaletteId } =
     useDashboardActions();
   const activeDateFilter = useMemo(
     () => getDateFilter(globalFilters, dateField),
@@ -69,6 +70,13 @@ function ExampleFilterBar({ dateField }) {
     setGlobalFilters(removeBrushFilter(globalFilters, dateField));
   }, [dateField, globalFilters, setGlobalFilters]);
 
+  const handlePaletteChange = useCallback(
+    (event) => {
+      setPaletteId(event.target.value);
+    },
+    [setPaletteId]
+  );
+
   return (
     <div className="radf-filter-bar">
       <div className="radf-filter-bar__group">
@@ -103,6 +111,22 @@ function ExampleFilterBar({ dateField }) {
           >
             Reset
           </button>
+        </div>
+      </div>
+      <div className="radf-filter-bar__group">
+        <span className="radf-filter-bar__label">Palette</span>
+        <div className="radf-filter-bar__inputs">
+          <select
+            className="radf-filter-bar__select"
+            value={selectedPaletteId}
+            onChange={handlePaletteChange}
+          >
+            {PALETTES.map((palette) => (
+              <option key={palette.id} value={palette.id}>
+                {palette.label}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
       {selections.length ? (

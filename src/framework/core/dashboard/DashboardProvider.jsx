@@ -9,6 +9,7 @@ import {
   setDashboardContext,
   setGlobalFilters,
   setPanelState,
+  setPaletteId,
 } from './dashboardActions';
 
 export const DashboardStateContext = createContext(null);
@@ -23,6 +24,7 @@ const bindDashboardActions = (dispatch) => ({
   pushDrillPath: (entry) => dispatch(pushDrillPath(entry)),
   popDrillPath: () => dispatch(popDrillPath()),
   setPanelState: (panelId, nextState) => dispatch(setPanelState(panelId, nextState)),
+  setPaletteId: (paletteId) => dispatch(setPaletteId(paletteId)),
 });
 
 const DashboardProvider = ({ children, initialState }) => {

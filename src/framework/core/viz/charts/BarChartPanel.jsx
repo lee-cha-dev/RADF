@@ -12,7 +12,7 @@ import {
 import ChartContainer from '../common/ChartContainer.jsx';
 import ChartTooltip from '../common/ChartTooltip.jsx';
 import ChartLegend from '../common/ChartLegend.jsx';
-import { getChartColor } from '../common/chartColors';
+import { getChartColorByKey } from '../common/chartColors';
 
 const resolveSeriesKeys = (encodings, data) => {
   if (!encodings) {
@@ -56,7 +56,7 @@ function BarChartPanel({ data = [], encodings = {}, options = {}, handlers = {} 
             <Bar
               key={key}
               dataKey={key}
-              fill={getChartColor(index)}
+              fill={getChartColorByKey(key)}
               stackId={isStacked ? 'radf-stack' : undefined}
               radius={[6, 6, 0, 0]}
               onClick={handlers.onClick}

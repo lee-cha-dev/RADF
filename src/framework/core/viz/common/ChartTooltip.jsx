@@ -1,5 +1,5 @@
 import React from 'react';
-import { getChartColorClass } from './chartColors';
+import { getChartColorClass, getChartColorClassByKey } from './chartColors';
 
 function ChartTooltip({ active, label, payload }) {
   if (!active || !payload || payload.length === 0) {
@@ -15,7 +15,9 @@ function ChartTooltip({ active, label, payload }) {
             <span
               className={[
                 'radf-chart-tooltip__swatch',
-                getChartColorClass(index),
+                item.dataKey != null
+                  ? getChartColorClassByKey(item.dataKey)
+                  : getChartColorClass(index),
               ].join(' ')}
             />
             <span className="radf-chart-tooltip__name">{item.name}</span>

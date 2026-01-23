@@ -36,14 +36,6 @@
   --radf-panel-header-gradient: linear-gradient(180deg, #1f2b42 0%, #172133 100%);
 
   --radf-chart-grid: rgba(148, 163, 184, 0.2);
-  --radf-chart-series-1: #38bdf8;
-  --radf-chart-series-2: #a78bfa;
-  --radf-chart-series-3: #22d3ee;
-  --radf-chart-series-4: #f97316;
-  --radf-chart-series-5: #34d399;
-  --radf-chart-series-6: #e879f9;
-  --radf-chart-series-7: #facc15;
-  --radf-chart-series-8: #fb7185;
 
   --radf-color-bg: var(--radf-surface-bg);
   --radf-color-surface: var(--radf-surface-2);
@@ -54,11 +46,6 @@
   --radf-color-accent: var(--radf-accent-primary);
   --radf-color-accent-weak: var(--radf-accent-primary-soft);
 
-  --radf-chart-color-1: var(--radf-chart-series-1);
-  --radf-chart-color-2: var(--radf-chart-series-2);
-  --radf-chart-color-3: var(--radf-chart-series-3);
-  --radf-chart-color-4: var(--radf-chart-series-4);
-  --radf-chart-color-5: var(--radf-chart-series-5);
 }
 
 :root.fecc-theme-dark {
@@ -99,14 +86,6 @@
   --radf-panel-header-gradient: linear-gradient(180deg, #292c34 0%, #1f2128 100%);
 
   --radf-chart-grid: rgba(148, 163, 184, 0.2);
-  --radf-chart-series-1: #186329;
-  --radf-chart-series-2: #22c55e;
-  --radf-chart-series-3: #fbbf24;
-  --radf-chart-series-4: #16a34a;
-  --radf-chart-series-5: #38bdf8;
-  --radf-chart-series-6: #ef4444;
-  --radf-chart-series-7: #a78bfa;
-  --radf-chart-series-8: #f97316;
 
   --radf-color-bg: var(--radf-surface-bg);
   --radf-color-surface: var(--radf-surface-2);
@@ -117,9 +96,4 @@
   --radf-color-accent: var(--radf-accent-primary);
   --radf-color-accent-weak: var(--radf-accent-primary-soft);
 
-  --radf-chart-color-1: var(--radf-chart-series-1);
-  --radf-chart-color-2: var(--radf-chart-series-2);
-  --radf-chart-color-3: var(--radf-chart-series-3);
-  --radf-chart-color-4: var(--radf-chart-series-4);
-  --radf-chart-color-5: var(--radf-chart-series-5);
 }

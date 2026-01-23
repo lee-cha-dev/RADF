@@ -12,3 +12,5 @@ export const selectPanelStateById = (state) => state.panelStateById;
 
 export const selectPanelState = (state, panelId) =>
   state.panelStateById[panelId] || {};
+
+export const selectPaletteId = (state) => state.selectedPaletteId;

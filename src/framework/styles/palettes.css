@@ -1,0 +1,237 @@
+:root.radf-palette-analytics,
+.radf-palette-analytics {
+  --radf-series-1: #4e79a7;
+  --radf-series-2: #f28e2b;
+  --radf-series-3: #e15759;
+  --radf-series-4: #76b7b2;
+  --radf-series-5: #59a14f;
+  --radf-series-6: #edc949;
+  --radf-series-7: #af7aa1;
+  --radf-series-8: #ff9da7;
+  --radf-series-9: #9c755f;
+  --radf-series-10: #bab0ab;
+  --radf-series-11: #7f86b7;
+  --radf-series-12: #1f77b4;
+  --radf-seq-1: #f7fbff;
+  --radf-seq-2: #deebf7;
+  --radf-seq-3: #c6dbef;
+  --radf-seq-4: #9ecae1;
+  --radf-seq-5: #6baed6;
+  --radf-seq-6: #4292c6;
+  --radf-seq-7: #2171b5;
+  --radf-seq-8: #08519c;
+  --radf-seq-9: #08306b;
+  --radf-div-neg-4: #a50026;
+  --radf-div-neg-3: #d73027;
+  --radf-div-neg-2: #f46d43;
+  --radf-div-neg-1: #fdae61;
+  --radf-div-zero: #ffffbf;
+  --radf-div-pos-1: #d9ef8b;
+  --radf-div-pos-2: #a6d96a;
+  --radf-div-pos-3: #66bd63;
+  --radf-div-pos-4: #1a9850;
+}
+
+:root.radf-palette-tableau10,
+.radf-palette-tableau10 {
+  --radf-series-1: #4e79a7;
+  --radf-series-2: #f28e2b;
+  --radf-series-3: #e15759;
+  --radf-series-4: #76b7b2;
+  --radf-series-5: #59a14f;
+  --radf-series-6: #edc949;
+  --radf-series-7: #af7aa1;
+  --radf-series-8: #ff9da7;
+  --radf-series-9: #9c755f;
+  --radf-series-10: #bab0ab;
+  --radf-series-11: #86bc86;
+  --radf-series-12: #d4a6c8;
+  --radf-seq-1: #f7fbff;
+  --radf-seq-2: #deebf7;
+  --radf-seq-3: #c6dbef;
+  --radf-seq-4: #9ecae1;
+  --radf-seq-5: #6baed6;
+  --radf-seq-6: #4292c6;
+  --radf-seq-7: #2171b5;
+  --radf-seq-8: #08519c;
+  --radf-seq-9: #08306b;
+  --radf-div-neg-4: #a50026;
+  --radf-div-neg-3: #d73027;
+  --radf-div-neg-2: #f46d43;
+  --radf-div-neg-1: #fdae61;
+  --radf-div-zero: #ffffbf;
+  --radf-div-pos-1: #d9ef8b;
+  --radf-div-pos-2: #a6d96a;
+  --radf-div-pos-3: #66bd63;
+  --radf-div-pos-4: #1a9850;
+}
+
+:root.radf-palette-set2,
+.radf-palette-set2 {
+  --radf-series-1: #66c2a5;
+  --radf-series-2: #fc8d62;
+  --radf-series-3: #8da0cb;
+  --radf-series-4: #e78ac3;
+  --radf-series-5: #a6d854;
+  --radf-series-6: #ffd92f;
+  --radf-series-7: #e5c494;
+  --radf-series-8: #b3b3b3;
+  --radf-series-9: #a6cee3;
+  --radf-series-10: #1f78b4;
+  --radf-series-11: #b2df8a;
+  --radf-series-12: #33a02c;
+  --radf-seq-1: #f7fcf5;
+  --radf-seq-2: #e5f5e0;
+  --radf-seq-3: #c7e9c0;
+  --radf-seq-4: #a1d99b;
+  --radf-seq-5: #74c476;
+  --radf-seq-6: #41ab5d;
+  --radf-seq-7: #238b45;
+  --radf-seq-8: #006d2c;
+  --radf-seq-9: #00441b;
+  --radf-div-neg-4: #8c510a;
+  --radf-div-neg-3: #bf812d;
+  --radf-div-neg-2: #dfc27d;
+  --radf-div-neg-1: #f6e8c3;
+  --radf-div-zero: #f5f5f5;
+  --radf-div-pos-1: #c7eae5;
+  --radf-div-pos-2: #80cdc1;
+  --radf-div-pos-3: #35978f;
+  --radf-div-pos-4: #01665e;
+}
+
+:root.radf-palette-dark2,
+.radf-palette-dark2 {
+  --radf-series-1: #1b9e77;
+  --radf-series-2: #d95f02;
+  --radf-series-3: #7570b3;
+  --radf-series-4: #e7298a;
+  --radf-series-5: #66a61e;
+  --radf-series-6: #e6ab02;
+  --radf-series-7: #a6761d;
+  --radf-series-8: #666666;
+  --radf-series-9: #1f78b4;
+  --radf-series-10: #b2df8a;
+  --radf-series-11: #fb9a99;
+  --radf-series-12: #cab2d6;
+  --radf-seq-1: #f7fbff;
+  --radf-seq-2: #deebf7;
+  --radf-seq-3: #c6dbef;
+  --radf-seq-4: #9ecae1;
+  --radf-seq-5: #6baed6;
+  --radf-seq-6: #4292c6;
+  --radf-seq-7: #2171b5;
+  --radf-seq-8: #08519c;
+  --radf-seq-9: #08306b;
+  --radf-div-neg-4: #b2182b;
+  --radf-div-neg-3: #d6604d;
+  --radf-div-neg-2: #f4a582;
+  --radf-div-neg-1: #fddbc7;
+  --radf-div-zero: #f7f7f7;
+  --radf-div-pos-1: #d1e5f0;
+  --radf-div-pos-2: #92c5de;
+  --radf-div-pos-3: #4393c3;
+  --radf-div-pos-4: #2166ac;
+}
+
+:root.radf-palette-okabe-ito,
+.radf-palette-okabe-ito {
+  --radf-series-1: #e69f00;
+  --radf-series-2: #56b4e9;
+  --radf-series-3: #009e73;
+  --radf-series-4: #f0e442;
+  --radf-series-5: #0072b2;
+  --radf-series-6: #d55e00;
+  --radf-series-7: #cc79a7;
+  --radf-series-8: #000000;
+  --radf-series-9: #999999;
+  --radf-series-10: #bdbdbd;
+  --radf-series-11: #80b1d3;
+  --radf-series-12: #fdb462;
+  --radf-seq-1: #f7fbff;
+  --radf-seq-2: #deebf7;
+  --radf-seq-3: #c6dbef;
+  --radf-seq-4: #9ecae1;
+  --radf-seq-5: #6baed6;
+  --radf-seq-6: #4292c6;
+  --radf-seq-7: #2171b5;
+  --radf-seq-8: #08519c;
+  --radf-seq-9: #08306b;
+  --radf-div-neg-4: #8c510a;
+  --radf-div-neg-3: #bf812d;
+  --radf-div-neg-2: #dfc27d;
+  --radf-div-neg-1: #f6e8c3;
+  --radf-div-zero: #f5f5f5;
+  --radf-div-pos-1: #c7eae5;
+  --radf-div-pos-2: #80cdc1;
+  --radf-div-pos-3: #35978f;
+  --radf-div-pos-4: #01665e;
+}
+
+:root.radf-palette-viridis,
+.radf-palette-viridis {
+  --radf-series-1: #440154;
+  --radf-series-2: #482878;
+  --radf-series-3: #3e4989;
+  --radf-series-4: #31688e;
+  --radf-series-5: #26828e;
+  --radf-series-6: #1f9e89;
+  --radf-series-7: #35b779;
+  --radf-series-8: #6ece58;
+  --radf-series-9: #b5de2b;
+  --radf-series-10: #fde725;
+  --radf-series-11: #9bd93c;
+  --radf-series-12: #2a788e;
+  --radf-seq-1: #440154;
+  --radf-seq-2: #482878;
+  --radf-seq-3: #3e4989;
+  --radf-seq-4: #31688e;
+  --radf-seq-5: #26828e;
+  --radf-seq-6: #1f9e89;
+  --radf-seq-7: #35b779;
+  --radf-seq-8: #6ece58;
+  --radf-seq-9: #fde725;
+  --radf-div-neg-4: #3b4cc0;
+  --radf-div-neg-3: #688aef;
+  --radf-div-neg-2: #9ecae1;
+  --radf-div-neg-1: #dce7f1;
+  --radf-div-zero: #f7f7f7;
+  --radf-div-pos-1: #fde0b2;
+  --radf-div-pos-2: #f9a65a;
+  --radf-div-pos-3: #ed6a5a;
+  --radf-div-pos-4: #b40426;
+}
+
+:root.radf-palette-rdylgn,
+.radf-palette-rdylgn {
+  --radf-series-1: #d73027;
+  --radf-series-2: #fc8d59;
+  --radf-series-3: #fee08b;
+  --radf-series-4: #d9ef8b;
+  --radf-series-5: #91cf60;
+  --radf-series-6: #1a9850;
+  --radf-series-7: #fdae61;
+  --radf-series-8: #66bd63;
+  --radf-series-9: #e0f3f8;
+  --radf-series-10: #abdda4;
+  --radf-series-11: #a50026;
+  --radf-series-12: #006837;
+  --radf-seq-1: #fff7ec;
+  --radf-seq-2: #fee8c8;
+  --radf-seq-3: #fdd49e;
+  --radf-seq-4: #fdbb84;
+  --radf-seq-5: #fc8d59;
+  --radf-seq-6: #ef6548;
+  --radf-seq-7: #d7301f;
+  --radf-seq-8: #b30000;
+  --radf-seq-9: #7f0000;
+  --radf-div-neg-4: #a50026;
+  --radf-div-neg-3: #d73027;
+  --radf-div-neg-2: #f46d43;
+  --radf-div-neg-1: #fdae61;
+  --radf-div-zero: #ffffbf;
+  --radf-div-pos-1: #d9ef8b;
+  --radf-div-pos-2: #a6d96a;
+  --radf-div-pos-3: #66bd63;
+  --radf-div-pos-4: #1a9850;
+}
