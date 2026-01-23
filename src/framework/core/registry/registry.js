@@ -22,7 +22,10 @@ const createRegistry = (label = 'registry') => {
 };
 
 export const vizRegistry = createRegistry('vizRegistry');
+export const insightRegistry = createRegistry('insightRegistry');
 
 export const registerViz = (vizType, component) => vizRegistry.register(vizType, component);
+export const registerInsight = (insightType, analyzer) =>
+  insightRegistry.register(insightType, analyzer);
 
 export { createRegistry };

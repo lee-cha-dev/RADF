@@ -1,0 +1,58 @@
+const findMeasureId = (rows, querySpec) => {
+  if (querySpec?.measures?.length) {
+    return querySpec.measures[0];
+  }
+  const sample = rows?.[0];
+  if (!sample) {
+    return null;
+  }
+  const numericKey = Object.keys(sample).find((key) => typeof sample[key] === 'number');
+  return numericKey || null;
+};
+
+const mean = (values) => values.reduce((sum, value) => sum + value, 0) / values.length;
+
+const stdDev = (values, avg) => {
+  const variance = values.reduce((sum, value) => sum + (value - avg) ** 2, 0) / values.length;
+  return Math.sqrt(variance);
+};
+
+const analyze = ({ rows, querySpec }) => {
+  const measureId = findMeasureId(rows, querySpec);
+  if (!measureId) {
+    return [];
+  }
+  const values = (rows || [])
+    .map((row) => Number(row?.[measureId]))
+    .filter((value) => Number.isFinite(value));
+  if (values.length < 5) {
+    return [];
+  }
+  const last = values[values.length - 1];
+  const avg = mean(values.slice(0, -1));
+  const deviation = stdDev(values.slice(0, -1), avg);
+  if (deviation === 0) {
+    return [];
+  }
+  const zScore = (last - avg) / deviation;
+  if (Math.abs(zScore) < 2.2) {
+    return [];
+  }
+
+  return {
+    title: 'Recent anomaly detected',
+    severity: zScore > 0 ? 'warning' : 'negative',
+    narrative: `The latest ${measureId} value deviates from the recent average by ${Math.abs(zScore).toFixed(1)} standard deviations.`,
+    recommendedAction: 'Review the contributing drivers behind this spike or dip.',
+    evidence: [
+      `Latest value: ${last.toLocaleString()}`,
+      `Recent average: ${avg.toFixed(1)}`,
+    ],
+  };
+};
+
+export default {
+  id: 'anomaly',
+  label: 'Anomaly Detection',
+  analyze,
+};
