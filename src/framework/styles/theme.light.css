@@ -1,0 +1,9 @@
+:root.radf-theme-light {
+  --radf-color-bg: #f6f7fb;
+  --radf-color-surface: #ffffff;
+  --radf-color-text: #0f172a;
+  --radf-color-muted: #475569;
+  --radf-color-border: #e2e8f0;
+  --radf-color-accent: #2563eb;
+  --radf-color-accent-weak: #dbeafe;
+}
