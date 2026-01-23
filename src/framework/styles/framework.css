@@ -7,12 +7,37 @@ body {
   font-family: var(--radf-font-family);
   font-size: var(--radf-font-size-base);
   line-height: var(--radf-line-height);
-  background: var(--radf-color-bg);
-  color: var(--radf-color-text);
+  background: var(--radf-app-gradient, var(--radf-color-bg));
+  color: var(--radf-text-primary, var(--radf-color-text));
+  min-height: 100vh;
 }
 
-button {
+::selection {
+  background: var(--radf-accent-primary-soft, var(--radf-color-accent-weak));
+  color: var(--radf-text-primary, var(--radf-color-text));
+}
+
+button,
+input,
+select,
+textarea {
   font-family: inherit;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+.radf-button:focus-visible,
+.radf-selection-chip:focus-visible,
+.radf-filter-bar__chip:focus-visible,
+.radf-filter-bar__button:focus-visible,
+.radf-selection-bar__clear:focus-visible,
+.radf-drill__crumb:focus-visible,
+.radf-drill__reset:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 var(--radf-focus-ring-size)
+    var(--radf-border-focus, var(--radf-color-accent));
 }
 
 .radf-app {
@@ -27,9 +52,9 @@ button {
   align-items: center;
   justify-content: space-between;
   padding: var(--radf-space-5) var(--radf-space-6);
-  background: var(--radf-color-surface);
-  border-bottom: 1px solid var(--radf-color-border);
-  box-shadow: var(--radf-shadow-soft);
+  background: linear-gradient(180deg, var(--radf-surface-1), var(--radf-surface-2));
+  border-bottom: 1px solid var(--radf-border-divider, var(--radf-color-border));
+  box-shadow: var(--radf-shadow-low);
 }
 
 .radf-app__branding {
@@ -39,50 +64,89 @@ button {
 }
 
 .radf-app__title {
-  font-weight: var(--radf-font-weight-semibold);
-  font-size: 1.25rem;
+  font-weight: var(--radf-font-weight-bold);
+  font-size: 1.35rem;
+  letter-spacing: -0.01em;
 }
 
 .radf-app__subtitle {
-  color: var(--radf-color-muted);
+  color: var(--radf-text-muted, var(--radf-color-muted));
   font-size: 0.95rem;
 }
 
 .radf-app__content {
-  padding: 0 var(--radf-space-6) var(--radf-space-6);
+  padding: 0 var(--radf-space-6) var(--radf-space-8);
+  width: 100%;
+  max-width: 1260px;
+  margin: 0 auto;
 }
 
 .radf-button {
-  border: 1px solid var(--radf-color-border);
-  background: var(--radf-color-surface);
-  color: var(--radf-color-text);
+  border: 1px solid var(--radf-border-subtle, var(--radf-color-border));
+  background: linear-gradient(180deg, var(--radf-surface-1), var(--radf-surface-2));
+  color: var(--radf-text-primary, var(--radf-color-text));
   padding: var(--radf-space-2) var(--radf-space-4);
   border-radius: var(--radf-radius-md);
   cursor: pointer;
-  transition: border-color 0.2s ease, color 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease,
+    color 0.2s ease, background 0.2s ease;
+  box-shadow: var(--radf-shadow-low);
 }
 
 .radf-button:hover {
-  border-color: var(--radf-color-accent);
-  color: var(--radf-color-accent);
+  border-color: var(--radf-border-strong, var(--radf-color-border));
+  transform: translateY(-1px);
+  box-shadow: var(--radf-shadow-med);
+}
+
+.radf-button:active {
+  transform: translateY(0);
+  box-shadow: var(--radf-shadow-low);
+}
+
+.radf-button--primary {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--radf-accent-primary) 92%, #ffffff 8%),
+    var(--radf-accent-primary)
+  );
+  color: var(--radf-text-inverse, #ffffff);
+  border-color: transparent;
+  box-shadow: 0 8px 16px rgba(37, 99, 235, 0.25);
+}
+
+.radf-button--primary:hover {
+  color: var(--radf-text-inverse, #ffffff);
 }
 
 .radf-dashboard {
-  background: var(--radf-color-surface);
-  border-radius: var(--radf-radius-md);
+  background: linear-gradient(180deg, var(--radf-surface-1), var(--radf-surface-2));
+  border-radius: var(--radf-radius-lg);
   padding: var(--radf-space-6);
-  border: 1px solid var(--radf-color-border);
-  box-shadow: var(--radf-shadow-soft);
+  border: 1px solid var(--radf-border-subtle, var(--radf-color-border));
+  box-shadow: var(--radf-shadow-high);
+  position: relative;
+}
+
+.radf-dashboard::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: var(--radf-shadow-inset);
+  pointer-events: none;
 }
 
 .radf-dashboard__title {
   margin: 0 0 var(--radf-space-2);
-  font-size: 1.5rem;
+  font-size: 1.75rem;
+  font-weight: var(--radf-font-weight-bold);
+  letter-spacing: -0.02em;
 }
 
 .radf-dashboard__subtitle {
   margin: 0;
-  color: var(--radf-color-muted);
+  color: var(--radf-text-muted, var(--radf-color-muted));
 }
 
 .radf-error-boundary {
@@ -90,10 +154,10 @@ button {
   align-items: center;
   justify-content: center;
   padding: var(--radf-space-7);
-  background: var(--radf-color-surface);
-  border: 1px solid var(--radf-color-border);
-  border-radius: var(--radf-radius-md);
-  box-shadow: var(--radf-shadow-soft);
+  background: var(--radf-surface-1);
+  border: 1px solid var(--radf-border-subtle, var(--radf-color-border));
+  border-radius: var(--radf-radius-lg);
+  box-shadow: var(--radf-shadow-med);
   min-height: 320px;
 }
 
@@ -112,7 +176,7 @@ button {
 
 .radf-error-boundary__message {
   margin: 0;
-  color: var(--radf-color-muted);
+  color: var(--radf-text-muted, var(--radf-color-muted));
 }
 
 .radf-error-boundary__action {

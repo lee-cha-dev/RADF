@@ -91,7 +91,7 @@ function ExampleFilterBar({ dateField }) {
           />
           <button
             type="button"
-            className="radf-filter-bar__button"
+            className="radf-filter-bar__button radf-filter-bar__button--primary"
             onClick={handleApply}
           >
             Apply
