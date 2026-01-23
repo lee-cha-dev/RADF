@@ -13,10 +13,16 @@ import {
   isSelectionDuplicate,
 } from '../../framework/core/interactions/crossFilter.js';
 import SelectionChips from '../../framework/core/interactions/SelectionChips.jsx';
+import {
+  buildDrilldownEntryFromEvent,
+  isDrilldownDuplicate,
+  applyDrilldownToDimensions,
+} from '../../framework/core/interactions/drilldown.js';
+import DrillBreadcrumbs from '../../framework/core/interactions/DrillBreadcrumbs.jsx';
 
 const VizPanel = ({ panelConfig }) => {
   const dashboardState = useDashboardState();
-  const { addSelection } = useDashboardActions();
+  const { addSelection, pushDrillPath } = useDashboardActions();
 
   const querySpec = useMemo(
     () => buildQuerySpec(panelConfig, dashboardState),
@@ -33,6 +39,13 @@ const VizPanel = ({ panelConfig }) => {
   const crossFilterLabel =
     typeof crossFilterConfig === 'object' ? crossFilterConfig.label : null;
   const selections = dashboardState.selections;
+  const drillPath = dashboardState.drillPath;
+
+  const drilldownConfig = panelConfig.interactions?.drilldown;
+  const drilldownDimension =
+    typeof drilldownConfig === 'object' ? drilldownConfig.dimension : null;
+  const drilldownTo =
+    typeof drilldownConfig === 'object' ? drilldownConfig.to : null;
 
   const handleCrossFilterClick = useCallback(
     (event) => {
@@ -65,14 +78,76 @@ const VizPanel = ({ panelConfig }) => {
     ]
   );
 
+  const handleDrilldownClick = useCallback(
+    (event) => {
+      if (!drilldownConfig) {
+        return;
+      }
+      const entry = buildDrilldownEntryFromEvent({
+        event,
+        panelId: panelConfig.id,
+        dimension: drilldownDimension || panelConfig.encodings?.x,
+        to: drilldownTo,
+        label: panelConfig.title,
+      });
+      if (!entry) {
+        return;
+      }
+      if (isDrilldownDuplicate(drillPath, entry)) {
+        return;
+      }
+      pushDrillPath(entry);
+    },
+    [
+      drillPath,
+      drilldownConfig,
+      drilldownDimension,
+      drilldownTo,
+      panelConfig.encodings?.x,
+      panelConfig.id,
+      panelConfig.title,
+      pushDrillPath,
+    ]
+  );
+
   const handlers = useMemo(() => {
-    if (!crossFilterConfig) {
+    if (!crossFilterConfig && !drilldownConfig) {
       return {};
     }
     return {
-      onClick: handleCrossFilterClick,
+      onClick: (event) => {
+        if (crossFilterConfig) {
+          handleCrossFilterClick(event);
+        }
+        if (drilldownConfig) {
+          handleDrilldownClick(event);
+        }
+      },
     };
-  }, [crossFilterConfig, handleCrossFilterClick]);
+  }, [
+    crossFilterConfig,
+    drilldownConfig,
+    handleCrossFilterClick,
+    handleDrilldownClick,
+  ]);
+
+  const resolvedEncodings = useMemo(() => {
+    if (!panelConfig.encodings) {
+      return panelConfig.encodings;
+    }
+    if (!drilldownConfig || !drillPath.length) {
+      return panelConfig.encodings;
+    }
+    const [drilldownField] = applyDrilldownToDimensions({
+      dimensions: [panelConfig.encodings.x],
+      drillPath,
+      drilldownConfig,
+    });
+    return {
+      ...panelConfig.encodings,
+      x: drilldownField,
+    };
+  }, [panelConfig.encodings, drillPath, drilldownConfig]);
 
   const isEmpty = !loading && !error && (!data || data.length === 0);
   const status = loading ? 'loading' : error ? 'error' : 'ready';
@@ -89,7 +164,7 @@ const VizPanel = ({ panelConfig }) => {
       <VizRenderer
         vizType={panelConfig.vizType}
         data={data || []}
-        encodings={panelConfig.encodings}
+        encodings={resolvedEncodings}
         options={panelConfig.options}
         handlers={handlers}
       />
@@ -98,8 +173,19 @@ const VizPanel = ({ panelConfig }) => {
 };
 
 const DashboardContent = () => {
-  const { selections } = useDashboardState();
-  const { clearSelections, removeSelection } = useDashboardActions();
+  const { selections, drillPath } = useDashboardState();
+  const { clearSelections, removeSelection, popDrillPath } = useDashboardActions();
+
+  const handleCrumbClick = useCallback(
+    (index) => {
+      const pops = drillPath.length - 1 - index;
+      if (pops <= 0) {
+        return;
+      }
+      Array.from({ length: pops }).forEach(() => popDrillPath());
+    },
+    [drillPath.length, popDrillPath]
+  );
 
   const panels = useMemo(
     () => [
@@ -127,10 +213,16 @@ const DashboardContent = () => {
         datasetId: 'mock-dataset',
         query: {
           measures: ['metric_value'],
-          dimensions: ['date_day'],
+          dimensions: ['date_month'],
         },
-        encodings: { x: 'date_day', y: 'metric_value' },
+        encodings: { x: 'date_month', y: 'metric_value' },
         options: { tooltip: true, legend: false },
+        interactions: {
+          drilldown: {
+            dimension: 'date_month',
+            to: 'date_day',
+          },
+        },
       },
       {
         id: 'breakdown',
@@ -160,6 +252,13 @@ const DashboardContent = () => {
   return (
     <section className="radf-dashboard">
       <h1 className="radf-dashboard__title">Dashboard Layout Preview</h1>
+      <DrillBreadcrumbs
+        drillPath={drillPath}
+        onCrumbClick={handleCrumbClick}
+        onReset={() =>
+          Array.from({ length: drillPath.length }).forEach(() => popDrillPath())
+        }
+      />
       <SelectionChips
         selections={selections}
         onClear={clearSelections}

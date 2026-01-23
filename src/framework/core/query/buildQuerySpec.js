@@ -1,4 +1,5 @@
 import { createQuerySpec, toFilterArray } from './QuerySpec';
+import { applyDrilldownToDimensions } from '../interactions/drilldown';
 
 const buildFilterFromDrillEntry = (entry) => {
   if (!entry) {
@@ -46,6 +47,7 @@ const collectFilters = ({ globalFilters, selections, drillPath, panelFilters }) 
 export const buildQuerySpec = (panelConfig = {}, dashboardState = {}) => {
   const panelQuery = panelConfig.query || {};
   const datasetId = panelConfig.datasetId ?? dashboardState.datasetId ?? null;
+  const baseDimensions = panelQuery.dimensions || [];
 
   const filters = collectFilters({
     globalFilters: dashboardState.globalFilters,
@@ -57,7 +59,11 @@ export const buildQuerySpec = (panelConfig = {}, dashboardState = {}) => {
   return createQuerySpec({
     datasetId,
     measures: panelQuery.measures || [],
-    dimensions: panelQuery.dimensions || [],
+    dimensions: applyDrilldownToDimensions({
+      dimensions: baseDimensions,
+      drillPath: dashboardState.drillPath,
+      drilldownConfig: panelConfig.interactions?.drilldown,
+    }),
     filters,
     timeRange: panelQuery.timeRange ?? dashboardState.timeRange ?? null,
     grain: panelQuery.grain ?? null,
