@@ -1,5 +1,5 @@
 import React from 'react';
-import { getChartColorClass, getChartColorClassByKey } from './chartColors';
+import { getChartColorClass } from './chartColors';
 
 function ChartLegend({ payload }) {
   if (!payload || payload.length === 0) {
@@ -13,9 +13,7 @@ function ChartLegend({ payload }) {
           <span
             className={[
               'radf-chart-legend__swatch',
-              entry.dataKey != null
-                ? getChartColorClassByKey(entry.dataKey)
-                : getChartColorClass(index),
+              getChartColorClass(index),
             ].join(' ')}
           />
           <span className="radf-chart-legend__label">{entry.value}</span>

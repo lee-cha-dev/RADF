@@ -1,5 +1,4 @@
 import { DashboardActionTypes } from './dashboardActions';
-import { DEFAULT_PALETTE } from '../viz/palettes/paletteRegistry';
 
 export const createInitialDashboardState = (overrides = {}) => ({
   dashboardId: null,
@@ -8,7 +7,6 @@ export const createInitialDashboardState = (overrides = {}) => ({
   selections: [],
   drillPath: [],
   panelStateById: {},
-  selectedPaletteId: DEFAULT_PALETTE,
   ...overrides,
 });
 
@@ -68,11 +66,6 @@ export const dashboardReducer = (state, action) => {
           action.payload.panelId,
           action.payload.nextState
         ),
-      };
-    case DashboardActionTypes.SET_PALETTE_ID:
-      return {
-        ...state,
-        selectedPaletteId: action.payload.paletteId ?? state.selectedPaletteId,
       };
     default:
       return state;

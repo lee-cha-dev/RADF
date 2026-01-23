@@ -10,26 +10,6 @@
   color: var(--radf-text-muted, var(--radf-color-muted));
 }
 
-.radf-panel__palette-controls {
-  display: flex;
-  align-items: center;
-  gap: var(--radf-space-2);
-}
-
-.radf-panel__palette-toggle {
-  padding: 6px 12px;
-  font-size: 0.75rem;
-}
-
-.radf-panel__palette-select {
-  border: 1px solid var(--radf-border-subtle, var(--radf-color-border));
-  background: var(--radf-surface-2);
-  color: var(--radf-text-primary, var(--radf-color-text));
-  border-radius: var(--radf-radius-sm);
-  padding: 6px 10px;
-  font-size: 0.75rem;
-}
-
 .radf-filter-bar {
   display: flex;
   flex-direction: column;
@@ -71,16 +51,6 @@
   padding: 8px 12px;
   font-size: 0.85rem;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.radf-filter-bar__select {
-  border: 1px solid var(--radf-border-subtle, var(--radf-color-border));
-  background: var(--radf-surface-2);
-  color: var(--radf-text-primary, var(--radf-color-text));
-  border-radius: var(--radf-radius-sm);
-  padding: 8px 12px;
-  font-size: 0.85rem;
-  min-width: 200px;
 }
 
 .radf-filter-bar__input:hover {

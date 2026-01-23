@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef, useEffect, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useEffect } from 'react';
 import GridLayout from '../../framework/core/layout/GridLayout.jsx';
 import Panel from '../../framework/core/layout/Panel.jsx';
 import VizRenderer from '../../framework/core/viz/VizRenderer.jsx';
@@ -30,10 +30,7 @@ import {
 import exampleDashboard from '../dashboards/example/example.dashboard.js';
 import ExampleFilterBar from '../dashboards/example/ExampleFilterBar.jsx';
 import '../dashboards/example/example.css';
-import {
-  getPaletteClass,
-  PALETTES,
-} from '../../framework/core/viz/palettes/paletteRegistry';
+import { resolvePaletteClass } from '../../framework/core/viz/palettes/paletteResolver';
 
 const buildDefaultRange = (days) => {
   const end = new Date();
@@ -43,25 +40,11 @@ const buildDefaultRange = (days) => {
   return [toValue(start), toValue(end)];
 };
 
-const PaletteClassManager = () => {
-  const { selectedPaletteId } = useDashboardState();
-
-  useEffect(() => {
-    const root = document.documentElement;
-    const paletteClasses = PALETTES.map((palette) => getPaletteClass(palette.id));
-    root.classList.remove(...paletteClasses);
-    root.classList.add(getPaletteClass(selectedPaletteId));
-  }, [selectedPaletteId]);
-
-  return null;
-};
-
 const VizPanel = ({ panelConfig }) => {
   const dashboardState = useDashboardState();
   const { addSelection, pushDrillPath, setPanelState, setGlobalFilters } =
     useDashboardActions();
   const brushDebounceRef = useRef(null);
-  const [showPaletteControls, setShowPaletteControls] = useState(false);
 
   const querySpec = useMemo(
     () => buildQuerySpec(panelConfig, dashboardState),
@@ -281,22 +264,18 @@ const VizPanel = ({ panelConfig }) => {
     setGlobalFilters,
   ]);
 
-  const panelPaletteOverride = panelStateById[panelConfig.id]?.paletteId;
-  const resolvedPaletteId = panelPaletteOverride ?? panelConfig.paletteId ?? null;
-  const panelPaletteClass = resolvedPaletteId ? getPaletteClass(resolvedPaletteId) : null;
-
-  const handleTogglePaletteControls = useCallback(() => {
-    setShowPaletteControls((prev) => !prev);
-  }, []);
-
-  const handlePanelPaletteChange = useCallback(
-    (event) => {
-      const nextValue = event.target.value;
-      setPanelState(panelConfig.id, {
-        paletteId: nextValue === 'default' ? null : nextValue,
-      });
-    },
-    [panelConfig.id, setPanelState]
+  const panelPaletteClass = useMemo(
+    () =>
+      resolvePaletteClass({
+        panelConfig,
+        vizType: panelConfig.vizType,
+        encodings: resolvedEncodings,
+        options: panelConfig.options,
+        dashboardConfig: exampleDashboard,
+        dashboardState,
+        data,
+      }),
+    [dashboardState, data, panelConfig, resolvedEncodings]
   );
 
   const panelFooter = brushZoomEnabled ? (
@@ -355,31 +334,6 @@ const VizPanel = ({ panelConfig }) => {
       isEmpty={isEmpty}
       emptyMessage="No data returned for this panel."
       footer={panelFooter}
-      actions={
-        <div className="radf-panel__palette-controls">
-          <button
-            type="button"
-            className="radf-button radf-panel__palette-toggle"
-            onClick={handleTogglePaletteControls}
-          >
-            Customize
-          </button>
-          {showPaletteControls ? (
-            <select
-              className="radf-panel__palette-select"
-              value={resolvedPaletteId || 'default'}
-              onChange={handlePanelPaletteChange}
-            >
-              <option value="default">Dashboard default</option>
-              {PALETTES.map((palette) => (
-                <option key={palette.id} value={palette.id}>
-                  {palette.label}
-                </option>
-              ))}
-            </select>
-          ) : null}
-        </div>
-      }
     >
       <VizRenderer
         vizType={panelConfig.vizType}
@@ -447,7 +401,6 @@ const DashboardContent = () => {
 
   return (
     <section className="radf-dashboard radf-example-dashboard">
-      <PaletteClassManager />
       <header className="radf-example-dashboard__header">
         <h1 className="radf-dashboard__title">{exampleDashboard.title}</h1>
         <p className="radf-example-dashboard__subtitle">

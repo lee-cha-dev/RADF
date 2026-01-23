@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   Brush,
   CartesianGrid,
@@ -13,7 +13,7 @@ import {
 import ChartContainer from '../common/ChartContainer.jsx';
 import ChartTooltip from '../common/ChartTooltip.jsx';
 import ChartLegend from '../common/ChartLegend.jsx';
-import { getChartColorByKey } from '../common/chartColors';
+import { getSeriesColor, getSeriesColorsForKeys } from '../palettes/seriesColors';
 
 const resolveSeriesKeys = (encodings, data) => {
   if (!encodings) {
@@ -37,6 +37,10 @@ function LineChartPanel({ data = [], encodings = {}, options = {}, handlers = {}
   const showTooltip = options.tooltip !== false;
   const brushConfig = options.brush || {};
   const brushEnabled = Boolean(brushConfig.enabled) && data.length > 1;
+  const seriesColors = useMemo(
+    () => getSeriesColorsForKeys(seriesKeys),
+    [seriesKeys]
+  );
   const brushStartIndex =
     typeof brushConfig.startIndex === 'number' ? brushConfig.startIndex : undefined;
   const brushEndIndex =
@@ -63,7 +67,7 @@ function LineChartPanel({ data = [], encodings = {}, options = {}, handlers = {}
               key={key}
               type="monotone"
               dataKey={key}
-              stroke={getChartColorByKey(key)}
+              stroke={seriesColors[key] || getSeriesColor(index)}
               strokeWidth={2}
               dot={{ r: 3 }}
               activeDot={{ r: 5, onClick: handlers.onClick }}

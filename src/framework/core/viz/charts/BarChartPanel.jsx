@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   Bar,
   BarChart,
@@ -12,7 +12,7 @@ import {
 import ChartContainer from '../common/ChartContainer.jsx';
 import ChartTooltip from '../common/ChartTooltip.jsx';
 import ChartLegend from '../common/ChartLegend.jsx';
-import { getChartColorByKey } from '../common/chartColors';
+import { getSeriesColor, getSeriesColorsForKeys } from '../palettes/seriesColors';
 
 const resolveSeriesKeys = (encodings, data) => {
   if (!encodings) {
@@ -35,6 +35,10 @@ function BarChartPanel({ data = [], encodings = {}, options = {}, handlers = {} 
   const showLegend = options.legend !== false && seriesKeys.length > 1;
   const showTooltip = options.tooltip !== false;
   const isStacked = options.stacked === true;
+  const seriesColors = useMemo(
+    () => getSeriesColorsForKeys(seriesKeys),
+    [seriesKeys]
+  );
 
   return (
     <ChartContainer>
@@ -56,7 +60,7 @@ function BarChartPanel({ data = [], encodings = {}, options = {}, handlers = {} 
             <Bar
               key={key}
               dataKey={key}
-              fill={getChartColorByKey(key)}
+              fill={seriesColors[key] || getSeriesColor(index)}
               stackId={isStacked ? 'radf-stack' : undefined}
               radius={[6, 6, 0, 0]}
               onClick={handlers.onClick}
