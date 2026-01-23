@@ -14,7 +14,6 @@ import {
   buildCrossFilterSelectionFromEvent,
   isSelectionDuplicate,
 } from '../../framework/core/interactions/crossFilter.js';
-import SelectionChips from '../../framework/core/interactions/SelectionChips.jsx';
 import {
   buildDrilldownEntryFromEvent,
   isDrilldownDuplicate,
@@ -28,6 +27,17 @@ import {
   removeBrushFilter,
   upsertBrushFilter,
 } from '../../framework/core/interactions/brushZoom.js';
+import exampleDashboard from '../dashboards/example/example.dashboard.js';
+import ExampleFilterBar from '../dashboards/example/ExampleFilterBar.jsx';
+import '../dashboards/example/example.css';
+
+const buildDefaultRange = (days) => {
+  const end = new Date();
+  const start = new Date();
+  start.setDate(end.getDate() - days + 1);
+  const toValue = (date) => date.toISOString().slice(0, 10);
+  return [toValue(start), toValue(end)];
+};
 
 const VizPanel = ({ panelConfig }) => {
   const dashboardState = useDashboardState();
@@ -357,8 +367,8 @@ const InsightsPanelContainer = ({ panelConfig }) => {
 };
 
 const DashboardContent = () => {
-  const { selections, drillPath } = useDashboardState();
-  const { clearSelections, removeSelection, popDrillPath } = useDashboardActions();
+  const { drillPath } = useDashboardState();
+  const { popDrillPath } = useDashboardActions();
 
   const handleCrumbClick = useCallback(
     (index) => {
@@ -371,98 +381,23 @@ const DashboardContent = () => {
     [drillPath.length, popDrillPath]
   );
 
-  const panels = useMemo(
-    () => [
-      {
-        id: 'overview',
-        panelType: 'content',
-        title: 'Framework Loaded',
-        subtitle: 'Viz registry and core charts are now wired.',
-        layout: { x: 1, y: 1, w: 12, h: 1 },
-        status: 'ready',
-        content: (
-          <p className="radf-dashboard__subtitle">
-            Line and bar charts are registered in the viz registry and render using
-            shared tooltip and legend styling.
-          </p>
-        ),
-      },
-      {
-        id: 'trend',
-        panelType: 'viz',
-        title: 'Daily Metric Trend',
-        subtitle: 'Mock data via the query layer.',
-        layout: { x: 1, y: 2, w: 8, h: 2 },
-        vizType: 'line',
-        datasetId: 'mock-dataset',
-        query: {
-          measures: ['metric_value'],
-          dimensions: ['date_month'],
-        },
-        encodings: { x: 'date_month', y: 'metric_value' },
-        options: { tooltip: true, legend: false },
-        interactions: {
-          drilldown: {
-            dimension: 'date_month',
-            to: 'date_day',
-          },
-          brushZoom: {
-            label: 'Visible date window',
-            applyToGlobal: true,
-          },
-        },
-      },
-      {
-        id: 'breakdown',
-        panelType: 'viz',
-        title: 'Category Breakdown',
-        subtitle: 'Mock categorical breakdown.',
-        layout: { x: 9, y: 2, w: 4, h: 2 },
-        vizType: 'bar',
-        datasetId: 'mock-dataset',
-        query: {
-          measures: ['metric_value'],
-          dimensions: ['category'],
-        },
-        encodings: { x: 'category', y: 'metric_value' },
-        options: { tooltip: true, legend: false },
-        interactions: {
-          crossFilter: {
-            field: 'category',
-            label: 'Category',
-          },
-        },
-      },
-      {
-        id: 'insights',
-        panelType: 'insights',
-        title: 'Automated Insights',
-        subtitle: 'Trend and anomaly signals from the mock dataset.',
-        layout: { x: 1, y: 4, w: 12, h: 2 },
-        datasetId: 'mock-dataset',
-        query: {
-          measures: ['metric_value'],
-          dimensions: ['date_month'],
-        },
-      },
-    ],
-    []
-  );
+  const panels = useMemo(() => exampleDashboard.panels, []);
 
   return (
-    <section className="radf-dashboard">
-      <h1 className="radf-dashboard__title">Dashboard Layout Preview</h1>
+    <section className="radf-dashboard radf-example-dashboard">
+      <header className="radf-example-dashboard__header">
+        <h1 className="radf-dashboard__title">{exampleDashboard.title}</h1>
+        <p className="radf-example-dashboard__subtitle">
+          {exampleDashboard.subtitle}
+        </p>
+      </header>
+      <ExampleFilterBar dateField={exampleDashboard.dateField} />
       <DrillBreadcrumbs
         drillPath={drillPath}
         onCrumbClick={handleCrumbClick}
         onReset={() =>
           Array.from({ length: drillPath.length }).forEach(() => popDrillPath())
         }
-      />
-      <SelectionChips
-        selections={selections}
-        onClear={clearSelections}
-        onRemove={removeSelection}
       />
       <GridLayout
         panels={panels}
@@ -483,12 +418,20 @@ const DashboardContent = () => {
 };
 
 function DashboardPage() {
+  const [defaultStart, defaultEnd] = buildDefaultRange(14);
+
   return (
     <DashboardProvider
       initialState={{
-        dashboardId: 'overview',
-        datasetId: 'mock-dataset',
-        globalFilters: [],
+        dashboardId: exampleDashboard.id,
+        datasetId: exampleDashboard.datasetId,
+        globalFilters: [
+          {
+            field: exampleDashboard.dateField,
+            op: 'BETWEEN',
+            values: [defaultStart, defaultEnd],
+          },
+        ],
       }}
     >
       <DashboardContent />
