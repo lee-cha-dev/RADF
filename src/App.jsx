@@ -4,8 +4,8 @@ import routes from './routes.jsx';
 import ErrorBoundary from './framework/core/layout/ErrorBoundary.jsx';
 
 const THEME_CLASS = {
-  light: 'radf-theme-light',
-  dark: 'radf-theme-dark',
+  light: 'fecc-theme-light',
+  dark: 'fecc-theme-dark',
 };
 
 function App() {
