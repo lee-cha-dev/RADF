@@ -91,11 +91,13 @@
 
 /**
  * @typedef {Object} DashboardState
- * @property {string} dashboardId - Active dashboard id.
- * @property {string} datasetId - Active dataset id.
- * @property {Filter[]} filters - Global filters applied to the dashboard.
+ * @property {string|null} dashboardId - Active dashboard id.
+ * @property {string|null} datasetId - Active dataset id.
+ * @property {Filter[]} globalFilters - Global filters applied to the dashboard.
  * @property {Selection[]} selections - Active selections for interactions.
- * @property {DrilldownPath[]} drilldowns - Active drilldown paths.
+ * @property {DrilldownPath[]} drillPath - Active drilldown path entries.
+ * @property {Record<string, Record<string, unknown>>} panelStateById
+ *   - Per-panel UI state keyed by panel id.
  */
 
 /**
@@ -167,8 +169,12 @@
 /**
  * @typedef {Object} Filter
  * @property {string} field - Field to filter.
- * @property {string} operator - Filter operator (eq, in, gt, lt, etc.).
- * @property {string|string[]|number|number[]} value - Filter value(s).
+ * @property {string} op - Filter operator (IN, EQ, BETWEEN, etc.).
+ * @property {Array<string|number|boolean|Date>} [values] - Normalized filter values.
+ * @property {string} [operator]
+ *   - Optional alias for op (for legacy filter payloads).
+ * @property {string|number|boolean|Date} [value]
+ *   - Optional single-value alias for values.
  */
 
 /**

@@ -1,5 +1,25 @@
+/**
+ * @module core/dashboard/dashboardReducer
+ * @description Reducer and state factory for dashboard context.
+ */
+
 import { DashboardActionTypes } from './dashboardActions';
 
+/**
+ * @typedef {import('../docs/jsdocTypes').DashboardState} DashboardState
+ * @typedef {import('../docs/jsdocTypes').DashboardAction} DashboardAction
+ */
+
+/**
+ * Creates a normalized dashboard state object with defaults.
+ *
+ * Invariants:
+ * - `globalFilters`, `selections`, and `drillPath` are always arrays.
+ * - `panelStateById` is an object keyed by panel id.
+ *
+ * @param {Partial<DashboardState>} [overrides={}] - Optional overrides for initial state.
+ * @returns {DashboardState} Initialized dashboard state.
+ */
 export const createInitialDashboardState = (overrides = {}) => ({
   dashboardId: null,
   datasetId: null,
@@ -18,6 +38,13 @@ const mergePanelState = (panelStateById, panelId, nextState) => ({
   },
 });
 
+/**
+ * Reducer for dashboard state transitions.
+ *
+ * @param {DashboardState} state
+ * @param {DashboardAction} action
+ * @returns {DashboardState} Next dashboard state.
+ */
 export const dashboardReducer = (state, action) => {
   switch (action.type) {
     case DashboardActionTypes.SET_CONTEXT:
