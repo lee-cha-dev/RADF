@@ -64,6 +64,9 @@ export const useQuery = (
           updatedAt: now(),
         };
         cache.set(currentHash, entry);
+        if (cache.prune) {
+          cache.prune();
+        }
         setState(entry);
         if (onSuccess) {
           onSuccess(entry);
@@ -82,6 +85,9 @@ export const useQuery = (
           updatedAt: now(),
         };
         cache.set(currentHash, entry);
+        if (cache.prune) {
+          cache.prune();
+        }
         setState(entry);
         if (onError) {
           onError(error);
@@ -103,6 +109,9 @@ export const useQuery = (
       updatedAt: cached?.updatedAt ?? null,
       promise,
     });
+    if (cache.prune) {
+      cache.prune();
+    }
 
     return promise;
   }, [activeProvider, cache, onError, onSuccess, querySpec]);
