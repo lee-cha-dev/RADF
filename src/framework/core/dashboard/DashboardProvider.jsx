@@ -1,4 +1,4 @@
-import React, { createContext, useMemo, useReducer } from 'react';
+import React, { useMemo, useReducer } from 'react';
 import { dashboardReducer, createInitialDashboardState } from './dashboardReducer';
 import {
   addSelection,
@@ -10,9 +10,10 @@ import {
   setGlobalFilters,
   setPanelState,
 } from './dashboardActions';
-
-export const DashboardStateContext = createContext(null);
-export const DashboardActionsContext = createContext(null);
+import {
+  DashboardActionsContext,
+  DashboardStateContext,
+} from './DashboardContext';
 
 const bindDashboardActions = (dispatch) => ({
   setDashboardContext: (payload) => dispatch(setDashboardContext(payload)),

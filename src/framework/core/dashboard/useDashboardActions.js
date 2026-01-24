@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { DashboardActionsContext } from './DashboardProvider';
+import { DashboardActionsContext } from './DashboardContext';
 
 export const useDashboardActions = () => {
   const context = useContext(DashboardActionsContext);

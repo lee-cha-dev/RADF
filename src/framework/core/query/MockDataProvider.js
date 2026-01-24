@@ -102,7 +102,7 @@ const dimensionDefaults = {
   segment: ['Consumer', 'SMB', 'Enterprise'],
 };
 
-const getDimensionValues = (dimensionId, random) => {
+const getDimensionValues = (dimensionId) => {
   if (dimensionDefaults[dimensionId]) {
     return dimensionDefaults[dimensionId];
   }
@@ -116,7 +116,6 @@ const getDimensionValues = (dimensionId, random) => {
     return dimensionDefaults.category;
   }
   const base = ['A', 'B', 'C', 'D'];
-  const pick = clamp(Math.floor(random() * base.length), 0, base.length - 1);
   return base.map((value, index) => `${dimensionId || 'dim'}-${value}${index + 1}`);
 };
 
@@ -144,7 +143,7 @@ const generateRows = ({ measures, dimensions, timeRange, random }) => {
         return formatDate(date);
       });
     }
-    return getDimensionValues(dimensionId, random);
+    return getDimensionValues(dimensionId);
   });
 
   const buildRow = (depth, base) => {

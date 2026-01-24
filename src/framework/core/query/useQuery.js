@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { assertDataProvider } from './DataProvider';
 import { hashQuerySpec } from './hashQuerySpec';
 import { queryCache } from './cache';
@@ -44,7 +44,7 @@ export const useQuery = (
     createInitialState(cache.get(hash))
   );
 
-  const fetchData = async (currentHash) => {
+  const fetchData = useCallback(async (currentHash) => {
     const cached = cache.get(currentHash);
     if (cached?.promise) {
       return cached.promise;
@@ -105,7 +105,7 @@ export const useQuery = (
     });
 
     return promise;
-  };
+  }, [activeProvider, cache, onError, onSuccess, querySpec]);
 
   useEffect(() => {
     if (!enabled) {
@@ -124,7 +124,7 @@ export const useQuery = (
     }
 
     if (!cached || isStale(cached, staleTime)) {
-      fetchData(hash).then(r => {});
+      void fetchData(hash);
     }
 
     return () => {
@@ -132,7 +132,7 @@ export const useQuery = (
         abortRef.current.abort();
       }
     };
-  }, [hash, enabled, staleTime, cache, querySpec, activeProvider]);
+  }, [hash, enabled, staleTime, cache, fetchData]);
 
   return {
     data: state.data,

@@ -24,7 +24,7 @@ function VizRenderer({
     [panelConfig, vizType, encodings, options, data]
   );
   const [hiddenKeys, setHiddenKeys] = useState(new Set());
-  const legendItems = colorAssignment?.items ?? [];
+  const legendItems = useMemo(() => colorAssignment?.items ?? [], [colorAssignment]);
   const legendMode = options?.legendMode ?? 'auto';
   const legendPosition = options?.legendPosition ?? 'bottom';
   const shouldShowLegend =
@@ -68,7 +68,7 @@ function VizRenderer({
       <div className="radf-viz__missing">
         <p className="radf-viz__missing-title">Visualization unavailable</p>
         <p className="radf-viz__missing-text">
-          The viz type "{vizType}" has not been registered yet.
+          The viz type &quot;{vizType}&quot; has not been registered yet.
         </p>
       </div>
     );
