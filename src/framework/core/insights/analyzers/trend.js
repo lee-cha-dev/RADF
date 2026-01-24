@@ -1,4 +1,21 @@
-import {findMeasureId} from "./analysisUtils.js";
+/**
+ * @module core/insights/analyzers/trend
+ * @description Analyzer that summarizes directional trends in a series.
+ */
+
+import { findMeasureId } from './analysisUtils.js';
+
+/**
+ * @typedef {import('../../docs/jsdocTypes.js').Insight} Insight
+ * @typedef {import('../../docs/jsdocTypes.js').QuerySpec} QuerySpec
+ */
+
+/**
+ * @typedef {Object} AnalyzerContext
+ * @property {Object[]} rows - Raw query rows.
+ * @property {QuerySpec|null} [querySpec] - QuerySpec used to fetch the data.
+ * @property {Record<string, unknown>|null} [meta] - Provider metadata.
+ */
 
 const formatNumber = (value) => {
   if (value == null || Number.isNaN(value)) {
@@ -12,6 +29,11 @@ const getValues = (rows, measureId) =>
     .map((row) => Number(row?.[measureId]))
     .filter((value) => Number.isFinite(value));
 
+/**
+ * Summarize the overall directional trend in a series.
+ * @param {AnalyzerContext} context - Analyzer context.
+ * @returns {Insight[]|Insight} Insight result(s).
+ */
 const analyze = ({ rows, querySpec, meta }) => {
   const measureId = findMeasureId(rows, querySpec);
   if (!measureId) {
@@ -60,6 +82,10 @@ const analyze = ({ rows, querySpec, meta }) => {
   };
 };
 
+/**
+ * Analyzer definition for trend summarization.
+ * @type {{ id: string, label: string, analyze: (context: AnalyzerContext) => Insight[]|Insight }}
+ */
 export default {
   id: 'trend',
   label: 'Trend Summary',

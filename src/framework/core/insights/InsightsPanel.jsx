@@ -1,5 +1,19 @@
+/**
+ * @module core/insights/InsightsPanel
+ * @description Presentational component for rendering insight cards.
+ */
+
 import React from 'react';
 
+/**
+ * @typedef {import('../docs/jsdocTypes.js').Insight} Insight
+ */
+
+/**
+ * Render the evidence list for an insight card.
+ * @param {string[]} evidence - Evidence strings.
+ * @returns {React.ReactNode|null} Evidence list markup.
+ */
 const renderEvidence = (evidence = []) => {
   if (!evidence.length) {
     return null;
@@ -15,6 +29,16 @@ const renderEvidence = (evidence = []) => {
   );
 };
 
+/**
+ * @typedef {Object} InsightsPanelProps
+ * @property {Insight[]} [insights] - Insights to display.
+ */
+
+/**
+ * Render insight cards in a stacked layout.
+ * @param {InsightsPanelProps} props - Component props.
+ * @returns {JSX.Element} Insight list UI.
+ */
 function InsightsPanel({ insights = [] }) {
   return (
     <div className="radf-insights">

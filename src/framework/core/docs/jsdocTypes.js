@@ -201,9 +201,11 @@
  * @typedef {Object} Insight
  * @property {string} id - Insight id.
  * @property {string} title - Insight title.
- * @property {string} description - Insight narrative.
- * @property {string} severity - Insight severity (info, warning, critical).
- * @property {Record<string, unknown>} [meta] - Optional insight metadata.
+ * @property {string} [severity] - Insight severity (info, warning, positive, negative).
+ * @property {string} [narrative] - Descriptive insight narrative.
+ * @property {string|null} [recommendedAction] - Suggested next step for the user.
+ * @property {string[]} [evidence] - Supporting evidence strings.
+ * @property {string} [source] - Analyzer or system source label.
  */
 
 /**
@@ -218,7 +220,7 @@
  * @typedef {Object} Analyzer
  * @property {string} id - Analyzer id.
  * @property {string} label - Display label.
- * @property {(context: AnalyzerContext) => Insight[]|Promise<Insight[]>} run
+ * @property {(context: AnalyzerContext) => Insight[]|Insight|Promise<Insight[]|Insight>} analyze
  *   - Executes analysis and returns insights.
  */
 
