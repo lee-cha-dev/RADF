@@ -18,6 +18,12 @@ import './framework/styles/components/table.css';
 
 const rootElement = document.getElementById('root');
 
+if (!rootElement) {
+  throw new Error(
+    'RADF could not find the #root element. Ensure index.html includes <div id="root"></div> before initializing the app.'
+  );
+}
+
 registerCharts();
 registerInsights();
 
