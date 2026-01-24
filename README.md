@@ -307,6 +307,29 @@ const myProvider = {
 
 ---
 
+## Tooling
+
+This repo includes baseline quality gates for linting, formatting, and testing.
+
+### Scripts
+
+```bash
+npm run lint
+npm run lint:fix
+npm run format
+npm run format:check
+npm run test
+npm run test:watch
+```
+
+### Configs
+
+- ESLint: `eslint.config.js`
+- Prettier: `.prettierrc.json` + `.prettierignore`
+- Vitest: `vitest.config.js` + `vitest.setup.js`
+
+---
+
 ## Repo structure (consumer relevant)
 
 Only a few folders matter when you embed RADF into your app:
