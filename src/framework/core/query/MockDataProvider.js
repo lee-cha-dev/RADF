@@ -116,7 +116,6 @@ const getDimensionValues = (dimensionId, random) => {
     return dimensionDefaults.category;
   }
   const base = ['A', 'B', 'C', 'D'];
-  const pick = clamp(Math.floor(random() * base.length), 0, base.length - 1);
   return base.map((value, index) => `${dimensionId || 'dim'}-${value}${index + 1}`);
 };
 
