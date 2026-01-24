@@ -1,3 +1,8 @@
+/**
+ * @module main
+ * @description Application entry point. Registers RADF chart/insight modules,
+ * loads framework styles, and mounts the React router at the root element.
+ */
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';

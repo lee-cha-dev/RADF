@@ -1,3 +1,8 @@
+/**
+ * @module App
+ * @description Application shell that manages theme toggling, routing, and
+ * error boundaries for the RADF example dashboard.
+ */
 import React, { useEffect, useMemo, useState } from 'react';
 import { useRoutes } from 'react-router-dom';
 import routes from './routes.jsx';
