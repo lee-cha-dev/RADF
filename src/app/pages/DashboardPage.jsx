@@ -1,3 +1,8 @@
+/**
+ * @module app/pages/DashboardPage
+ * @description Example dashboard page wiring RADF providers, interactions, and panels.
+ */
+
 import React, { useCallback, useMemo, useRef, useEffect } from 'react';
 import GridLayout from '../../framework/core/layout/GridLayout.jsx';
 import Panel from '../../framework/core/layout/Panel.jsx';
@@ -35,6 +40,11 @@ import ExampleFilterBar from '../dashboards/example/ExampleFilterBar.jsx';
 import '../dashboards/example/example.css';
 import { resolvePalette } from '../../framework/core/viz/palettes/paletteResolver';
 
+/**
+ * Build an ISO date range for a rolling window.
+ * @param {number} days - Number of days to include in the window.
+ * @returns {[string, string]} Tuple of ISO yyyy-mm-dd values.
+ */
 const buildDefaultRange = (days) => {
   const end = new Date();
   const start = new Date();
@@ -43,6 +53,17 @@ const buildDefaultRange = (days) => {
   return [toValue(start), toValue(end)];
 };
 
+/**
+ * @typedef {Object} VizPanelProps
+ * @property {import('../../framework/core/docs/jsdocTypes.js').PanelConfig} panelConfig
+ *   - Panel configuration for the visualization.
+ */
+
+/**
+ * Render a single visualization panel with interactions wired to dashboard state.
+ * @param {VizPanelProps} props
+ * @returns {JSX.Element}
+ */
 const VizPanel = ({ panelConfig }) => {
   const dashboardState = useDashboardState();
   const { addSelection, pushDrillPath, setPanelState, setGlobalFilters } =
@@ -347,6 +368,17 @@ const VizPanel = ({ panelConfig }) => {
   );
 };
 
+/**
+ * @typedef {Object} InsightsPanelContainerProps
+ * @property {import('../../framework/core/docs/jsdocTypes.js').PanelConfig} panelConfig
+ *   - Panel configuration for the insight renderer.
+ */
+
+/**
+ * Render an insights panel using the insights engine and query pipeline.
+ * @param {InsightsPanelContainerProps} props
+ * @returns {JSX.Element}
+ */
 const InsightsPanelContainer = ({ panelConfig }) => {
   const dashboardState = useDashboardState();
 
@@ -383,6 +415,10 @@ const InsightsPanelContainer = ({ panelConfig }) => {
   );
 };
 
+/**
+ * Layout the dashboard header, filters, breadcrumbs, and panel grid.
+ * @returns {JSX.Element}
+ */
 const DashboardContent = () => {
   const dashboardState = useDashboardState();
   const drillBreadcrumbs = useMemo(
@@ -444,6 +480,13 @@ const DashboardContent = () => {
   );
 };
 
+/**
+ * Example dashboard route demonstrating stateful filters, drilldowns, and insights.
+ * @returns {JSX.Element}
+ *
+ * @example
+ * <Route path="/dashboard" element={<DashboardPage />} />
+ */
 function DashboardPage() {
   const [defaultStart, defaultEnd] = buildDefaultRange(31);
 

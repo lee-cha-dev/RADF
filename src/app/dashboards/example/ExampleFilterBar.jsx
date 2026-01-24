@@ -1,3 +1,8 @@
+/**
+ * @module app/dashboards/example/ExampleFilterBar
+ * @description Filter bar that syncs global date range and selections with dashboard state.
+ */
+
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDashboardActions } from '../../../framework/core/dashboard/useDashboardActions';
 import { useDashboardState } from '../../../framework/core/dashboard/useDashboardState';
@@ -12,6 +17,11 @@ import {
   upsertBrushFilter,
 } from '../../../framework/core/interactions/brushZoom';
 
+/**
+ * Normalize a date value for input elements.
+ * @param {string|number|Date|null|undefined} value - Raw date value.
+ * @returns {string} Input-ready yyyy-mm-dd string.
+ */
 const toInputValue = (value) => {
   if (!value) {
     return '';
@@ -19,6 +29,11 @@ const toInputValue = (value) => {
   return String(value).slice(0, 10);
 };
 
+/**
+ * Convert a brush filter into a date range object for inputs.
+ * @param {import('../../../framework/core/docs/jsdocTypes.js').Filter|null} filter
+ * @returns {{ start: string, end: string }}
+ */
 const buildRangeFromFilter = (filter) => {
   if (!filter || !Array.isArray(filter.values)) {
     return { start: '', end: '' };
@@ -29,6 +44,19 @@ const buildRangeFromFilter = (filter) => {
   };
 };
 
+/**
+ * @typedef {Object} ExampleFilterBarProps
+ * @property {string} dateField - Dimension id used for the date range filter.
+ */
+
+/**
+ * Example filter bar that manages global date filters and selection chips.
+ * @param {ExampleFilterBarProps} props
+ * @returns {JSX.Element}
+ *
+ * @example
+ * <ExampleFilterBar dateField="date_day" />
+ */
 function ExampleFilterBar({ dateField }) {
   const dashboardState = useDashboardState();
   const globalFilters = selectGlobalFilters(dashboardState);

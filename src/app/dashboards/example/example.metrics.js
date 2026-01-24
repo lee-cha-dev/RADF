@@ -1,5 +1,17 @@
+/**
+ * @module app/dashboards/example/example.metrics
+ * @description Example metric definitions for the tutorial dashboard.
+ */
+
 import createMetric from "../../../framework/core/model/createMetric";
 
+/**
+ * Metric definitions for the example dataset.
+ * @type {import('../../../framework/core/docs/jsdocTypes.js').Metric[]}
+ *
+ * @example
+ * import metrics from './example.metrics';
+ */
 const metrics = [
   createMetric({
     id: "total_revenue",

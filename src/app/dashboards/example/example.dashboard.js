@@ -1,3 +1,23 @@
+/**
+ * @module app/dashboards/example/example.dashboard
+ * @description Example dashboard configuration illustrating panels and interactions.
+ */
+
+/**
+ * Example dashboard configuration used by the tutorial page.
+ * @type {import('../../../framework/core/docs/jsdocTypes.js').DashboardConfig & {
+ *   dateField: string
+ * }}
+ *
+ * @example
+ * // Clone this file and update ids/titles to create a new dashboard.
+ * const myDashboard = {
+ *   ...exampleDashboard,
+ *   id: 'customer-retention',
+ *   title: 'Customer Retention',
+ *   datasetId: 'customer_dataset',
+ * };
+ */
 const exampleDashboard = {
   id: 'example-dashboard',
   title: 'Executive Performance Overview',

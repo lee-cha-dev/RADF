@@ -1,6 +1,18 @@
+/**
+ * @module app/dashboards/example/example.dimensions
+ * @description Example dimension definitions for the tutorial dashboard.
+ */
+
 import createDimension from "../../../framework/core/model/createDimension";
 import { FIELD_TYPES } from "../../../framework/core/model/fieldTypes";
 
+/**
+ * Dimension definitions for the example dataset.
+ * @type {import('../../../framework/core/docs/jsdocTypes.js').Dimension[]}
+ *
+ * @example
+ * import dimensions from './example.dimensions';
+ */
 const dimensions = [
   createDimension({
     id: "date_year",
