@@ -1,0 +1,14 @@
+:root {
+  background-color: #f4f6fb;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+#root {
+  min-height: 100vh;
+  padding: 24px;
+  box-sizing: border-box;
+}
