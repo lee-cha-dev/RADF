@@ -161,9 +161,10 @@
 
 /**
  * @typedef {Object} Selection
- * @property {string} field - Field that was selected.
- * @property {string|string[]|number|number[]} value - Selected value(s).
- * @property {string} [label] - Human-friendly label.
+ * @property {string} id - Stable selection id.
+ * @property {string|null} sourcePanelId - Panel that originated the selection.
+ * @property {string} label - Human-friendly selection label.
+ * @property {Filter} filter - Filter payload represented by the selection.
  */
 
 /**
@@ -179,15 +180,21 @@
 
 /**
  * @typedef {Object} DrilldownPath
- * @property {string} dimension - Base dimension id.
- * @property {string[]} path - Ordered drilldown dimension ids.
+ * @property {string} id - Stable drilldown entry id.
+ * @property {string|null} sourcePanelId - Panel that originated the drilldown.
+ * @property {string} dimension - Dimension being drilled.
+ * @property {string} [to] - Next dimension in the hierarchy.
+ * @property {string|number|Date} value - Value selected for the drilldown.
+ * @property {string} label - Display label for the drill entry.
+ * @property {Filter} filter - Filter payload represented by the drilldown.
  */
 
 /**
  * @typedef {Object} BrushRange
- * @property {string} field - Field being brushed.
- * @property {number|Date} start - Range start.
- * @property {number|Date} end - Range end.
+ * @property {number} startIndex - Start index in the data array.
+ * @property {number} endIndex - End index in the data array.
+ * @property {string|number|Date} startValue - Data value at the start index.
+ * @property {string|number|Date} endValue - Data value at the end index.
  */
 
 /**

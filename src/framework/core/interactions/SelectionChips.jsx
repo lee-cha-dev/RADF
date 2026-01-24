@@ -1,6 +1,28 @@
+/**
+ * @module core/interactions/SelectionChips
+ * @description Renders active selections as removable chips.
+ */
+
 import React from 'react';
 import { getSelectionLabel } from './crossFilter';
 
+/**
+ * @typedef {import('../docs/jsdocTypes.js').Selection} Selection
+ */
+
+/**
+ * @typedef {Object} SelectionChipsProps
+ * @property {Selection[]} [selections] - Active cross-filter selections.
+ * @property {(selectionId: string) => void} onRemove - Handler for removing a selection.
+ * @property {() => void} onClear - Handler for clearing all selections.
+ */
+
+/**
+ * Render selection chips with remove/clear actions.
+ *
+ * @param {SelectionChipsProps} props
+ * @returns {JSX.Element|null} Selection bar or null when empty.
+ */
 const SelectionChips = ({ selections = [], onRemove, onClear }) => {
   if (!selections.length) {
     return null;
