@@ -1,3 +1,12 @@
+/**
+ * @module core/query/normalizeQuerySpec
+ * @description Canonicalizes QuerySpec values for hashing and cache keys.
+ */
+
+/**
+ * @typedef {import('../docs/jsdocTypes').QuerySpec} QuerySpec
+ */
+
 const isPlainObject = (value) =>
   Boolean(value && typeof value === 'object' && !Array.isArray(value));
 
@@ -75,6 +84,12 @@ const normalizeStringArray = (values) => {
   return [...values.filter(Boolean)].sort();
 };
 
+/**
+ * Normalizes a QuerySpec by sorting arrays and removing undefined values.
+ *
+ * @param {Partial<QuerySpec>} [querySpec={}]
+ * @returns {QuerySpec} Normalized query spec with stable ordering.
+ */
 export const normalizeQuerySpec = (querySpec = {}) => ({
   datasetId: querySpec.datasetId ?? null,
   measures: normalizeStringArray(querySpec.measures),

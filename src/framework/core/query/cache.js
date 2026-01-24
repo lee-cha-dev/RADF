@@ -1,3 +1,8 @@
+/**
+ * @module core/query/cache
+ * @description LRU-style cache for query results.
+ */
+
 const createStore = () => new Map();
 
 const touch = (store, key, entry) => {
@@ -7,6 +12,21 @@ const touch = (store, key, entry) => {
   store.set(key, entry);
 };
 
+/**
+ * Creates an LRU-style cache for query results.
+ *
+ * @param {{ maxSize?: number }} [options]
+ * @returns {{
+ *   get: (key: string) => any,
+ *   set: (key: string, entry: any) => any,
+ *   has: (key: string) => boolean,
+ *   delete: (key: string) => boolean,
+ *   clear: () => void,
+ *   entries: () => Array<[string, any]>,
+ *   size: () => number,
+ *   prune: () => void
+ * }} Cache API with LRU eviction behavior.
+ */
 export const createQueryCache = ({ maxSize = 500 } = {}) => {
   const store = createStore();
 
@@ -44,4 +64,9 @@ export const createQueryCache = ({ maxSize = 500 } = {}) => {
   };
 };
 
+/**
+ * Default in-memory query cache shared by useQuery.
+ *
+ * @type {ReturnType<typeof createQueryCache>}
+ */
 export const queryCache = createQueryCache();

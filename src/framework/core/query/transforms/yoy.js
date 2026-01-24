@@ -1,3 +1,8 @@
+/**
+ * @module core/query/transforms/yoy
+ * @description Year-over-year delta transform for time series data.
+ */
+
 const parseDateParts = (value) => {
   if (value instanceof Date && !Number.isNaN(value.getTime())) {
     return {
@@ -25,6 +30,17 @@ const parseDateParts = (value) => {
   return null;
 };
 
+/**
+ * Computes year-over-year deltas for a numeric field.
+ *
+ * @param {Array<Object>} [rows=[]]
+ * @param {object} [options={}]
+ * @param {string} options.field - Field with numeric values.
+ * @param {string} options.dateField - Field containing dates or years.
+ * @param {string} [options.resultField] - Output field name override.
+ * @param {boolean} [options.percent=true] - Return percent change when true.
+ * @returns {Array<Object>} Rows with the YoY field appended.
+ */
 export const yoyRows = (
   rows = [],
   { field, dateField, resultField, percent = true } = {}

@@ -1,7 +1,54 @@
+/**
+ * @module core/query/useQuery
+ * @description React hook for executing QuerySpecs with caching and validation.
+ */
+
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { assertDataProvider } from './DataProvider';
 import { hashQuerySpec } from './hashQuerySpec';
 import { queryCache } from './cache';
+
+/**
+ * @typedef {import('../docs/jsdocTypes').QuerySpec} QuerySpec
+ * @typedef {import('../docs/jsdocTypes').DataProvider} DataProvider
+ * @typedef {import('../docs/jsdocTypes').ProviderResult} ProviderResult
+ */
+
+/**
+ * @typedef {Object} UseQueryOptions
+ * @property {DataProvider} provider - Provider instance with execute().
+ * @property {{ get: (key: string) => any, set: (key: string, entry: any) => any, prune?: () => void }} [cache]
+ *   - Cache implementation (LRU-style by default).
+ * @property {number} [staleTime=30000] - Milliseconds until cached data is stale.
+ * @property {boolean} [enabled=true] - When false, skip executing the query.
+ * @property {(entry: QueryState) => void} [onSuccess] - Called after successful fetch.
+ * @property {(error: Error) => void} [onError] - Called after failed fetch.
+ * @property {(result: ProviderResult, querySpec: QuerySpec) => (true|false|string|string[]|{valid?:boolean, errors?:string[], error?:string})} [validateResult]
+ *   - Custom validation for provider results.
+ * @property {boolean} [strictResultValidation=false]
+ *   - When true, throw on validation errors instead of warning.
+ */
+
+/**
+ * @typedef {Object} QueryState
+ * @property {'idle'|'loading'|'success'|'error'} status
+ * @property {Array<Object>|null} data
+ * @property {Record<string, unknown>|null} meta
+ * @property {Error|null} error
+ * @property {number|null} updatedAt
+ */
+
+/**
+ * @typedef {Object} UseQueryResult
+ * @property {Array<Object>|null} data
+ * @property {Record<string, unknown>|null} meta
+ * @property {boolean} loading
+ * @property {Error|null} error
+ * @property {'idle'|'loading'|'success'|'error'} status
+ * @property {number|null} updatedAt
+ * @property {boolean} isStale
+ * @property {() => Promise<QueryState|null>} refetch
+ */
 
 const now = () => Date.now();
 
@@ -78,6 +125,32 @@ const isStale = (entry, staleTime) => {
   return now() - entry.updatedAt > staleTime;
 };
 
+/**
+ * Executes a QuerySpec through a provider with cache, stale checking, and aborting.
+ *
+ * Lifecycle notes:
+ * - Cache hit: returns cached data immediately, refetches if stale.
+ * - Cache miss: sets status to loading and executes provider.
+ * - In-flight requests are shared via cache promise.
+ * - Aborts on unmount or query spec changes.
+ * - Validation failures warn by default and return empty rows; strict mode throws.
+ *
+ * @param {QuerySpec} querySpec
+ * @param {UseQueryOptions} [options]
+ * @returns {UseQueryResult}
+ *
+ * @example
+ * const querySpec = {
+ *   datasetId: 'sales_dataset',
+ *   measures: ['total_revenue'],
+ *   dimensions: ['order_month'],
+ * };
+ *
+ * const { data, loading, error, refetch } = useQuery(querySpec, {
+ *   provider: myProvider,
+ *   staleTime: 60000,
+ * });
+ */
 export const useQuery = (
   querySpec,
   {

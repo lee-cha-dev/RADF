@@ -1,3 +1,8 @@
+/**
+ * @module core/query/transforms/rolling
+ * @description Rolling window average transform for time series data.
+ */
+
 const sortRowsByField = (rows, field, order) => {
   const direction = order === 'desc' ? -1 : 1;
   return [...rows].sort((left, right) => {
@@ -23,6 +28,18 @@ const sortRowsByField = (rows, field, order) => {
   });
 };
 
+/**
+ * Computes a rolling average over a numeric field.
+ *
+ * @param {Array<Object>} [rows=[]]
+ * @param {object} [options={}]
+ * @param {string} options.field - Field to aggregate.
+ * @param {number} [options.window=3] - Window size for the rolling average.
+ * @param {string} [options.sortBy] - Optional field used to sort rows.
+ * @param {'asc'|'desc'} [options.order='asc'] - Sort order for the window.
+ * @param {string} [options.resultField] - Output field name override.
+ * @returns {Array<Object>} Rows with the rolling field appended.
+ */
 export const rollingRows = (
   rows = [],
   { field, window = 3, sortBy, order = 'asc', resultField } = {}

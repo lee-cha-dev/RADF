@@ -1,4 +1,13 @@
+/**
+ * @module core/query/MockDataProvider
+ * @description Deterministic mock data provider for local development and demos.
+ */
+
 import { createDataProvider } from './DataProvider';
+
+/**
+ * @typedef {import('../docs/jsdocTypes').DataProvider} DataProvider
+ */
 
 const wait = (ms, signal) =>
   new Promise((resolve, reject) => {
@@ -205,4 +214,10 @@ const mockExecute = async (querySpec, { signal } = {}) => {
   };
 };
 
+/**
+ * Mock provider that generates deterministic, pseudo-random rows based on the
+ * query spec. Useful for demos and layout testing when a backend is missing.
+ *
+ * @type {DataProvider}
+ */
 export const MockDataProvider = createDataProvider(mockExecute);
