@@ -5,6 +5,58 @@ import { queryCache } from './cache';
 
 const now = () => Date.now();
 
+const isPlainObject = (value) =>
+  Boolean(value && typeof value === 'object' && !Array.isArray(value));
+
+const getDefaultValidationErrors = (result) => {
+  const errors = [];
+  if (!Array.isArray(result?.rows)) {
+    errors.push('rows must be an array');
+  }
+  if (result?.meta != null && !isPlainObject(result.meta)) {
+    errors.push('meta must be an object when provided');
+  }
+  return errors;
+};
+
+const getCustomValidationErrors = (validator, result, querySpec) => {
+  if (!validator) {
+    return [];
+  }
+  try {
+    const outcome = validator(result, querySpec);
+    if (outcome == null || outcome === true) {
+      return [];
+    }
+    if (outcome === false) {
+      return ['custom validation failed'];
+    }
+    if (typeof outcome === 'string') {
+      return [outcome];
+    }
+    if (Array.isArray(outcome)) {
+      return outcome;
+    }
+    if (typeof outcome === 'object' && outcome.valid === false) {
+      if (Array.isArray(outcome.errors)) {
+        return outcome.errors;
+      }
+      if (typeof outcome.error === 'string') {
+        return [outcome.error];
+      }
+      return ['custom validation failed'];
+    }
+    return [];
+  } catch (error) {
+    return [error?.message || 'custom validation threw an error'];
+  }
+};
+
+const normalizeProviderResult = (result) => ({
+  rows: Array.isArray(result?.rows) ? result.rows : [],
+  meta: isPlainObject(result?.meta) ? result.meta : null,
+});
+
 const createInitialState = (entry) => ({
   status: entry?.status ?? 'idle',
   data: entry?.data ?? null,
@@ -35,6 +87,8 @@ export const useQuery = (
     enabled = true,
     onSuccess,
     onError,
+    validateResult,
+    strictResultValidation = false,
   } = {}
 ) => {
   const activeProvider = useMemo(() => assertDataProvider(provider), [provider]);
@@ -56,10 +110,25 @@ export const useQuery = (
     const promise = activeProvider
       .execute(querySpec, { signal: controller.signal })
       .then((result) => {
+        const validator = validateResult || activeProvider?.validateResult;
+        const errors = [
+          ...getDefaultValidationErrors(result),
+          ...getCustomValidationErrors(validator, result, querySpec),
+        ].filter(Boolean);
+
+        if (errors.length > 0) {
+          const message = `Invalid provider result: ${errors.join('; ')}`;
+          if (strictResultValidation) {
+            throw new Error(message);
+          }
+          console.warn(message, { result, querySpec });
+        }
+
+        const normalized = normalizeProviderResult(result);
         const entry = {
           status: 'success',
-          data: result?.rows ?? [],
-          meta: result?.meta ?? null,
+          data: errors.length > 0 ? [] : normalized.rows,
+          meta: errors.length > 0 ? null : normalized.meta,
           error: null,
           updatedAt: now(),
         };
@@ -114,7 +183,15 @@ export const useQuery = (
     }
 
     return promise;
-  }, [activeProvider, cache, onError, onSuccess, querySpec]);
+  }, [
+    activeProvider,
+    cache,
+    onError,
+    onSuccess,
+    querySpec,
+    strictResultValidation,
+    validateResult,
+  ]);
 
   useEffect(() => {
     if (!enabled) {

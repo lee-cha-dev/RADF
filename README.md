@@ -281,12 +281,28 @@ const myProvider = {
     const json = await response.json();
     return { rows: json.rows, meta: json.meta };
   },
+  validateResult(result, querySpec) {
+    if (!Array.isArray(result?.rows)) {
+      return 'rows must be an array';
+    }
+    if (result?.meta && typeof result.meta !== 'object') {
+      return 'meta must be an object';
+    }
+    return true;
+  },
 };
 ```
 
 **Key requirements:**
 - Must accept `execute(querySpec, { signal })` (AbortController is required).
+- Must return `{ rows: [] }` (required) and optional `meta` object.
+- Optional: `validateResult(result, querySpec)` can return `true`, `false`, a string, or an array of strings for custom validation.
 - `useQuery` caches results based on a stable QuerySpec hash; it will reuse cached responses and refetch when stale.
+
+**Result validation behavior:**
+- By default, invalid results log a warning and return empty data (to avoid breaking dashboards).
+- To fail fast, pass `strictResultValidation: true` to `useQuery`.
+- You can also pass a one-off validator via `useQuery` options (`validateResult`) if you don't want it on the provider.
 
 ---
 

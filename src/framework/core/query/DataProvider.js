@@ -1,5 +1,6 @@
-export const createDataProvider = (execute) => ({
+export const createDataProvider = (execute, { validateResult } = {}) => ({
   execute,
+  validateResult,
 });
 
 export const isDataProvider = (provider) =>
