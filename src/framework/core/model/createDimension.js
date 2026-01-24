@@ -1,12 +1,39 @@
 import { FIELD_TYPES, isFieldType } from "./fieldTypes";
 
 /**
- * @param {object} config
- * @param {string} config.id
- * @param {string} config.label
- * @param {string} config.type
- * @param {object} [config.hierarchy]
- * @param {function} [config.formatter]
+ * @module core/model/createDimension
+ * @description Factory helper for defining semantic dimensions.
+ */
+
+/**
+ * Create a dimension schema for use in datasets and query specs.
+ *
+ * Validation:
+ * - Requires `id` and `label`.
+ * - `type` must be one of the FIELD_TYPES values.
+ *
+ * @param {object} config - Dimension configuration.
+ * @param {string} config.id - Unique dimension id.
+ * @param {string} config.label - Display label for UI surfaces.
+ * @param {string} config.type - Dimension field type.
+ * @param {object} [config.hierarchy] - Optional hierarchy metadata for drilldowns.
+ * @param {function} [config.formatter] - Optional value formatter.
+ * @returns {object} Dimension definition.
+ * @throws {Error} When required fields are missing or `type` is invalid.
+ * @example
+ * import { FIELD_TYPES } from './fieldTypes';
+ * import createDimension from './createDimension';
+ *
+ * const orderMonth = createDimension({
+ *   id: 'order_month',
+ *   label: 'Order Month',
+ *   type: FIELD_TYPES.DATE,
+ *   hierarchy: {
+ *     id: 'order_date',
+ *     type: 'date',
+ *     levels: ['order_year', 'order_quarter', 'order_month', 'order_day'],
+ *   },
+ * });
  */
 const createDimension = ({ id, label, type, hierarchy, formatter } = {}) => {
   if (!id) {
