@@ -1,3 +1,7 @@
+/**
+ * @module core/viz/palettes/colorAssignment
+ * @description Build palette-aware color assignments for charts and legends.
+ */
 import { getDivergingVar, getSequentialVar, getSeriesVar } from './paletteRegistry';
 
 const TEXT_VIZ_TYPES = new Set(['kpi', 'text', 'metric', 'number', 'markdown']);
@@ -5,6 +9,11 @@ const LINE_VIZ_TYPES = new Set(['line', 'area', 'composed', 'time-series', 'time
 const BAR_VIZ_TYPES = new Set(['bar', 'column', 'histogram']);
 const SEQUENTIAL_VIZ_TYPES = new Set(['heatmap', 'choropleth', 'density']);
 
+/**
+ * Normalize a key to a stable string form.
+ * @param {*} key - Raw key value.
+ * @returns {string|null} Normalized key.
+ */
 const normalizeKey = (key) => {
   if (key == null) {
     return null;
@@ -12,6 +21,11 @@ const normalizeKey = (key) => {
   return String(key);
 };
 
+/**
+ * Normalize a list of keys and preserve order uniqueness.
+ * @param {Array<*>} keys - Raw keys list.
+ * @returns {string[]} Normalized keys.
+ */
 const normalizeKeys = (keys) => {
   if (!Array.isArray(keys)) {
     return [];
@@ -29,6 +43,11 @@ const normalizeKeys = (keys) => {
   return ordered;
 };
 
+/**
+ * Resolve series definitions defined on panel config.
+ * @param {Object} panelConfig - Panel configuration.
+ * @returns {Array<{key: string, label: string}>} Series definitions.
+ */
 const resolveSeriesDefinitions = (panelConfig) => {
   if (!Array.isArray(panelConfig?.series)) {
     return [];
@@ -41,6 +60,15 @@ const resolveSeriesDefinitions = (panelConfig) => {
     .filter((entry) => entry.key);
 };
 
+/**
+ * Resolve series keys for a chart from config, options, or data.
+ * @param {Object} args - Resolution inputs.
+ * @param {Object} args.encodings - Encoding map for the visualization.
+ * @param {Object} args.options - Viz options.
+ * @param {Object} args.panelConfig - Panel config.
+ * @param {Array<Object>} args.data - Data rows.
+ * @returns {string[]} Series keys.
+ */
 const resolveSeriesKeys = ({ encodings, options, panelConfig, data }) => {
   const seriesDefinitions = resolveSeriesDefinitions(panelConfig);
   if (seriesDefinitions.length) {
@@ -65,6 +93,11 @@ const resolveSeriesKeys = ({ encodings, options, panelConfig, data }) => {
   return [];
 };
 
+/**
+ * Resolve the value key for sequential/diverging palettes.
+ * @param {Object} encodings - Encoding map.
+ * @returns {string|null} Value key.
+ */
 const resolveValueKey = (encodings) => {
   if (Array.isArray(encodings?.y)) {
     return encodings.y[0];
@@ -72,6 +105,14 @@ const resolveValueKey = (encodings) => {
   return encodings?.y ?? null;
 };
 
+/**
+ * Resolve palette intent for a visualization.
+ * @param {Object} args - Intent inputs.
+ * @param {Object} args.panelConfig - Panel configuration.
+ * @param {string} args.vizType - Visualization type.
+ * @param {Object} args.options - Visualization options.
+ * @returns {string} Palette intent.
+ */
 const resolveIntent = ({ panelConfig, vizType, options }) => {
   if (panelConfig?.paletteIntent) {
     return panelConfig.paletteIntent;
@@ -85,6 +126,13 @@ const resolveIntent = ({ panelConfig, vizType, options }) => {
   return 'categorical';
 };
 
+/**
+ * Build assignment for series palettes.
+ * @param {Object} args - Assignment inputs.
+ * @param {string[]} args.seriesKeys - Series keys.
+ * @param {Array<{key: string, label: string}>} args.seriesDefinitions - Series definitions.
+ * @returns {Object} Series assignment helper.
+ */
 const buildSeriesAssignment = ({ seriesKeys, seriesDefinitions }) => {
   const labelMap = new Map(seriesDefinitions.map((entry) => [entry.key, entry.label]));
   const items = seriesKeys.map((key, index) => ({
@@ -100,6 +148,13 @@ const buildSeriesAssignment = ({ seriesKeys, seriesDefinitions }) => {
   };
 };
 
+/**
+ * Build assignment for category palettes.
+ * @param {Object} args - Assignment inputs.
+ * @param {Array<Object>} args.data - Data rows.
+ * @param {string} args.xKey - Category key.
+ * @returns {Object} Category assignment helper.
+ */
 const buildCategoryAssignment = ({ data, xKey }) => {
   const values = Array.isArray(data)
     ? data.map((row) => row?.[xKey]).filter((value) => value != null)
@@ -128,6 +183,13 @@ const buildCategoryAssignment = ({ data, xKey }) => {
   };
 };
 
+/**
+ * Build assignment for diverging palettes.
+ * @param {Object} args - Assignment inputs.
+ * @param {Array<Object>} args.data - Data rows.
+ * @param {string} args.valueKey - Value key.
+ * @returns {Object} Diverging assignment helper.
+ */
 const buildDivergingAssignment = ({ data, valueKey }) => {
   const values = Array.isArray(data)
     ? data
@@ -173,6 +235,13 @@ const buildDivergingAssignment = ({ data, valueKey }) => {
   };
 };
 
+/**
+ * Build assignment for sequential palettes.
+ * @param {Object} args - Assignment inputs.
+ * @param {Array<Object>} args.data - Data rows.
+ * @param {string} args.valueKey - Value key.
+ * @returns {Object} Sequential assignment helper.
+ */
 const buildSequentialAssignment = ({ data, valueKey }) => {
   const values = Array.isArray(data)
     ? data
@@ -204,6 +273,24 @@ const buildSequentialAssignment = ({ data, valueKey }) => {
   };
 };
 
+/**
+ * @typedef {Object} ColorAssignment
+ * @property {string} mode - Assignment mode (series, single, category, diverging, sequential).
+ * @property {Array<{key: string, label: string, colorVar: string}>} items - Legend items.
+ * @property {(key: string) => string} getColor - Resolve a color for a key/value.
+ * @property {(key: string) => (string|null)} getLabel - Resolve a label for a key.
+ */
+
+/**
+ * Build the palette assignment for a given viz configuration.
+ * @param {Object} args - Inputs for palette assignment.
+ * @param {Object} args.panelConfig - Panel configuration.
+ * @param {string} args.vizType - Visualization type key.
+ * @param {Object} args.encodings - Encoding map.
+ * @param {Object} args.options - Viz options.
+ * @param {Array<Object>} args.data - Data rows.
+ * @returns {ColorAssignment|null} Palette assignment or null when not applicable.
+ */
 export const buildColorAssignment = ({
   panelConfig,
   vizType,

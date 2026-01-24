@@ -1,8 +1,29 @@
+/**
+ * @module core/viz/VizRenderer
+ * @description Resolve a visualization component from the registry and render it
+ * with legend and palette behavior.
+ */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { vizRegistry } from '../registry/registry';
 import { buildColorAssignment } from './palettes/colorAssignment';
 import Legend from './legend/Legend.jsx';
 
+/**
+ * @typedef {Object} VizRendererProps
+ * @property {Object} panelConfig - Panel configuration used for palette + intent.
+ * @property {string} vizType - Visualization type key registered in the registry.
+ * @property {Array<Object>} data - Rows returned by the query layer.
+ * @property {Object} encodings - Encodings mapping dimensions/measures to axes.
+ * @property {Object} options - Visualization options (legend, tooltip, palette).
+ * @property {Object} handlers - Interaction handlers passed to chart panels.
+ */
+
+/**
+ * Render a registered visualization component with legends and palette assignment.
+ * If the viz type is missing, a friendly empty state is shown.
+ * @param {VizRendererProps} props - Renderer props.
+ * @returns {JSX.Element} Visualization output.
+ */
 function VizRenderer({
   panelConfig,
   vizType,

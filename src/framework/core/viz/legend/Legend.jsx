@@ -1,6 +1,15 @@
+/**
+ * @module core/viz/legend/Legend
+ * @description Toggleable legend for palette assignments.
+ */
 import React from 'react';
 import './legend.css';
 
+/**
+ * Resolve the swatch class from a palette CSS variable.
+ * @param {string} colorVar - CSS variable string.
+ * @returns {string} Swatch class name.
+ */
 const resolveSwatchClass = (colorVar) => {
   if (typeof colorVar !== 'string') {
     return 'radf-swatch--1';
@@ -27,6 +36,26 @@ const resolveSwatchClass = (colorVar) => {
   return 'radf-swatch--1';
 };
 
+/**
+ * @typedef {Object} LegendItem
+ * @property {string} key - Unique key for the series/category.
+ * @property {string} label - Label shown in the legend.
+ * @property {string} colorVar - CSS variable for the swatch color.
+ */
+
+/**
+ * @typedef {Object} LegendProps
+ * @property {LegendItem[]} [items] - Legend items to display.
+ * @property {Set<string>} [hiddenKeys] - Keys hidden from the chart.
+ * @property {(key: string) => void} [onToggle] - Toggle handler for legend items.
+ * @property {('top'|'bottom'|'right')} [position] - Legend position.
+ */
+
+/**
+ * Render a palette-aware legend list.
+ * @param {LegendProps} props - Legend props.
+ * @returns {JSX.Element|null} Legend markup.
+ */
 function Legend({
   items = [],
   hiddenKeys,

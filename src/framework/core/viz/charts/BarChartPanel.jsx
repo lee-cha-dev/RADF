@@ -1,3 +1,7 @@
+/**
+ * @module core/viz/charts/BarChartPanel
+ * @description Bar chart visualization panel using Recharts.
+ */
 import React, { useMemo } from 'react';
 import {
   Bar,
@@ -13,6 +17,12 @@ import ChartContainer from '../common/ChartContainer.jsx';
 import ChartTooltip from '../common/ChartTooltip.jsx';
 import { getSeriesColor, getSeriesColorsForKeys } from '../palettes/seriesColors';
 
+/**
+ * Resolve series keys from encodings or data.
+ * @param {Object} encodings - Encoding map for the visualization.
+ * @param {Array<Object>} data - Chart data rows.
+ * @returns {string[]} Series keys.
+ */
 const resolveSeriesKeys = (encodings, data) => {
   if (!encodings) {
     return [];
@@ -29,6 +39,21 @@ const resolveSeriesKeys = (encodings, data) => {
   return [];
 };
 
+/**
+ * @typedef {Object} BarChartPanelProps
+ * @property {Array<Object>} [data] - Chart data rows.
+ * @property {Object} [encodings] - Encoding map (x/y, stacked keys).
+ * @property {Object} [options] - Chart options (tooltip, stacked, legend).
+ * @property {Object} [handlers] - Interaction handlers (onClick).
+ * @property {Object|null} [colorAssignment] - Palette assignment helper.
+ * @property {Set<string>} [hiddenKeys] - Keys hidden via legend toggles.
+ */
+
+/**
+ * Render a bar chart panel with optional stacked series and palette-aware colors.
+ * @param {BarChartPanelProps} props - Chart props.
+ * @returns {JSX.Element} Chart panel.
+ */
 function BarChartPanel({
   data = [],
   encodings = {},

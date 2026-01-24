@@ -1,5 +1,15 @@
+/**
+ * @module core/viz/charts/KpiPanel
+ * @description KPI panel visualization for single metric values.
+ */
 import React, { useMemo } from 'react';
 
+/**
+ * Resolve the numeric field key used to render the KPI.
+ * @param {Object} encodings - Encoding map for the visualization.
+ * @param {Array<Object>} data - Chart data rows.
+ * @returns {string|null} Value key.
+ */
 const resolveValueKey = (encodings, data) => {
   if (encodings?.value) {
     return encodings.value;
@@ -13,6 +23,13 @@ const resolveValueKey = (encodings, data) => {
   return null;
 };
 
+/**
+ * Format a raw KPI value.
+ * @param {*} value - Raw value.
+ * @param {string} format - Format identifier (currency, percent, integer).
+ * @param {Object} [options] - Formatting options (currency, etc).
+ * @returns {string} Formatted value.
+ */
 const formatValue = (value, format, options = {}) => {
   if (value == null || Number.isNaN(value)) {
     return '--';
@@ -36,6 +53,18 @@ const formatValue = (value, format, options = {}) => {
   return value.toLocaleString(undefined, { maximumFractionDigits: 2 });
 };
 
+/**
+ * @typedef {Object} KpiPanelProps
+ * @property {Array<Object>} [data] - KPI data rows.
+ * @property {Object} [encodings] - Encoding map (value/label).
+ * @property {Object} [options] - Formatting and display options.
+ */
+
+/**
+ * Render a KPI panel displaying a single aggregated value.
+ * @param {KpiPanelProps} props - KPI props.
+ * @returns {JSX.Element} KPI visualization.
+ */
 function KpiPanel({ data = [], encodings = {}, options = {} }) {
   const valueKey = useMemo(() => resolveValueKey(encodings, data), [encodings, data]);
   const rawValue = valueKey ? data?.[0]?.[valueKey] : null;
