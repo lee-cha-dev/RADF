@@ -1,5 +1,26 @@
-import {findMeasureId} from "./analysisUtils.js";
+/**
+ * @module core/insights/analyzers/topDrivers
+ * @description Analyzer that identifies top contributing dimension values.
+ */
 
+import { findMeasureId } from './analysisUtils.js';
+
+/**
+ * @typedef {import('../../docs/jsdocTypes.js').Insight} Insight
+ * @typedef {import('../../docs/jsdocTypes.js').QuerySpec} QuerySpec
+ */
+
+/**
+ * @typedef {Object} AnalyzerContext
+ * @property {Object[]} rows - Raw query rows.
+ * @property {QuerySpec|null} [querySpec] - QuerySpec used to fetch the data.
+ */
+
+/**
+ * Surface the highest contributing dimension value in a breakdown.
+ * @param {AnalyzerContext} context - Analyzer context.
+ * @returns {Insight[]|Insight} Insight result(s).
+ */
 const analyze = ({ rows, querySpec }) => {
   const dimensionId = querySpec?.dimensions?.[0];
   const measureId = findMeasureId(rows, querySpec);
@@ -35,6 +56,10 @@ const analyze = ({ rows, querySpec }) => {
   };
 };
 
+/**
+ * Analyzer definition for top-driver detection.
+ * @type {{ id: string, label: string, analyze: (context: AnalyzerContext) => Insight[]|Insight }}
+ */
 export default {
   id: 'topDrivers',
   label: 'Top Drivers',

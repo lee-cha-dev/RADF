@@ -1,4 +1,20 @@
-import {findMeasureId} from "./analysisUtils.js";
+/**
+ * @module core/insights/analyzers/anomaly
+ * @description Analyzer that flags recent anomalies in a time series.
+ */
+
+import { findMeasureId } from './analysisUtils.js';
+
+/**
+ * @typedef {import('../../docs/jsdocTypes.js').Insight} Insight
+ * @typedef {import('../../docs/jsdocTypes.js').QuerySpec} QuerySpec
+ */
+
+/**
+ * @typedef {Object} AnalyzerContext
+ * @property {Object[]} rows - Raw query rows.
+ * @property {QuerySpec|null} [querySpec] - QuerySpec used to fetch the data.
+ */
 
 const mean = (values) => values.reduce((sum, value) => sum + value, 0) / values.length;
 
@@ -7,6 +23,11 @@ const stdDev = (values, avg) => {
   return Math.sqrt(variance);
 };
 
+/**
+ * Detect a recent anomaly using a z-score against historical values.
+ * @param {AnalyzerContext} context - Analyzer context.
+ * @returns {Insight[]|Insight} Insight result(s).
+ */
 const analyze = ({ rows, querySpec }) => {
   const measureId = findMeasureId(rows, querySpec);
   if (!measureId) {
@@ -41,6 +62,10 @@ const analyze = ({ rows, querySpec }) => {
   };
 };
 
+/**
+ * Analyzer definition for anomaly detection.
+ * @type {{ id: string, label: string, analyze: (context: AnalyzerContext) => Insight[]|Insight }}
+ */
 export default {
   id: 'anomaly',
   label: 'Anomaly Detection',
