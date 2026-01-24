@@ -212,7 +212,7 @@ Prove the actual workflow works end-to-end.
 
 ### Scope / Tasks
 
-Choose one:
+Do both for a comprehensive smoke test:
 
 * Option A (fast): `scripts/smoke-consumer.mjs`
 
