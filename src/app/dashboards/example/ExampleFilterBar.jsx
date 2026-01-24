@@ -2,14 +2,15 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDashboardActions } from '../../../framework/core/dashboard/useDashboardActions';
 import { useDashboardState } from '../../../framework/core/dashboard/useDashboardState';
 import {
+  selectActiveFiltersSummary,
+  selectGlobalFilters,
+  selectSelectedEntities,
+} from '../../../framework/core/dashboard/dashboardSelectors';
+import {
   buildBrushFilter,
   removeBrushFilter,
   upsertBrushFilter,
 } from '../../../framework/core/interactions/brushZoom';
-import { getSelectionLabel } from '../../../framework/core/interactions/crossFilter';
-
-const getDateFilter = (filters, field) =>
-  (filters || []).find((filter) => filter.field === field && filter.op === 'BETWEEN');
 
 const toInputValue = (value) => {
   if (!value) {
@@ -29,11 +30,35 @@ const buildRangeFromFilter = (filter) => {
 };
 
 function ExampleFilterBar({ dateField }) {
-  const { globalFilters, selections } = useDashboardState();
+  const dashboardState = useDashboardState();
+  const globalFilters = selectGlobalFilters(dashboardState);
+  const selectionEntities = useMemo(
+    () => selectSelectedEntities(dashboardState),
+    [dashboardState]
+  );
+  const activeFiltersSummary = useMemo(
+    () => selectActiveFiltersSummary(dashboardState),
+    [dashboardState]
+  );
   const { setGlobalFilters, clearSelections, removeSelection } = useDashboardActions();
   const activeDateFilter = useMemo(
-    () => getDateFilter(globalFilters, dateField),
-    [dateField, globalFilters]
+    () => {
+      const match = activeFiltersSummary.find(
+        (filter) =>
+          filter.source === 'global' &&
+          filter.field === dateField &&
+          filter.op === 'BETWEEN'
+      );
+      if (!match) {
+        return null;
+      }
+      return {
+        field: match.field,
+        op: match.op,
+        values: match.values,
+      };
+    },
+    [activeFiltersSummary, dateField]
   );
   const [range, setRange] = useState(() => buildRangeFromFilter(activeDateFilter));
 
@@ -104,19 +129,19 @@ function ExampleFilterBar({ dateField }) {
           </button>
         </div>
       </div>
-      {selections.length ? (
+      {selectionEntities.length ? (
         <div className="radf-filter-bar__group radf-filter-bar__group--chips">
           <span className="radf-filter-bar__label">Selections</span>
           <div className="radf-filter-bar__chips">
-            {selections.map((selection) => (
+            {selectionEntities.map((selection) => (
               <button
-                key={selection.id}
+                key={selection.selectionId}
                 type="button"
                 className="radf-filter-bar__chip"
-                onClick={() => removeSelection(selection.id)}
+                onClick={() => removeSelection(selection.selectionId)}
               >
                 <span className="radf-filter-bar__chip-label">
-                  {getSelectionLabel(selection)}
+                  {selection.label}
                 </span>
                 <span className="radf-filter-bar__chip-remove">×</span>
               </button>

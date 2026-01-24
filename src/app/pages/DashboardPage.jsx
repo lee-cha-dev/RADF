@@ -2,7 +2,6 @@ import React, { useCallback, useMemo, useRef, useEffect } from 'react';
 import GridLayout from '../../framework/core/layout/GridLayout.jsx';
 import Panel from '../../framework/core/layout/Panel.jsx';
 import VizRenderer from '../../framework/core/viz/VizRenderer.jsx';
-import { buildQuerySpec } from '../../framework/core/query/buildQuerySpec.js';
 import { useQuery } from '../../framework/core/query/useQuery.js';
 import { MockDataProvider } from '../../framework/core/query/MockDataProvider.js';
 import InsightsPanel from '../../framework/core/insights/InsightsPanel.jsx';
@@ -10,6 +9,10 @@ import { useInsights } from '../../framework/core/insights/useInsights.js';
 import DashboardProvider from '../../framework/core/dashboard/DashboardProvider.jsx';
 import { useDashboardActions } from '../../framework/core/dashboard/useDashboardActions.js';
 import { useDashboardState } from '../../framework/core/dashboard/useDashboardState.js';
+import {
+  selectDerivedQueryInputs,
+  selectDrillBreadcrumbs,
+} from '../../framework/core/dashboard/dashboardSelectors.js';
 import {
   buildCrossFilterSelectionFromEvent,
   isSelectionDuplicate,
@@ -47,7 +50,7 @@ const VizPanel = ({ panelConfig }) => {
   const brushDebounceRef = useRef(null);
 
   const querySpec = useMemo(
-    () => buildQuerySpec(panelConfig, dashboardState),
+    () => selectDerivedQueryInputs(dashboardState, panelConfig),
     [panelConfig, dashboardState]
   );
 
@@ -348,7 +351,7 @@ const InsightsPanelContainer = ({ panelConfig }) => {
   const dashboardState = useDashboardState();
 
   const querySpec = useMemo(
-    () => buildQuerySpec(panelConfig, dashboardState),
+    () => selectDerivedQueryInputs(dashboardState, panelConfig),
     [panelConfig, dashboardState]
   );
 
@@ -381,18 +384,26 @@ const InsightsPanelContainer = ({ panelConfig }) => {
 };
 
 const DashboardContent = () => {
-  const { drillPath } = useDashboardState();
+  const dashboardState = useDashboardState();
+  const drillBreadcrumbs = useMemo(
+    () => selectDrillBreadcrumbs(dashboardState),
+    [dashboardState]
+  );
+  const drillPath = useMemo(
+    () => drillBreadcrumbs.map((crumb) => crumb.entry),
+    [drillBreadcrumbs]
+  );
   const { popDrillPath } = useDashboardActions();
 
   const handleCrumbClick = useCallback(
     (index) => {
-      const pops = drillPath.length - 1 - index;
+      const pops = drillBreadcrumbs.length - 1 - index;
       if (pops <= 0) {
         return;
       }
       Array.from({ length: pops }).forEach(() => popDrillPath());
     },
-    [drillPath.length, popDrillPath]
+    [drillBreadcrumbs.length, popDrillPath]
   );
 
   const panels = useMemo(() => exampleDashboard.panels, []);
@@ -410,7 +421,9 @@ const DashboardContent = () => {
         drillPath={drillPath}
         onCrumbClick={handleCrumbClick}
         onReset={() =>
-          Array.from({ length: drillPath.length }).forEach(() => popDrillPath())
+          Array.from({ length: drillBreadcrumbs.length }).forEach(() =>
+            popDrillPath()
+          )
         }
       />
       <GridLayout
