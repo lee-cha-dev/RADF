@@ -1,0 +1,12 @@
+@import './framework/styles/tokens.css';
+@import './framework/styles/palettes.css';
+@import './framework/styles/framework.css';
+@import './framework/styles/components/grid.css';
+@import './framework/styles/components/panel.css';
+@import './framework/styles/components/charts.css';
+@import './framework/styles/components/filters.css';
+@import './framework/styles/components/insights.css';
+@import './framework/styles/components/table.css';
+@import './framework/core/viz/legend/legend.css';
+@import './framework/styles/theme.light.css';
+@import './framework/styles/theme.dark.css';
