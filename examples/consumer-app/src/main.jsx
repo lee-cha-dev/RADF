@@ -1,6 +1,5 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import 'radf/style.css';
 import App from './App.jsx';
 import './app.css';
 

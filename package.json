@@ -3,9 +3,17 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
   "style": "./dist/style.css",
+  "sideEffects": [
+    "**/*.css"
+  ],
   "exports": {
-    ".": "./dist/index.js",
+    ".": {
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
     "./style.css": "./dist/style.css",
     "./dist/style.css": "./dist/style.css"
   },
