@@ -272,3 +272,19 @@ export const selectSelectionFilters = (state) =>
  */
 export const selectDrillFilters = (state) =>
   collectDrillFilters(state.drillPath);
+
+export const dashboardSelectors = {
+  selectDashboardId,
+  selectDatasetId,
+  selectGlobalFilters,
+  selectSelections,
+  selectDrillPath,
+  selectPanelStateById,
+  selectPanelState,
+  selectActiveFiltersSummary,
+  selectDrillBreadcrumbs,
+  selectSelectedEntities,
+  selectDerivedQueryInputs,
+  selectSelectionFilters,
+  selectDrillFilters,
+};
