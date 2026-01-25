@@ -3,8 +3,11 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
+  "style": "./dist/style.css",
   "exports": {
-    ".": "./dist/index.js"
+    ".": "./dist/index.js",
+    "./style.css": "./dist/style.css",
+    "./dist/style.css": "./dist/style.css"
   },
   "files": [
     "dist/**"
