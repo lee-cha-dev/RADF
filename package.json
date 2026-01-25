@@ -13,7 +13,7 @@
     "dev": "vite",
     "start": "vite",
     "build": "vite build",
-    "build:lib": "vite build -c vite.lib.config.js",
+    "build:lib": "node scripts/gen-inline-styles.mjs && vite build -c vite.lib.config.js",
     "prepare": "npm run build:lib",
     "preview": "vite preview",
     "lint": "eslint . --max-warnings=0",
