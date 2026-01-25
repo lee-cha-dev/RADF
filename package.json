@@ -6,8 +6,7 @@
   "style": "./dist/style.css",
   "exports": {
     ".": "./dist/index.js",
-    "./style.css": "./dist/style.css",
-    "./dist/style.css": "./dist/style.css"
+    "./style.css": "./dist/style.css"
   },
   "files": [
     "dist/**"
