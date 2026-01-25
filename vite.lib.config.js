@@ -6,13 +6,17 @@ export default defineConfig({
   build: {
     cssCodeSplit: false,
     lib: {
-      entry: 'src/framework/index.js',
+      entry: 'src/index.js',
       name: 'RADF',
       formats: ['es'],
       fileName: 'index',
     },
     rollupOptions: {
       external: ['react', 'react-dom', 'react-router-dom', 'recharts'],
+      output: {
+        assetFileNames: (assetInfo) =>
+          assetInfo.name === 'style.css' ? 'styles.css' : assetInfo.name,
+      },
     },
   },
 });

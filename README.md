@@ -1,94 +1,39 @@
 # RADF (Recharts Analytics Dashboard Framework)
 
-RADF is a reusable, config-driven React framework for building PowerBI-like analytics dashboards: grids of KPI cards, trend charts, breakdowns, cross-filtering, drilldowns, and insights. It gives you a semantic layer (metrics/dimensions), a query layer, dashboard state management, and Recharts-based visualizations so you can ship consistent dashboards fast in any React app.
+RADF is a config-driven React framework for building analytic dashboards (KPIs, trends, breakdowns, and insights) with Recharts. It ships as a package you can install directly from Git and includes a single CSS entrypoint for tokens, themes, and component styles.
 
-**Hard constraints (non-negotiable):**
-- **JavaScript only** (no TypeScript)
-- **No Tailwind**
-- **No inline styles** (no `style={{ ... }}`)
-- **Recharts for charts**
-- **CSS files + CSS variables** for tokens/themes
-
----
-
-## Quick Start (Using RADF in your app)
-
-1) **Copy the framework code into your app**
-   - From this repo: `src/framework/`
-   - Into your app (recommended): `src/components/radf/` or `src/lib/radf/`
-
-2) **Copy global styles**
-   - Copy `src/framework/styles/*` into your app (either under the same `radf` folder or your global styles folder).
-   - You can keep the `styles/` folder inside the RADF path if you prefer.
-
-3) **Install Recharts**
+## Install
 
 ```bash
-npm install recharts
+npm install radf@"git+https://github.com/lee-cha-dev/RADF.git"
 ```
 
-4) **Import RADF styles in your app entry point** (`main.jsx` or `index.jsx`) in this order:
+## Include styles (required)
+
+Import the RADF stylesheet once in your app entry (e.g. `main.jsx`):
 
 ```jsx
-import './components/radf/styles/tokens.css';
-import './components/radf/styles/theme.light.css';
-import './components/radf/styles/theme.dark.css';
-import './components/radf/styles/framework.css';
-import './components/radf/styles/components/grid.css';
-import './components/radf/styles/components/panel.css';
-import './components/radf/styles/components/charts.css';
-import './components/radf/styles/components/filters.css';
-import './components/radf/styles/components/insights.css';
-import './components/radf/styles/components/table.css';
+import 'radf/styles.css';
 ```
 
-5) **Register the default viz + insight modules** (once at startup):
+This single import includes tokens, themes, and component styles. CSS is required for layout, theming, and panel chrome.
+
+## Minimal usage
 
 ```jsx
-import registerCharts from './components/radf/core/registry/registerCharts.js';
-import registerInsights from './components/radf/core/registry/registerInsights.js';
-
-registerCharts();
-registerInsights();
-```
-
-6) **Theme toggle (light/dark)**
-   - Themes are applied by adding a class to the root element (`document.documentElement`).
-   - `theme.light.css` and `theme.dark.css` both define `:root.radf-theme-light` and `:root.radf-theme-dark`.
-
-```jsx
-const THEME_CLASS = {
-  light: 'radf-theme-light',
-  dark: 'radf-theme-dark',
-};
-
-useEffect(() => {
-  const root = document.documentElement;
-  root.classList.remove(THEME_CLASS.light, THEME_CLASS.dark);
-  root.classList.add(THEME_CLASS[theme]);
-}, [theme]);
-```
-
-> If your app already has a theme system, map it to these root classes and keep the CSS variable names intact.
-
----
-
-## Basic Usage Example
-
-Below is a minimal example that wires up a dashboard page with RADF’s provider, layout, and visualization renderer. This example uses the included `MockDataProvider` for local data.
-
-### `DashboardPage.jsx`
-
-```jsx
-import React, { useMemo } from 'react';
-import DashboardProvider from '../components/radf/core/dashboard/DashboardProvider.jsx';
-import { useDashboardState } from '../components/radf/core/dashboard/useDashboardState.js';
-import GridLayout from '../components/radf/core/layout/GridLayout.jsx';
-import Panel from '../components/radf/core/layout/Panel.jsx';
-import VizRenderer from '../components/radf/core/viz/VizRenderer.jsx';
-import { buildQuerySpec } from '../components/radf/core/query/buildQuerySpec.js';
-import { useQuery } from '../components/radf/core/query/useQuery.js';
-import { MockDataProvider } from '../components/radf/core/query/MockDataProvider.js';
+import React, { useEffect, useMemo } from 'react';
+import {
+  DashboardProvider,
+  GridLayout,
+  Panel,
+  VizRenderer,
+  buildQuerySpec,
+  registerCharts,
+  registerInsights,
+  useDashboardState,
+  useQuery,
+  MockDataProvider,
+} from 'radf';
 import dashboardConfig from './dashboard.config.js';
 
 const VizPanel = ({ panel }) => {
@@ -130,14 +75,17 @@ const DashboardContent = () => (
     <p className="radf-dashboard__subtitle">{dashboardConfig.subtitle}</p>
     <GridLayout
       panels={dashboardConfig.panels}
-      renderPanel={(panel) => (
-        <VizPanel key={panel.id} panel={panel} />
-      )}
+      renderPanel={(panel) => <VizPanel key={panel.id} panel={panel} />}
     />
   </section>
 );
 
-function DashboardPage() {
+const App = () => {
+  useEffect(() => {
+    registerCharts();
+    registerInsights();
+  }, []);
+
   return (
     <DashboardProvider
       initialState={{
@@ -148,297 +96,76 @@ function DashboardPage() {
       <DashboardContent />
     </DashboardProvider>
   );
-}
-
-export default DashboardPage;
-```
-
-### `dashboard.config.js`
-
-```js
-const dashboardConfig = {
-  id: 'sales-overview',
-  title: 'Sales Overview',
-  subtitle: 'Revenue and growth at a glance',
-  datasetId: 'sales_dataset',
-  panels: [
-    {
-      id: 'kpi-revenue',
-      panelType: 'viz',
-      vizType: 'kpi',
-      title: 'Total Revenue',
-      subtitle: 'Last 30 days',
-      layout: { x: 1, y: 1, w: 4, h: 1 },
-      datasetId: 'sales_dataset',
-      query: {
-        measures: ['total_revenue'],
-        dimensions: [],
-      },
-      encodings: { value: 'total_revenue', label: 'Total Revenue' },
-      options: { format: 'currency', caption: 'All regions' },
-    },
-    {
-      id: 'trend-revenue',
-      panelType: 'viz',
-      vizType: 'line',
-      title: 'Revenue Trend',
-      subtitle: 'Monthly revenue',
-      layout: { x: 1, y: 2, w: 8, h: 2 },
-      datasetId: 'sales_dataset',
-      query: {
-        measures: ['total_revenue'],
-        dimensions: ['order_month'],
-      },
-      encodings: { x: 'order_month', y: 'total_revenue' },
-      options: { tooltip: true, legend: false },
-    },
-  ],
 };
 
-export default dashboardConfig;
+export default App;
 ```
 
-### Minimal `MockDataProvider` usage
+### Theme toggling
 
-RADF includes a mock provider you can use during integration. For production, supply your own provider (see “Data Providers” below).
+RADF themes are applied by root classes. Add one of these classes to `document.documentElement`:
 
----
+- `radf-theme-light`
+- `radf-theme-dark`
 
-## How to Add a Dashboard
-
-1) **Create semantic layer files** (dataset + metrics + dimensions):
-   - `your-dashboard.dataset.js`
-   - `your-dashboard.metrics.js`
-   - `your-dashboard.dimensions.js`
-2) **Create a dashboard config** with layout + panels (`your-dashboard.dashboard.js`).
-3) **Load the config on your page** and pass it into `DashboardProvider` and `GridLayout`.
-
-Reference the example dashboard in `src/app/dashboards/example/` for structure.
-
----
-
-## How to Add a Panel
-
-1) Pick a `vizType` registered in `core/registry/registerCharts.js` (`kpi`, `line`, `bar`, etc.).
-2) Define the `query` object:
-   - `measures: []`
-   - `dimensions: []`
-3) Provide `encodings` that map query fields to chart axes.
-4) (Optional) Configure interactions:
-
-```js
-interactions: {
-  crossFilter: { field: 'region', label: 'Region' },
-  drilldown: { dimension: 'order_month', to: 'order_day' },
-  brushZoom: { field: 'order_day', applyToGlobal: true }
-}
-```
-
----
-
-## How to Add Metrics & Dimensions
-
-RADF’s semantic layer lives in `core/model/` and lets you define reusable business logic.
-
-```js
-import { createMetric } from './components/radf/core/model/createMetric.js';
-import { createDimension } from './components/radf/core/model/createDimension.js';
-
-export const totalRevenue = createMetric({
-  id: 'total_revenue',
-  label: 'Total Revenue',
-  format: 'currency',
-  query: { field: 'revenue', op: 'SUM' },
-});
-
-export const orderMonth = createDimension({
-  id: 'order_month',
-  label: 'Order Month',
-  type: 'date',
-  hierarchy: ['order_year', 'order_quarter', 'order_month', 'order_day'],
-});
-```
-
-**Hierarchies power drilldowns.** If you define `hierarchy` on a dimension, drilldown interactions can step through the levels in order.
-
----
-
-## Data Providers
-
-RADF queries data through a `DataProvider` object with an `execute` method:
-
-```js
-const myProvider = {
-  async execute(querySpec, { signal }) {
-    // querySpec includes datasetId, measures, dimensions, filters, etc.
-    const response = await fetch('/api/query', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(querySpec),
-      signal,
-    });
-
-    const json = await response.json();
-    return { rows: json.rows, meta: json.meta };
-  },
-  validateResult(result, querySpec) {
-    if (!Array.isArray(result?.rows)) {
-      return 'rows must be an array';
-    }
-    if (result?.meta && typeof result.meta !== 'object') {
-      return 'meta must be an object';
-    }
-    return true;
-  },
+```jsx
+const THEME_CLASS = {
+  light: 'radf-theme-light',
+  dark: 'radf-theme-dark',
 };
+
+useEffect(() => {
+  const root = document.documentElement;
+  root.classList.remove(THEME_CLASS.light, THEME_CLASS.dark);
+  root.classList.add(THEME_CLASS[theme]);
+}, [theme]);
 ```
 
-**Key requirements:**
-- Must accept `execute(querySpec, { signal })` (AbortController is required).
-- Must return `{ rows: [] }` (required) and optional `meta` object.
-- Optional: `validateResult(result, querySpec)` can return `true`, `false`, a string, or an array of strings for custom validation.
-- `useQuery` caches results based on a stable QuerySpec hash; it will reuse cached responses and refetch when stale.
+## Consumer example
 
-**Result validation behavior:**
-- By default, invalid results log a warning and return empty data (to avoid breaking dashboards).
-- To fail fast, pass `strictResultValidation: true` to `useQuery`.
-- You can also pass a one-off validator via `useQuery` options (`validateResult`) if you don't want it on the provider.
+A runnable consumer app lives at `examples/consumer-app` and installs RADF via the Git dependency. It imports `radf/styles.css` and renders a dashboard using the public API.
 
----
+## How to run tests
 
-## Theming & Styling
+```bash
+npm run lint
+npm run test
+npm run build:lib
+npm run smoke:consumer
+npm run test:css
+```
 
-- **Tokens + themes:** `styles/tokens.css` defines spacing, typography, radii, and base tokens. Theme files (`theme.light.css`, `theme.dark.css`) define the color palette via CSS variables.
-- **Custom palettes:** override variables in your theme file (or define a new theme file) without changing component CSS.
-- **Panel elevation & borders:** look in `styles/components/panel.css` and `styles/framework.css` for shadow and border variables.
+`npm run test:css` builds the library, installs the packed tarball into the consumer app, starts Vite preview, and runs Playwright to assert computed styles are applied.
 
----
+## Package surface
 
-## Constraints / Known Limitations
+Public exports are available from the package root:
+
+```js
+import {
+  DashboardProvider,
+  GridLayout,
+  Panel,
+  VizRenderer,
+  InsightsPanel,
+  registerCharts,
+  registerInsights,
+  buildQuerySpec,
+  useQuery,
+  MockDataProvider,
+} from 'radf';
+```
+
+Styles are available from:
+
+```js
+import 'radf/styles.css';
+```
+
+## Constraints
 
 - JavaScript only (no TypeScript)
 - No Tailwind
 - No inline styles
-- Recharts determines chart capabilities and limits
-
----
-
-## Tooling
-
-This repo includes baseline quality gates for linting, formatting, and testing.
-
-### Scripts
-
-```bash
-npm run lint
-npm run lint:fix
-npm run format
-npm run format:check
-npm run test
-npm run test:watch
-```
-
-### Configs
-
-- ESLint: `eslint.config.js`
-- Prettier: `.prettierrc.json` + `.prettierignore`
-- Vitest: `vitest.config.js` + `vitest.setup.js`
-
----
-
-## Repo structure (consumer relevant)
-
-Only a few folders matter when you embed RADF into your app:
-
-- `core/dashboard/` — Provider, reducer, selectors, hooks
-- `core/query/` — QuerySpec, hashing, caching, `useQuery`, DataProvider contract
-- `core/viz/` — `VizRenderer` + registered chart panels
-- `core/layout/` — Grid, panel chrome, loading/empty/error states
-- `styles/` — tokens, themes, and component CSS
-
----
-
-## Distribution / Packaging
-
-RADF is currently designed to be **embedded** directly into another React app rather than consumed as a published npm package. The recommended approach is to copy the framework folder and styles into your app and keep it versioned alongside your product code.
-
-### Recommended embed layout
-
-```
-src/
-  components/
-    radf/
-      core/
-      styles/
-```
-
-You can also place RADF under `src/lib/radf/` if that matches your project conventions.
-
-### What to copy
-
-**Required**
-- `src/framework/core/` (all framework logic)
-- `src/framework/styles/` (tokens, themes, component CSS)
-
-**Optional (when you need them)**
-- `src/app/dashboards/example/` (reference configs + examples)
-- Any mock data providers or sample configs you want to use as templates
-
-### Minimal integration checklist
-
-1) Copy `core/` and `styles/` into your app’s `radf/` folder.
-2) Import the RADF CSS files in your entry point in the order shown above.
-3) Call `registerCharts()` and `registerInsights()` once at startup.
-4) Build dashboards using a local config file that matches your semantic layer (metrics + dimensions).
-
-### Versioning guidance
-
-- Treat RADF as vendored source: update by pulling changes from this repo and resolving conflicts.
-- Keep a changelog of dashboard-facing changes (new panels, breaking semantic layer changes).
-- When you upgrade, smoke test dashboards that rely on custom metrics/dimensions.
-
-### Packaging plan (future)
-
-If RADF is published later, the expected shape is a single package that exports:
-- Core components/hooks (dashboard, layout, viz, query)
-- Registry helpers (`registerCharts`, `registerInsights`)
-- Styles (tokens + themes + component CSS)
-
-Until then, embedding is the supported distribution strategy.
-
----
-
-## API / Extension Points
-
-The framework is designed to be extended in a few key areas. Start here when you need to customize behavior or add new capabilities. For canonical typedefs and shared shapes, see `src/framework/core/docs/jsdocTypes.js`.
-
-### Data Providers
-- Contract and validation: `src/framework/core/query/DataProvider.js`
-- Mock provider example: `src/framework/core/query/MockDataProvider.js`
-- `useQuery` expects providers to implement `execute(querySpec, { signal })` and return `{ rows, meta }`.
-
-### QuerySpec + Transforms
-- QuerySpec builder + normalization: `src/framework/core/query/buildQuerySpec.js`, `src/framework/core/query/normalizeQuerySpec.js`
-- Caching + hashing: `src/framework/core/query/cache.js`, `src/framework/core/query/hashQuerySpec.js`
-- Transform pipeline: `src/framework/core/query/transforms/index.js`
-
-### Registry (Charts + Insights)
-- Chart registry + defaults: `src/framework/core/registry/registerCharts.js`
-- Insight registry + defaults: `src/framework/core/registry/registerInsights.js`
-- Core registry utility: `src/framework/core/registry/registry.js`
-
-### Themes
-- Tokens + base variables: `src/framework/styles/tokens.css`
-- Light/dark themes: `src/framework/styles/theme.light.css`, `src/framework/styles/theme.dark.css`
-- Component styling: `src/framework/styles/components/`
-
-### Interactions + Drilldowns
-- Cross-filter, drilldown, brush zoom: `src/framework/core/interactions/`
-- Selection UI: `src/framework/core/interactions/SelectionChips.jsx`
-- Drill breadcrumbs UI: `src/framework/core/interactions/DrillBreadcrumbs.jsx`
-
----
-
-## License
-
-TBD
+- Recharts is the chart library
+- CSS variables power tokens + themes

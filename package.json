@@ -1,11 +1,11 @@
 {
   "name": "radf",
-  "private": true,
-  "version": "0.1.0",
+  "private": false,
+  "version": "0.2.0",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
-  "style": "./dist/style.css",
+  "style": "./dist/styles.css",
   "sideEffects": [
     "**/*.css"
   ],
@@ -14,8 +14,7 @@
       "import": "./dist/index.js",
       "default": "./dist/index.js"
     },
-    "./style.css": "./dist/style.css",
-    "./dist/style.css": "./dist/style.css"
+    "./styles.css": "./dist/styles.css"
   },
   "files": [
     "dist/**"
@@ -24,7 +23,7 @@
     "dev": "vite",
     "start": "vite",
     "build": "vite build",
-    "build:lib": "node scripts/gen-inline-styles.mjs && vite build -c vite.lib.config.js",
+    "build:lib": "vite build -c vite.lib.config.js",
     "prepare": "npm run build:lib",
     "preview": "vite preview",
     "lint": "eslint . --max-warnings=0",
@@ -32,6 +31,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "smoke:consumer": "node scripts/smoke-consumer.mjs",
+    "test:css": "node scripts/test-css-import.mjs",
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest"
   },
@@ -42,6 +42,7 @@
     "recharts": "^2.12.7"
   },
   "devDependencies": {
+    "@playwright/test": "^1.47.2",
     "@eslint/js": "^9.9.1",
     "@testing-library/jest-dom": "^6.5.0",
     "@testing-library/react": "^16.0.1",
