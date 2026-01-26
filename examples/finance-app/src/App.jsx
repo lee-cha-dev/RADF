@@ -8,9 +8,11 @@ import { useRoutes } from 'react-router-dom';
 import { ErrorBoundary } from 'radf';
 import routes from './routes.jsx';
 
+// Switch to "fecc-theme-light" and "fecc-theme-dark"
+// for an example of a custom style
 const THEME_CLASS = {
-  light: 'radf-theme-nord-light',
-  dark: 'radf-theme-nord-dark',
+  light: 'radf-theme-solarized-light',
+  dark: 'radf-theme-solarized-dark',
 };
 
 function App() {
