@@ -9,8 +9,8 @@ import { ErrorBoundary } from 'radf';
 import routes from './routes.jsx';
 
 const THEME_CLASS = {
-  light: 'fecc-theme-light',
-  dark: 'fecc-theme-dark',
+  light: 'radf-theme-nord-light',
+  dark: 'radf-theme-nord-dark',
 };
 
 function App() {

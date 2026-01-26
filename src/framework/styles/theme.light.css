@@ -97,3 +97,532 @@
   --radf-color-accent-weak: var(--radf-accent-primary-soft);
 
 }
+
+/* ========================================
+   NORD THEME
+   ======================================== */
+
+:root.radf-theme-nord-light {
+  --radf-surface-bg: #eceff4;
+  --radf-surface-1: #e5e9f0;
+  --radf-surface-2: #ffffff;
+  --radf-surface-3: #d8dee9;
+  --radf-surface-well: #e5e9f0;
+  --radf-surface-overlay: #ffffff;
+  --radf-surface-muted: #e5e9f0;
+
+  --radf-border-subtle: #d8dee9;
+  --radf-border-strong: #5e81ac;
+  --radf-border-divider: #d8dee9;
+  --radf-border-focus: #5e81ac;
+
+  --radf-text-primary: #2e3440;
+  --radf-text-secondary: #3b4252;
+  --radf-text-muted: #4c566a;
+  --radf-text-inverse: #eceff4;
+
+  --radf-accent-primary: #5e81ac;
+  --radf-accent-secondary: #81a1c1;
+  --radf-accent-success: #a3be8c;
+  --radf-accent-warning: #ebcb8b;
+  --radf-accent-danger: #bf616a;
+  --radf-accent-primary-soft: rgba(94, 129, 172, 0.12);
+  --radf-accent-secondary-soft: rgba(129, 161, 193, 0.12);
+
+  --radf-shadow-low: 0 1px 2px rgba(46, 52, 64, 0.08), 0 1px 1px rgba(46, 52, 64, 0.04);
+  --radf-shadow-med: 0 10px 24px rgba(46, 52, 64, 0.12), 0 4px 10px rgba(46, 52, 64, 0.08);
+  --radf-shadow-high: 0 20px 45px rgba(46, 52, 64, 0.16), 0 8px 20px rgba(46, 52, 64, 0.1);
+  --radf-shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.7), inset 0 -1px 0 rgba(46, 52, 64, 0.03);
+
+  --radf-app-gradient: radial-gradient(circle at top, rgba(94, 129, 172, 0.08), transparent 55%),
+  linear-gradient(180deg, #eceff4 0%, #e5e9f0 100%);
+  --radf-panel-gradient: linear-gradient(180deg, #ffffff 0%, #e5e9f0 100%);
+  --radf-panel-header-gradient: linear-gradient(180deg, #eceff4 0%, #e5e9f0 100%);
+
+  --radf-chart-grid: rgba(76, 86, 106, 0.3);
+
+  --radf-color-bg: var(--radf-surface-bg);
+  --radf-color-surface: var(--radf-surface-2);
+  --radf-color-surface-alt: var(--radf-surface-1);
+  --radf-color-text: var(--radf-text-primary);
+  --radf-color-muted: var(--radf-text-muted);
+  --radf-color-border: var(--radf-border-subtle);
+  --radf-color-accent: var(--radf-accent-primary);
+  --radf-color-accent-weak: var(--radf-accent-primary-soft);
+}
+
+/* ========================================
+   DRACULA THEME
+   ======================================== */
+
+:root.radf-theme-dracula-light {
+  --radf-surface-bg: #f8f8f2;
+  --radf-surface-1: #ffffff;
+  --radf-surface-2: #ffffff;
+  --radf-surface-3: #e9e9e3;
+  --radf-surface-well: #f8f8f2;
+  --radf-surface-overlay: #ffffff;
+  --radf-surface-muted: #e9e9e3;
+
+  --radf-border-subtle: #d4d4cf;
+  --radf-border-strong: #9580ff;
+  --radf-border-divider: #d4d4cf;
+  --radf-border-focus: #9580ff;
+
+  --radf-text-primary: #282a36;
+  --radf-text-secondary: #343746;
+  --radf-text-muted: #6272a4;
+  --radf-text-inverse: #f8f8f2;
+
+  --radf-accent-primary: #9580ff;
+  --radf-accent-secondary: #ff79c6;
+  --radf-accent-success: #3dd668;
+  --radf-accent-warning: #d4c21a;
+  --radf-accent-danger: #ff3838;
+  --radf-accent-primary-soft: rgba(149, 128, 255, 0.12);
+  --radf-accent-secondary-soft: rgba(255, 121, 198, 0.12);
+
+  --radf-shadow-low: 0 1px 2px rgba(40, 42, 54, 0.08), 0 1px 1px rgba(40, 42, 54, 0.04);
+  --radf-shadow-med: 0 10px 24px rgba(40, 42, 54, 0.12), 0 4px 10px rgba(40, 42, 54, 0.08);
+  --radf-shadow-high: 0 20px 45px rgba(40, 42, 54, 0.16), 0 8px 20px rgba(40, 42, 54, 0.1);
+  --radf-shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.7), inset 0 -1px 0 rgba(40, 42, 54, 0.03);
+
+  --radf-app-gradient: radial-gradient(circle at top, rgba(149, 128, 255, 0.08), transparent 55%),
+  linear-gradient(180deg, #f8f8f2 0%, #e9e9e3 100%);
+  --radf-panel-gradient: linear-gradient(180deg, #ffffff 0%, #f8f8f2 100%);
+  --radf-panel-header-gradient: linear-gradient(180deg, #f8f8f2 0%, #e9e9e3 100%);
+
+  --radf-chart-grid: rgba(98, 114, 164, 0.3);
+
+  --radf-color-bg: var(--radf-surface-bg);
+  --radf-color-surface: var(--radf-surface-2);
+  --radf-color-surface-alt: var(--radf-surface-1);
+  --radf-color-text: var(--radf-text-primary);
+  --radf-color-muted: var(--radf-text-muted);
+  --radf-color-border: var(--radf-border-subtle);
+  --radf-color-accent: var(--radf-accent-primary);
+  --radf-color-accent-weak: var(--radf-accent-primary-soft);
+}
+
+/* ========================================
+   SOLARIZED THEME
+   ======================================== */
+
+:root.radf-theme-solarized-light {
+  --radf-surface-bg: #fdf6e3;
+  --radf-surface-1: #eee8d5;
+  --radf-surface-2: #ffffff;
+  --radf-surface-3: #eee8d5;
+  --radf-surface-well: #eee8d5;
+  --radf-surface-overlay: #ffffff;
+  --radf-surface-muted: #eee8d5;
+
+  --radf-border-subtle: #93a1a1;
+  --radf-border-strong: #657b83;
+  --radf-border-divider: #93a1a1;
+  --radf-border-focus: #268bd2;
+
+  --radf-text-primary: #657b83;
+  --radf-text-secondary: #586e75;
+  --radf-text-muted: #93a1a1;
+  --radf-text-inverse: #fdf6e3;
+
+  --radf-accent-primary: #268bd2;
+  --radf-accent-secondary: #2aa198;
+  --radf-accent-success: #859900;
+  --radf-accent-warning: #b58900;
+  --radf-accent-danger: #dc322f;
+  --radf-accent-primary-soft: rgba(38, 139, 210, 0.12);
+  --radf-accent-secondary-soft: rgba(42, 161, 152, 0.12);
+
+  --radf-shadow-low: 0 1px 2px rgba(101, 123, 131, 0.08), 0 1px 1px rgba(101, 123, 131, 0.04);
+  --radf-shadow-med: 0 10px 24px rgba(101, 123, 131, 0.12), 0 4px 10px rgba(101, 123, 131, 0.08);
+  --radf-shadow-high: 0 20px 45px rgba(101, 123, 131, 0.16), 0 8px 20px rgba(101, 123, 131, 0.1);
+  --radf-shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.7), inset 0 -1px 0 rgba(101, 123, 131, 0.03);
+
+  --radf-app-gradient: radial-gradient(circle at top, rgba(38, 139, 210, 0.08), transparent 55%),
+  linear-gradient(180deg, #fdf6e3 0%, #eee8d5 100%);
+  --radf-panel-gradient: linear-gradient(180deg, #ffffff 0%, #eee8d5 100%);
+  --radf-panel-header-gradient: linear-gradient(180deg, #fdf6e3 0%, #eee8d5 100%);
+
+  --radf-chart-grid: rgba(101, 123, 131, 0.3);
+
+  --radf-color-bg: var(--radf-surface-bg);
+  --radf-color-surface: var(--radf-surface-2);
+  --radf-color-surface-alt: var(--radf-surface-1);
+  --radf-color-text: var(--radf-text-primary);
+  --radf-color-muted: var(--radf-text-muted);
+  --radf-color-border: var(--radf-border-subtle);
+  --radf-color-accent: var(--radf-accent-primary);
+  --radf-color-accent-weak: var(--radf-accent-primary-soft);
+}
+
+/* ========================================
+   MONOKAI THEME
+   ======================================== */
+
+:root.radf-theme-monokai-light {
+  --radf-surface-bg: #fafafa;
+  --radf-surface-1: #f5f5f5;
+  --radf-surface-2: #ffffff;
+  --radf-surface-3: #e0e0e0;
+  --radf-surface-well: #f5f5f5;
+  --radf-surface-overlay: #ffffff;
+  --radf-surface-muted: #f5f5f5;
+
+  --radf-border-subtle: #e0e0e0;
+  --radf-border-strong: #00a8c6;
+  --radf-border-divider: #e0e0e0;
+  --radf-border-focus: #00a8c6;
+
+  --radf-text-primary: #272822;
+  --radf-text-secondary: #3e3d32;
+  --radf-text-muted: #75715e;
+  --radf-text-inverse: #fafafa;
+
+  --radf-accent-primary: #00a8c6;
+  --radf-accent-secondary: #7c5cdb;
+  --radf-accent-success: #76b900;
+  --radf-accent-warning: #c4a000;
+  --radf-accent-danger: #d31145;
+  --radf-accent-primary-soft: rgba(0, 168, 198, 0.12);
+  --radf-accent-secondary-soft: rgba(124, 92, 219, 0.12);
+
+  --radf-shadow-low: 0 1px 2px rgba(39, 40, 34, 0.08), 0 1px 1px rgba(39, 40, 34, 0.04);
+  --radf-shadow-med: 0 10px 24px rgba(39, 40, 34, 0.12), 0 4px 10px rgba(39, 40, 34, 0.08);
+  --radf-shadow-high: 0 20px 45px rgba(39, 40, 34, 0.16), 0 8px 20px rgba(39, 40, 34, 0.1);
+  --radf-shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.7), inset 0 -1px 0 rgba(39, 40, 34, 0.03);
+
+  --radf-app-gradient: radial-gradient(circle at top, rgba(0, 168, 198, 0.08), transparent 55%),
+  linear-gradient(180deg, #fafafa 0%, #f5f5f5 100%);
+  --radf-panel-gradient: linear-gradient(180deg, #ffffff 0%, #f5f5f5 100%);
+  --radf-panel-header-gradient: linear-gradient(180deg, #fafafa 0%, #f5f5f5 100%);
+
+  --radf-chart-grid: rgba(117, 113, 94, 0.3);
+
+  --radf-color-bg: var(--radf-surface-bg);
+  --radf-color-surface: var(--radf-surface-2);
+  --radf-color-surface-alt: var(--radf-surface-1);
+  --radf-color-text: var(--radf-text-primary);
+  --radf-color-muted: var(--radf-text-muted);
+  --radf-color-border: var(--radf-border-subtle);
+  --radf-color-accent: var(--radf-accent-primary);
+  --radf-color-accent-weak: var(--radf-accent-primary-soft);
+}
+
+/* ========================================
+   GRUVBOX THEME
+   ======================================== */
+
+:root.radf-theme-gruvbox-light {
+  --radf-surface-bg: #fbf1c7;
+  --radf-surface-1: #ebdbb2;
+  --radf-surface-2: #ffffff;
+  --radf-surface-3: #d5c4a1;
+  --radf-surface-well: #ebdbb2;
+  --radf-surface-overlay: #ffffff;
+  --radf-surface-muted: #ebdbb2;
+
+  --radf-border-subtle: #d5c4a1;
+  --radf-border-strong: #bdae93;
+  --radf-border-divider: #d5c4a1;
+  --radf-border-focus: #076678;
+
+  --radf-text-primary: #3c3836;
+  --radf-text-secondary: #504945;
+  --radf-text-muted: #7c6f64;
+  --radf-text-inverse: #fbf1c7;
+
+  --radf-accent-primary: #076678;
+  --radf-accent-secondary: #8f3f71;
+  --radf-accent-success: #79740e;
+  --radf-accent-warning: #b57614;
+  --radf-accent-danger: #9d0006;
+  --radf-accent-primary-soft: rgba(7, 102, 120, 0.12);
+  --radf-accent-secondary-soft: rgba(143, 63, 113, 0.12);
+
+  --radf-shadow-low: 0 1px 2px rgba(60, 56, 54, 0.08), 0 1px 1px rgba(60, 56, 54, 0.04);
+  --radf-shadow-med: 0 10px 24px rgba(60, 56, 54, 0.12), 0 4px 10px rgba(60, 56, 54, 0.08);
+  --radf-shadow-high: 0 20px 45px rgba(60, 56, 54, 0.16), 0 8px 20px rgba(60, 56, 54, 0.1);
+  --radf-shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.7), inset 0 -1px 0 rgba(60, 56, 54, 0.03);
+
+  --radf-app-gradient: radial-gradient(circle at top, rgba(7, 102, 120, 0.08), transparent 55%),
+  linear-gradient(180deg, #fbf1c7 0%, #ebdbb2 100%);
+  --radf-panel-gradient: linear-gradient(180deg, #ffffff 0%, #ebdbb2 100%);
+  --radf-panel-header-gradient: linear-gradient(180deg, #fbf1c7 0%, #ebdbb2 100%);
+
+  --radf-chart-grid: rgba(124, 111, 100, 0.3);
+
+  --radf-color-bg: var(--radf-surface-bg);
+  --radf-color-surface: var(--radf-surface-2);
+  --radf-color-surface-alt: var(--radf-surface-1);
+  --radf-color-text: var(--radf-text-primary);
+  --radf-color-muted: var(--radf-text-muted);
+  --radf-color-border: var(--radf-border-subtle);
+  --radf-color-accent: var(--radf-accent-primary);
+  --radf-color-accent-weak: var(--radf-accent-primary-soft);
+}
+
+/* ========================================
+   MATERIAL THEME
+   ======================================== */
+
+:root.radf-theme-material-light {
+  --radf-surface-bg: #fafafa;
+  --radf-surface-1: #ffffff;
+  --radf-surface-2: #ffffff;
+  --radf-surface-3: #f5f5f5;
+  --radf-surface-well: #f5f5f5;
+  --radf-surface-overlay: #ffffff;
+  --radf-surface-muted: #f5f5f5;
+
+  --radf-border-subtle: #e0e0e0;
+  --radf-border-strong: #bdbdbd;
+  --radf-border-divider: #e0e0e0;
+  --radf-border-focus: #2196f3;
+
+  --radf-text-primary: #212121;
+  --radf-text-secondary: #424242;
+  --radf-text-muted: #757575;
+  --radf-text-inverse: #ffffff;
+
+  --radf-accent-primary: #2196f3;
+  --radf-accent-secondary: #009688;
+  --radf-accent-success: #4caf50;
+  --radf-accent-warning: #ff9800;
+  --radf-accent-danger: #f44336;
+  --radf-accent-primary-soft: rgba(33, 150, 243, 0.12);
+  --radf-accent-secondary-soft: rgba(0, 150, 136, 0.12);
+
+  --radf-shadow-low: 0 1px 2px rgba(33, 33, 33, 0.08), 0 1px 1px rgba(33, 33, 33, 0.04);
+  --radf-shadow-med: 0 10px 24px rgba(33, 33, 33, 0.12), 0 4px 10px rgba(33, 33, 33, 0.08);
+  --radf-shadow-high: 0 20px 45px rgba(33, 33, 33, 0.16), 0 8px 20px rgba(33, 33, 33, 0.1);
+  --radf-shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.7), inset 0 -1px 0 rgba(33, 33, 33, 0.03);
+
+  --radf-app-gradient: radial-gradient(circle at top, rgba(33, 150, 243, 0.08), transparent 55%),
+  linear-gradient(180deg, #fafafa 0%, #f5f5f5 100%);
+  --radf-panel-gradient: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
+  --radf-panel-header-gradient: linear-gradient(180deg, #fafafa 0%, #f5f5f5 100%);
+
+  --radf-chart-grid: rgba(117, 117, 117, 0.3);
+
+  --radf-color-bg: var(--radf-surface-bg);
+  --radf-color-surface: var(--radf-surface-2);
+  --radf-color-surface-alt: var(--radf-surface-1);
+  --radf-color-text: var(--radf-text-primary);
+  --radf-color-muted: var(--radf-text-muted);
+  --radf-color-border: var(--radf-border-subtle);
+  --radf-color-accent: var(--radf-accent-primary);
+  --radf-color-accent-weak: var(--radf-accent-primary-soft);
+}
+
+/* ========================================
+   ONE THEME
+   ======================================== */
+
+:root.radf-theme-one-light {
+  --radf-surface-bg: #fafafa;
+  --radf-surface-1: #f0f0f0;
+  --radf-surface-2: #ffffff;
+  --radf-surface-3: #e5e5e6;
+  --radf-surface-well: #f0f0f0;
+  --radf-surface-overlay: #ffffff;
+  --radf-surface-muted: #f0f0f0;
+
+  --radf-border-subtle: #e5e5e6;
+  --radf-border-strong: #d0d0d0;
+  --radf-border-divider: #e5e5e6;
+  --radf-border-focus: #4078f2;
+
+  --radf-text-primary: #383a42;
+  --radf-text-secondary: #383a42;
+  --radf-text-muted: #a0a1a7;
+  --radf-text-inverse: #fafafa;
+
+  --radf-accent-primary: #4078f2;
+  --radf-accent-secondary: #a626a4;
+  --radf-accent-success: #50a14f;
+  --radf-accent-warning: #c18401;
+  --radf-accent-danger: #e45649;
+  --radf-accent-primary-soft: rgba(64, 120, 242, 0.12);
+  --radf-accent-secondary-soft: rgba(166, 38, 164, 0.12);
+
+  --radf-shadow-low: 0 1px 2px rgba(56, 58, 66, 0.08), 0 1px 1px rgba(56, 58, 66, 0.04);
+  --radf-shadow-med: 0 10px 24px rgba(56, 58, 66, 0.12), 0 4px 10px rgba(56, 58, 66, 0.08);
+  --radf-shadow-high: 0 20px 45px rgba(56, 58, 66, 0.16), 0 8px 20px rgba(56, 58, 66, 0.1);
+  --radf-shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.7), inset 0 -1px 0 rgba(56, 58, 66, 0.03);
+
+  --radf-app-gradient: radial-gradient(circle at top, rgba(64, 120, 242, 0.08), transparent 55%),
+  linear-gradient(180deg, #fafafa 0%, #f0f0f0 100%);
+  --radf-panel-gradient: linear-gradient(180deg, #ffffff 0%, #f0f0f0 100%);
+  --radf-panel-header-gradient: linear-gradient(180deg, #fafafa 0%, #f0f0f0 100%);
+
+  --radf-chart-grid: rgba(160, 161, 167, 0.3);
+
+  --radf-color-bg: var(--radf-surface-bg);
+  --radf-color-surface: var(--radf-surface-2);
+  --radf-color-surface-alt: var(--radf-surface-1);
+  --radf-color-text: var(--radf-text-primary);
+  --radf-color-muted: var(--radf-text-muted);
+  --radf-color-border: var(--radf-border-subtle);
+  --radf-color-accent: var(--radf-accent-primary);
+  --radf-color-accent-weak: var(--radf-accent-primary-soft);
+}
+
+/* ========================================
+   TOKYO NIGHT THEME
+   ======================================== */
+
+:root.radf-theme-tokyo-light {
+  --radf-surface-bg: #d5d6db;
+  --radf-surface-1: #dfe0e5;
+  --radf-surface-2: #ffffff;
+  --radf-surface-3: #cbccd1;
+  --radf-surface-well: #dfe0e5;
+  --radf-surface-overlay: #ffffff;
+  --radf-surface-muted: #dfe0e5;
+
+  --radf-border-subtle: #cbccd1;
+  --radf-border-strong: #9699a3;
+  --radf-border-divider: #cbccd1;
+  --radf-border-focus: #2e7de9;
+
+  --radf-text-primary: #343b58;
+  --radf-text-secondary: #4c505e;
+  --radf-text-muted: #6172b0;
+  --radf-text-inverse: #d5d6db;
+
+  --radf-accent-primary: #2e7de9;
+  --radf-accent-secondary: #9854f1;
+  --radf-accent-success: #587539;
+  --radf-accent-warning: #8c6c3e;
+  --radf-accent-danger: #f52a65;
+  --radf-accent-primary-soft: rgba(46, 125, 233, 0.12);
+  --radf-accent-secondary-soft: rgba(152, 84, 241, 0.12);
+
+  --radf-shadow-low: 0 1px 2px rgba(52, 59, 88, 0.08), 0 1px 1px rgba(52, 59, 88, 0.04);
+  --radf-shadow-med: 0 10px 24px rgba(52, 59, 88, 0.12), 0 4px 10px rgba(52, 59, 88, 0.08);
+  --radf-shadow-high: 0 20px 45px rgba(52, 59, 88, 0.16), 0 8px 20px rgba(52, 59, 88, 0.1);
+  --radf-shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.7), inset 0 -1px 0 rgba(52, 59, 88, 0.03);
+
+  --radf-app-gradient: radial-gradient(circle at top, rgba(46, 125, 233, 0.08), transparent 55%),
+  linear-gradient(180deg, #d5d6db 0%, #dfe0e5 100%);
+  --radf-panel-gradient: linear-gradient(180deg, #ffffff 0%, #dfe0e5 100%);
+  --radf-panel-header-gradient: linear-gradient(180deg, #d5d6db 0%, #dfe0e5 100%);
+
+  --radf-chart-grid: rgba(97, 114, 176, 0.3);
+
+  --radf-color-bg: var(--radf-surface-bg);
+  --radf-color-surface: var(--radf-surface-2);
+  --radf-color-surface-alt: var(--radf-surface-1);
+  --radf-color-text: var(--radf-text-primary);
+  --radf-color-muted: var(--radf-text-muted);
+  --radf-color-border: var(--radf-border-subtle);
+  --radf-color-accent: var(--radf-accent-primary);
+  --radf-color-accent-weak: var(--radf-accent-primary-soft);
+}
+
+/* ========================================
+   CATPPUCCIN MOCHA THEME
+   ======================================== */
+
+:root.radf-theme-catppuccin-light {
+  --radf-surface-bg: #eff1f5;
+  --radf-surface-1: #e6e9ef;
+  --radf-surface-2: #ffffff;
+  --radf-surface-3: #dce0e8;
+  --radf-surface-well: #e6e9ef;
+  --radf-surface-overlay: #ffffff;
+  --radf-surface-muted: #e6e9ef;
+
+  --radf-border-subtle: #dce0e8;
+  --radf-border-strong: #9ca0b0;
+  --radf-border-divider: #dce0e8;
+  --radf-border-focus: #1e66f5;
+
+  --radf-text-primary: #4c4f69;
+  --radf-text-secondary: #5c5f77;
+  --radf-text-muted: #6c6f85;
+  --radf-text-inverse: #eff1f5;
+
+  --radf-accent-primary: #1e66f5;
+  --radf-accent-secondary: #8839ef;
+  --radf-accent-success: #40a02b;
+  --radf-accent-warning: #df8e1d;
+  --radf-accent-danger: #d20f39;
+  --radf-accent-primary-soft: rgba(30, 102, 245, 0.12);
+  --radf-accent-secondary-soft: rgba(136, 57, 239, 0.12);
+
+  --radf-shadow-low: 0 1px 2px rgba(76, 79, 105, 0.08), 0 1px 1px rgba(76, 79, 105, 0.04);
+  --radf-shadow-med: 0 10px 24px rgba(76, 79, 105, 0.12), 0 4px 10px rgba(76, 79, 105, 0.08);
+  --radf-shadow-high: 0 20px 45px rgba(76, 79, 105, 0.16), 0 8px 20px rgba(76, 79, 105, 0.1);
+  --radf-shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.7), inset 0 -1px 0 rgba(76, 79, 105, 0.03);
+
+  --radf-app-gradient: radial-gradient(circle at top, rgba(30, 102, 245, 0.08), transparent 55%),
+  linear-gradient(180deg, #eff1f5 0%, #e6e9ef 100%);
+  --radf-panel-gradient: linear-gradient(180deg, #ffffff 0%, #e6e9ef 100%);
+  --radf-panel-header-gradient: linear-gradient(180deg, #eff1f5 0%, #e6e9ef 100%);
+
+  --radf-chart-grid: rgba(108, 111, 133, 0.3);
+
+  --radf-color-bg: var(--radf-surface-bg);
+  --radf-color-surface: var(--radf-surface-2);
+  --radf-color-surface-alt: var(--radf-surface-1);
+  --radf-color-text: var(--radf-text-primary);
+  --radf-color-muted: var(--radf-text-muted);
+  --radf-color-border: var(--radf-border-subtle);
+  --radf-color-accent: var(--radf-accent-primary);
+  --radf-color-accent-weak: var(--radf-accent-primary-soft);
+}
+
+/* ========================================
+   HORIZON THEME
+   ======================================== */
+:root.radf-theme-horizon-light {
+  --radf-surface-bg: #fdf0ed;
+  --radf-surface-1: #fadad1;
+  --radf-surface-2: #ffffff;
+  --radf-surface-3: #f9cbbe;
+  --radf-surface-well: #fadad1;
+  --radf-surface-overlay: #ffffff;
+  --radf-surface-muted: #fadad1;
+
+  --radf-border-subtle: #f9cbbe;
+  --radf-border-strong: #f0b8a4;
+  --radf-border-divider: #f9cbbe;
+  --radf-border-focus: #1d8991;
+
+  --radf-text-primary: #403c3d;
+  --radf-text-secondary: #302c2d;
+  --radf-text-muted: #bdb3b1;
+  --radf-text-inverse: #fdf0ed;
+
+  --radf-accent-primary: #1d8991;
+  --radf-accent-secondary: #b31e8d;
+  --radf-accent-success: #1ebc73;
+  --radf-accent-warning: #dc7f5a;
+  --radf-accent-danger: #e32c58;
+  --radf-accent-primary-soft: rgba(29, 137, 145, 0.12);
+  --radf-accent-secondary-soft: rgba(179, 30, 141, 0.12);
+
+  --radf-shadow-low: 0 1px 2px rgba(64, 60, 61, 0.08), 0 1px 1px rgba(64, 60, 61, 0.04);
+  --radf-shadow-med: 0 10px 24px rgba(64, 60, 61, 0.12), 0 4px 10px rgba(64, 60, 61, 0.08);
+  --radf-shadow-high: 0 20px 45px rgba(64, 60, 61, 0.16), 0 8px 20px rgba(64, 60, 61, 0.1);
+  --radf-shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.7), inset 0 -1px 0 rgba(64, 60, 61, 0.03);
+
+  --radf-app-gradient: radial-gradient(circle at top, rgba(29, 137, 145, 0.08), transparent 55%),
+  linear-gradient(180deg, #fdf0ed 0%, #fadad1 100%);
+  --radf-panel-gradient: linear-gradient(180deg, #ffffff 0%, #fadad1 100%);
+  --radf-panel-header-gradient: linear-gradient(180deg, #fdf0ed 0%, #fadad1 100%);
+
+  --radf-chart-grid: rgba(189, 179, 177, 0.3);
+
+  --radf-color-bg: var(--radf-surface-bg);
+  --radf-color-surface: var(--radf-surface-2);
+  --radf-color-surface-alt: var(--radf-surface-1);
+  --radf-color-text: var(--radf-text-primary);
+  --radf-color-muted: var(--radf-text-muted);
+  --radf-color-border: var(--radf-border-subtle);
+  --radf-color-accent: var(--radf-accent-primary);
+  --radf-color-accent-weak: var(--radf-accent-primary-soft);
+}
