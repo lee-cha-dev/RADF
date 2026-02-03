@@ -31,7 +31,7 @@
 }
 
 .radf-chart__canvas {
-  width: 100%;
+  width: auto;
   min-height: 280px;
   background: var(--radf-surface-well, var(--radf-color-surface));
   border: 1px solid var(--radf-border-subtle, var(--radf-color-border));
