@@ -28,13 +28,29 @@ import {
   Panel,
   VizRenderer,
   buildQuerySpec,
+  createDataProvider,
   registerCharts,
   registerInsights,
   useDashboardState,
   useQuery,
-  MockDataProvider,
 } from 'radf';
 import dashboardConfig from './dashboard.config.js';
+
+const ApiDataProvider = createDataProvider(async (querySpec, { signal }) => {
+    const response = await fetch('/api/query', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(querySpec),
+        signal,
+    });
+    if (!response.ok) {
+        throw new Error(`Query failed: ${response.status}`);
+    }
+    const json = await response.json();
+    return { rows: json.rows, meta: json.meta };
+}, {
+    validateResult: (result) => Array.isArray(result?.rows) || 'rows must be an array',
+});
 
 const VizPanel = ({ panel }) => {
   const dashboardState = useDashboardState();
@@ -44,7 +60,7 @@ const VizPanel = ({ panel }) => {
   );
 
   const { data, loading, error } = useQuery(querySpec, {
-    provider: MockDataProvider,
+    provider: ApiDataProvider,
   });
 
   const isEmpty = !loading && !error && (!data || data.length === 0);
