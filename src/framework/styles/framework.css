@@ -18,6 +18,12 @@ textarea {
 }
 
 .radf-app {
+  margin: 0;
+  font-family: var(--radf-font-family);
+  font-size: var(--radf-font-size-base);
+  line-height: var(--radf-line-height);
+  background: var(--radf-app-gradient, var(--radf-color-bg));
+  color: var(--radf-text-primary, var(--radf-color-text));
   min-height: 100vh;
   display: flex;
   flex-direction: column;
