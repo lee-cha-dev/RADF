@@ -11,8 +11,8 @@ import routes from './routes.jsx';
 // Switch to "fecc-theme-light" and "fecc-theme-dark"
 // for an example of a custom style
 const THEME_CLASS = {
-  light: 'radf-theme-solarized-light',
-  dark: 'radf-theme-solarized-dark',
+  light: 'radf-theme-dracula-light',
+  dark: 'radf-theme-dracula-dark',
 };
 
 function App() {
