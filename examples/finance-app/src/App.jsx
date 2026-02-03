@@ -7,6 +7,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useRoutes } from 'react-router-dom';
 import { ErrorBoundary } from 'radf';
 import routes from './routes.jsx';
+import "./app.css";
 
 // Switch to "fecc-theme-light" and "fecc-theme-dark"
 // for an example of a custom style
@@ -39,7 +40,7 @@ function App() {
   };
 
   return (
-    <div className="radf-app">
+    <div className="radf-app app">
       <header className="radf-app__header">
         <div className="radf-app__branding">
           <span className="radf-app__title">RADF</span>
