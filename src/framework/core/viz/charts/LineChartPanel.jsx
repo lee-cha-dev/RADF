@@ -84,7 +84,7 @@ function LineChartPanel({
 
   return (
     <ChartContainer>
-      <ResponsiveContainer width="100%" height={280}>
+      <ResponsiveContainer width="100%" minHeight={280}>
         <LineChart data={data} margin={{ top: 8, right: 16, left: 0, bottom: 8 }}>
           <CartesianGrid stroke="var(--radf-chart-grid)" strokeDasharray="3 3" />
           <XAxis
