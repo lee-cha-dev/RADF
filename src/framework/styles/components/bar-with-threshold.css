@@ -1,0 +1,226 @@
+/**
+ * BarWithThresholdPanel styles
+ * Supports horizontal/vertical orientation, threshold markers, department legends
+ */
+
+.radf-bar-threshold {
+    display: flex;
+    flex-direction: column;
+    gap: var(--radf-space-4);
+    width: 100%;
+}
+
+.radf-bar-threshold__cell {
+    transition: fill-opacity 0.2s ease, stroke 0.2s ease;
+    cursor: pointer;
+}
+
+.radf-bar-threshold__cell:hover {
+    fill-opacity: 1;
+}
+
+.radf-bar-threshold__dot {
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15));
+    transition: r 0.2s ease;
+}
+
+.radf-bar-threshold__tick-label {
+    font-family: var(--radf-font-family);
+    transition: fill 0.2s ease;
+}
+
+/* Legend container */
+.radf-bar-threshold__legend {
+    padding: var(--radf-space-3) 0;
+    border-top: 1px solid var(--radf-border-subtle, var(--radf-color-border));
+}
+
+.radf-bar-threshold__legend-list {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--radf-space-4);
+    padding: 0;
+    margin: 0;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.radf-bar-threshold__legend-item {
+    display: inline-flex;
+    align-items: center;
+}
+
+.radf-bar-threshold__legend-item--hidden {
+    opacity: 0.4;
+}
+
+.radf-bar-threshold__legend-item--hidden .radf-bar-threshold__legend-swatch {
+    background: var(--radf-text-muted) !important;
+}
+
+.radf-bar-threshold__legend-button {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--radf-space-2);
+    padding: var(--radf-space-1) var(--radf-space-2);
+    border: none;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+    border-radius: var(--radf-radius-sm);
+    transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.radf-bar-threshold__legend-button:hover {
+    background: var(--radf-accent-primary-soft);
+    transform: translateY(-1px);
+}
+
+.radf-bar-threshold__legend-button:focus-visible {
+    outline: var(--radf-focus-ring-size) solid var(--radf-border-focus);
+    outline-offset: var(--radf-focus-ring-offset);
+}
+
+.radf-bar-threshold__legend-swatch {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    flex-shrink: 0;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+.radf-bar-threshold__legend-label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--radf-text-secondary, var(--radf-color-text));
+    white-space: nowrap;
+}
+
+/* Threshold line legend item */
+.radf-bar-threshold__legend-item--threshold {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--radf-space-2);
+    padding: var(--radf-space-1) var(--radf-space-2);
+    margin-left: var(--radf-space-2);
+    border-left: 1px solid var(--radf-border-subtle);
+    padding-left: var(--radf-space-4);
+}
+
+.radf-bar-threshold__legend-line {
+    display: inline-block;
+    width: 20px;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--radf-accent-warning);
+    background-image: repeating-linear-gradient(
+            90deg,
+            transparent,
+            transparent 4px,
+            var(--radf-surface-bg) 4px,
+            var(--radf-surface-bg) 6px
+    );
+}
+
+/* Tooltip enhancements */
+.radf-chart-tooltip__item--department {
+    margin-top: var(--radf-space-2);
+    padding-top: var(--radf-space-2);
+    border-top: 1px solid var(--radf-border-subtle);
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .radf-bar-threshold__legend-list {
+        gap: var(--radf-space-2);
+    }
+
+    .radf-bar-threshold__legend-button {
+        padding: var(--radf-space-1);
+    }
+
+    .radf-bar-threshold__legend-label {
+        font-size: 0.75rem;
+    }
+
+    .radf-bar-threshold__legend-item--threshold {
+        margin-left: 0;
+        border-left: none;
+        padding-left: var(--radf-space-2);
+        width: 100%;
+        margin-top: var(--radf-space-2);
+        padding-top: var(--radf-space-2);
+        border-top: 1px solid var(--radf-border-subtle);
+    }
+}
+
+/* Large container enhancements */
+@container (min-width: 800px) {
+    .radf-bar-threshold__legend-list {
+        gap: var(--radf-space-5);
+    }
+
+    .radf-bar-threshold__legend-swatch {
+        width: 14px;
+        height: 14px;
+    }
+
+    .radf-bar-threshold__legend-label {
+        font-size: 0.85rem;
+    }
+}
+
+/* Animation for bars */
+@keyframes radf-bar-enter {
+    from {
+        opacity: 0;
+        transform: scaleX(0);
+        transform-origin: left center;
+    }
+    to {
+        opacity: 1;
+        transform: scaleX(1);
+    }
+}
+
+.radf-bar-threshold .recharts-bar-rectangle {
+    animation: radf-bar-enter 0.4s ease-out backwards;
+}
+
+.radf-bar-threshold .recharts-bar-rectangle:nth-child(1) { animation-delay: 0ms; }
+.radf-bar-threshold .recharts-bar-rectangle:nth-child(2) { animation-delay: 30ms; }
+.radf-bar-threshold .recharts-bar-rectangle:nth-child(3) { animation-delay: 60ms; }
+.radf-bar-threshold .recharts-bar-rectangle:nth-child(4) { animation-delay: 90ms; }
+.radf-bar-threshold .recharts-bar-rectangle:nth-child(5) { animation-delay: 120ms; }
+.radf-bar-threshold .recharts-bar-rectangle:nth-child(6) { animation-delay: 150ms; }
+.radf-bar-threshold .recharts-bar-rectangle:nth-child(7) { animation-delay: 180ms; }
+.radf-bar-threshold .recharts-bar-rectangle:nth-child(8) { animation-delay: 210ms; }
+.radf-bar-threshold .recharts-bar-rectangle:nth-child(9) { animation-delay: 240ms; }
+.radf-bar-threshold .recharts-bar-rectangle:nth-child(10) { animation-delay: 270ms; }
+.radf-bar-threshold .recharts-bar-rectangle:nth-child(n+11) { animation-delay: 300ms; }
+
+/* Reference line pulse for threshold */
+.radf-bar-threshold .recharts-reference-line line {
+    stroke-linecap: round;
+}
+
+/* Exceeded threshold highlight */
+.radf-bar-threshold__exceeded {
+    position: relative;
+}
+
+.radf-bar-threshold__exceeded::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 8px;
+    height: 8px;
+    background: var(--radf-accent-danger);
+    border-radius: 50%;
+    transform: translate(50%, -50%);
+    box-shadow: 0 0 0 2px var(--radf-surface-bg);
+}
