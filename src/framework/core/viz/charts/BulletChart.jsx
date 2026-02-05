@@ -6,7 +6,7 @@
 import React, { useMemo, useRef, useState, useCallback } from 'react';
 import ChartContainer from '../common/ChartContainer.jsx';
 import BulletChartTooltip from '../common/BulletChartTooltip.jsx';
-import { getSeriesVar } from "../palettes/paletteRegistry.js";
+import { getSeriesVar } from '../palettes/paletteRegistry';
 
 const SERIES_COUNT = 12;
 
@@ -597,6 +597,9 @@ function BulletChart({ data = [], encodings = {}, options = {}, handlers = {}, h
     options.subtitle ||
     options.chartSubtitle ||
     'Bars show individual OT; marker shows dept average; highlights indicate higher-than-peer OT';
+  const xTitle = options.headerTitles.xTitle || '';
+  const yTitle = options.headerTitles.yTitle || '';
+  const percentTitle = options.headerTitles.percentTitle || '';
 
   return (
     <ChartContainer subtitle={subtitle}>
@@ -604,13 +607,13 @@ function BulletChart({ data = [], encodings = {}, options = {}, handlers = {}, h
         {/* Header row */}
         <div className="radf-bullet__header">
           <div className="radf-bullet__name-cell">
-            <span className="radf-bullet__axis-label radf-bullet-name-label">Employee</span>
+            <span className="radf-bullet__axis-label radf-bullet-name-label">{xTitle}</span>
           </div>
           <div className="radf-bullet__bar-cell">
-            <span className="radf-bullet__axis-label">OT Hours</span>
+            <span className="radf-bullet__axis-label">{yTitle}</span>
           </div>
           {showPercent && (
-            <div className="radf-bullet__pct-cell radf-bullet__pct-header">% of Total</div>
+            <div className="radf-bullet__pct-cell radf-bullet__pct-header">{percentTitle}</div>
           )}
         </div>
 
