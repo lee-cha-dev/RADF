@@ -153,6 +153,26 @@
   border-radius: 999px;
 }
 
+.radf-chart-legend__swatch--accent-primary {
+  background: var(--radf-accent-primary);
+}
+
+.radf-chart-legend__swatch--accent-secondary {
+  background: var(--radf-accent-secondary);
+}
+
+.radf-chart-legend__swatch--accent-success {
+  background: var(--radf-accent-success);
+}
+
+.radf-chart-legend__swatch--accent-warning {
+  background: var(--radf-accent-warning);
+}
+
+.radf-chart-legend__swatch--accent-danger {
+  background: var(--radf-accent-danger);
+}
+
 .radf-chart-tooltip__name {
   color: var(--radf-text-muted, var(--radf-color-muted));
 }
