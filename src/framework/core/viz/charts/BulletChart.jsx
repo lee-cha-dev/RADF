@@ -593,10 +593,7 @@ function BulletChart({ data = [], encodings = {}, options = {}, handlers = {}, h
   const markerLabel = sanitizeMarkerLabel(markerConfig.label);
   /* Use explicit markerLines color, otherwise neutral token */
   const markerColor = options.markerLines?.color || '#E0E000';
-  const subtitle =
-    options.subtitle ||
-    options.chartSubtitle ||
-    'Bars show individual OT; marker shows dept average; highlights indicate higher-than-peer OT';
+  const subtitle = options.subtitle || options.chartSubtitle || '';
   const xTitle = options.headerTitles.xTitle || '';
   const yTitle = options.headerTitles.yTitle || '';
   const percentTitle = options.headerTitles.percentTitle || '';
