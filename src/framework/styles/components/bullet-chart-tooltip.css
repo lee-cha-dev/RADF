@@ -3,6 +3,11 @@
  */
 
 .radf-bullet-tooltip {
+  position: absolute;
+  z-index: 1000;
+  pointer-events: none;
+  transform: translate(-50%, -100%);
+  margin-top: -12px;
   display: flex;
   flex-direction: column;
   gap: var(--radf-space-2);

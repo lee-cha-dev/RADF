@@ -1,21 +1,9 @@
 /**
  * @module core/viz/charts/BarWithThresholdPanel
  * @description Bullet chart table with per-row marker lines, department coloring,
- * and Recharts-native hover/tooltip behavior.
+ * vertical grid lines, and a three-column layout (names | bars | percent).
  */
-import React, { useMemo, useCallback } from 'react';
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  Customized,
-  LabelList,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts';
+import React, { useMemo, useState, useCallback } from 'react';
 import ChartContainer from '../common/ChartContainer.jsx';
 import BulletChartTooltip from '../common/BulletChartTooltip.jsx';
 import { getSeriesVar } from '../palettes/paletteRegistry';
@@ -42,16 +30,18 @@ const parseColor = (color) => {
   if (trimmed.startsWith('#')) {
     const hex = trimmed.replace('#', '');
     if (hex.length === 3) {
-      const r = parseInt(hex[0] + hex[0], 16);
-      const g = parseInt(hex[1] + hex[1], 16);
-      const b = parseInt(hex[2] + hex[2], 16);
-      return { r, g, b };
+      return {
+        r: parseInt(hex[0] + hex[0], 16),
+        g: parseInt(hex[1] + hex[1], 16),
+        b: parseInt(hex[2] + hex[2], 16),
+      };
     }
     if (hex.length === 6) {
-      const r = parseInt(hex.slice(0, 2), 16);
-      const g = parseInt(hex.slice(2, 4), 16);
-      const b = parseInt(hex.slice(4, 6), 16);
-      return { r, g, b };
+      return {
+        r: parseInt(hex.slice(0, 2), 16),
+        g: parseInt(hex.slice(2, 4), 16),
+        b: parseInt(hex.slice(4, 6), 16),
+      };
     }
     return null;
   }
@@ -136,14 +126,25 @@ const resolveNonRedSeriesIndices = () => {
 };
 
 /**
+ * @typedef {Object} BarWithThresholdPanelProps
+ * @property {Array<Object>} [data] - Chart data rows.
+ * @property {Object} [encodings] - Encoding map (x/y/color).
+ * @property {Object} [options] - Chart options.
+ * @property {Object} [handlers] - Interaction handlers.
+ * @property {Object|null} [colorAssignment] - Palette assignment helper.
+ * @property {Set<string>} [hiddenKeys] - Keys hidden via legend toggles.
+ */
+
+/**
  * Build a color map for categorical coloring using series palette.
- * Ensures each unique category gets a distinct non-red color from the palette.
+ * Ensures each unique category gets a distinct color from the palette.
  */
 const buildCategoryColorMap = (data, colorKey, seriesIndices) => {
   if (!colorKey || !data?.length) {
     return new Map();
   }
 
+  // Get unique categories in order of first appearance
   const categories = [];
   const seen = new Set();
   data.forEach((row) => {
@@ -155,11 +156,14 @@ const buildCategoryColorMap = (data, colorKey, seriesIndices) => {
   });
 
   const colorMap = new Map();
+
   categories.forEach((cat, index) => {
     const seriesIndex = seriesIndices[index % seriesIndices.length] ?? 0;
-    colorMap.set(cat, { color: getSeriesVar(seriesIndex), index: seriesIndex });
+    colorMap.set(cat, {
+      color: getSeriesVar(seriesIndex),
+      index: seriesIndex,
+    });
   });
-
   return colorMap;
 };
 
@@ -249,16 +253,137 @@ const computeGroupAverages = (data, groupKey, valueKey) => {
 };
 
 /**
+ * Single bullet row component with tooltip support.
+ */
+function BulletRow({
+  row,
+  xKey,
+  yKey,
+  colorKey,
+  dotColorKey,
+  barColorMap,
+  dotColorMap,
+  showAnnotations,
+  maxValue,
+  markerValue,
+  markerConfig,
+  outlierBound,
+  percentKey,
+  showPercent,
+  onClick,
+  onMouseEnter,
+  onMouseLeave,
+}) {
+  const value = row[xKey] || 0;
+  const label = row[yKey] || '';
+  const category = normalizeKey(row[colorKey]);
+  const dotCategory = normalizeKey(row[dotColorKey]);
+  const barColorEntry = category ? barColorMap.get(category) : null;
+  const dotColorEntry = dotCategory ? dotColorMap.get(dotCategory) : null;
+  const barColorClass = barColorEntry
+    ? `radf-chart-color-${barColorEntry.index}`
+    : 'radf-chart-color-0';
+  const dotColorClass = dotColorEntry ? `radf-chart-color-${dotColorEntry.index}` : barColorClass;
+
+  const markerEnabled = markerConfig?.enabled !== false;
+  const percent = showPercent && percentKey ? row[percentKey] : null;
+
+  const barWidthPercent = maxValue > 0 ? (value / maxValue) * 100 : 0;
+  const markerPercent =
+    markerEnabled && markerValue != null && maxValue > 0 ? (markerValue / maxValue) * 100 : null;
+
+  const exceedsThreshold = outlierBound != null && value > outlierBound;
+
+  const handleMouseEnter = useCallback(
+    (e) => {
+      const rect = e.currentTarget.getBoundingClientRect();
+      onMouseEnter?.(row, {
+        x: rect.left + rect.width / 2,
+        y: rect.top,
+      });
+    },
+    [row, onMouseEnter]
+  );
+
+  return (
+    <div
+      className="radf-bullet__row"
+      onClick={() => onClick?.(row)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={onMouseLeave}
+      role="button"
+      tabIndex={0}
+    >
+      {/* Name column */}
+      <div className="radf-bullet__name-cell">
+        {showAnnotations ? (
+          <span className={['radf-bullet__dot', dotColorClass].join(' ')} />
+        ) : null}
+        <span className="radf-bullet__name">{label}</span>
+      </div>
+
+      {/* Bar column */}
+      <div className="radf-bullet__bar-cell">
+        <div className="radf-bullet__track">
+          {/* Background track */}
+          <div className="radf-bullet__track-bg" />
+
+          {/* Value bar */}
+          <div
+            className={[
+              'radf-bullet__bar',
+              barColorClass,
+              exceedsThreshold ? 'radf-bullet__bar--exceeded' : '',
+            ]
+              .filter(Boolean)
+              .join(' ')}
+            style={{
+              width: `${barWidthPercent}%`,
+            }}
+          >
+            {/* Value label ON the bar */}
+            <span className="radf-bullet__value-label">
+              {value.toLocaleString(undefined, { maximumFractionDigits: 1 })}h
+            </span>
+          </div>
+
+          {/* Marker line */}
+          {markerPercent != null && markerEnabled && (
+            <div
+              className="radf-bullet__threshold"
+              style={{
+                left: `${markerPercent}%`,
+                background: markerConfig.color || 'var(--radf-border-divider)',
+              }}
+            />
+          )}
+        </div>
+      </div>
+
+      {/* Percent column */}
+      {showPercent && (
+        <div className="radf-bullet__pct-cell">
+          {percent != null ? `${percent.toFixed(1)}%` : '—'}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
  * Render a bullet chart table with per-row marker lines.
  */
-function BulletChart({
-  data = [],
-  encodings = {},
-  options = {},
-  handlers = {},
-  hiddenKeys,
-}) {
-  const isHorizontal = options.orientation !== 'vertical';
+function BulletChart({ data = [], encodings = {}, options = {}, handlers = {}, hiddenKeys }) {
+  const [tooltip, setTooltip] = useState({
+    visible: false,
+    row: null,
+    position: null,
+  });
+
+  const isHorizontal = options.orientation === 'horizontal';
+  const markerConfig = options.markerLines || options.thresholdMarkers || {};
+  const markerEnabled = markerConfig?.enabled !== false;
+  const outlierConfig = options.outlierRule || {};
   const colorKey = encodings.color || options.colorBy;
   const leftAnnotations = options.leftAnnotations || {};
   const leftAnnotationKey = leftAnnotations.colorBy || colorKey;
@@ -269,14 +394,14 @@ function BulletChart({
   const xKey = isHorizontal ? encodings.x : encodings.y;
   const yKey = isHorizontal ? encodings.y : encodings.x;
 
+  const seriesIndices = useMemo(() => resolveNonRedSeriesIndices(), []);
+
   const filteredData = useMemo(() => {
     if (!hiddenKeys?.size || !colorKey) {
       return data;
     }
     return data.filter((row) => !hiddenKeys.has(row[colorKey]));
   }, [data, hiddenKeys, colorKey]);
-
-  const seriesIndices = useMemo(() => resolveNonRedSeriesIndices(), []);
 
   const barColorMap = useMemo(
     () => buildCategoryColorMap(filteredData, colorKey, seriesIndices),
@@ -309,15 +434,11 @@ function BulletChart({
       return {
         key: cat,
         label: cat.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
-        color: entry?.color || getSeriesVar(0),
         index: entry?.index ?? 0,
       };
     });
   }, [filteredData, colorKey, barColorMap]);
 
-  const markerConfig = options.markerLines || options.thresholdMarkers || {};
-  const markerEnabled = markerConfig?.enabled !== false;
-  const outlierConfig = options.outlierRule || {};
   const outlierValueKey =
     outlierConfig.valueKey ||
     options.iqrValueKey ||
@@ -368,7 +489,7 @@ function BulletChart({
       const group = normalizeKey(colorKey ? row[colorKey] : 'all');
       return markerAverages.get(group) ?? null;
     },
-    [markerValueKey, markerAverages, colorKey, markerEnabled]
+    [markerEnabled, markerValueKey, markerAverages, colorKey]
   );
 
   const getOutlierBound = useCallback(
@@ -392,152 +513,46 @@ function BulletChart({
   );
 
   const maxValue = useMemo(() => {
-    if (!filteredData.length) {
-      return 100;
-    }
+    if (!filteredData.length) return 100;
     let max = 0;
     filteredData.forEach((row) => {
-      const value = row?.[xKey] || 0;
+      const val = row[xKey] || 0;
       const markerValue = getMarkerValue(row) || 0;
-      max = Math.max(max, value, markerValue);
+      max = Math.max(max, val, markerValue);
     });
     return max * 1.1;
   }, [filteredData, xKey, getMarkerValue]);
 
-  const ticks = useMemo(() => {
-    if (maxValue <= 0) {
-      return [0];
-    }
-    const step = Math.ceil(maxValue / 4 / 50) * 50 || Math.ceil(maxValue / 4);
-    const values = [];
+  // X-axis tick values
+  const xTicks = useMemo(() => {
+    const step = Math.ceil(maxValue / 4 / 50) * 50;
+    const ticks = [];
     for (let i = 0; i <= maxValue; i += step) {
-      values.push(i);
+      ticks.push(i);
     }
-    return values;
+    return ticks;
   }, [maxValue]);
 
-  const hasExceeded = useMemo(() => filteredData.some((row) => getExceeds(row)), [
-    filteredData,
-    getExceeds,
-  ]);
-
-  const barSize = options.barSize || 18;
-  const chartHeight = Math.max(220, filteredData.length * 30 + 60);
-  const markerLabel = markerConfig.label || 'Dept average';
-  const markerColor = markerConfig.color || 'var(--radf-border-divider)';
-
-  const renderYAxisTick = useCallback(
-    (props) => {
-      const { x, y, payload } = props;
-      const row = filteredData[payload.index];
-      const annotationValue = row ? normalizeKey(row[leftAnnotationKey]) : null;
-      const colorEntry = annotationValue ? annotationColorMap.get(annotationValue) : null;
-      const dotFill = colorEntry?.color || getSeriesVar(0);
-
-      return (
-        <g transform={`translate(${x},${y})`} className="radf-bullet__axis-tick">
-          {showAnnotations ? (
-            <circle
-              className="radf-bullet__axis-dot"
-              cx={-12}
-              cy={0}
-              r={5}
-              fill={dotFill}
-            />
-          ) : null}
-          <text x={0} y={4} className="radf-bullet__axis-text">
-            {payload.value}
-          </text>
-        </g>
-      );
-    },
-    [filteredData, leftAnnotationKey, annotationColorMap, showAnnotations]
+  // Check if any rows exceed peer bounds
+  const hasExceededThreshold = useMemo(
+    () => filteredData.some((row) => getExceeds(row)),
+    [filteredData, getExceeds]
   );
 
-  const renderValueLabel = useCallback((props) => {
-    const { x, y, width, height, value } = props;
-    if (!Number.isFinite(value)) {
-      return null;
-    }
-    const label = `${value.toLocaleString(undefined, { maximumFractionDigits: 1 })}h`;
-    const labelX = x + Math.max(width - 6, 6);
-    return (
-      <text
-        x={labelX}
-        y={y + height / 2 + 4}
-        textAnchor="end"
-        className="radf-bullet__value-label"
-      >
-        {label}
-      </text>
-    );
+  const handleMouseEnter = useCallback((row, { x, y }) => {
+    setTooltip({
+      visible: true,
+      row,
+      position: { x, y },
+    });
   }, []);
 
-  const renderPercentLabel = useCallback(
-    (props) => {
-      if (!showPercent || !percentKey) {
-        return null;
-      }
-      const { x, y, width, height, payload } = props;
-      const percent = payload?.[percentKey];
-      if (!Number.isFinite(percent)) {
-        return null;
-      }
-      return (
-        <text
-          x={x + width + 10}
-          y={y + height / 2 + 4}
-          className="radf-bullet__percent-label"
-        >
-          {percent.toFixed(1)}%
-        </text>
-      );
-    },
-    [showPercent, percentKey]
-  );
+  const handleMouseLeave = useCallback(() => {
+    setTooltip((prev) => ({ ...prev, visible: false }));
+  }, []);
 
-  const renderMarkerLines = useCallback(
-    (props) => {
-      if (!markerEnabled) {
-        return null;
-      }
-      const { xAxisMap, yAxisMap } = props;
-      const xAxis = Object.values(xAxisMap || {})[0];
-      const yAxis = Object.values(yAxisMap || {})[0];
-      if (!xAxis?.scale || !yAxis?.scale) {
-        return null;
-      }
-      const xScale = xAxis.scale;
-      const yScale = yAxis.scale;
-      const bandwidth = yScale.bandwidth ? yScale.bandwidth() : 0;
-
-      return (
-        <g className="radf-bullet__marker-layer">
-          {filteredData.map((row, index) => {
-            const markerValue = getMarkerValue(row);
-            if (!Number.isFinite(markerValue)) {
-              return null;
-            }
-            const yPosition = yScale(row[yKey]) + (bandwidth - barSize) / 2;
-            const xPosition = xScale(markerValue);
-            return (
-              <line
-                key={`marker-${index}`}
-                className="radf-bullet__marker-line"
-                x1={xPosition}
-                x2={xPosition}
-                y1={yPosition - 2}
-                y2={yPosition + barSize + 2}
-                stroke={markerColor}
-              />
-            );
-          })}
-        </g>
-      );
-    },
-    [filteredData, getMarkerValue, yKey, barSize, markerColor, markerEnabled]
-  );
-
+  const markerLabel = markerConfig.label || 'Dept average';
+  const markerColor = markerConfig.color || 'var(--radf-border-divider)';
   const subtitle =
     options.subtitle ||
     options.chartSubtitle ||
@@ -546,82 +561,81 @@ function BulletChart({
   return (
     <ChartContainer subtitle={subtitle}>
       <div className="radf-bullet">
+        {/* Header row */}
         <div className="radf-bullet__header">
-          <span className="radf-bullet__axis-label">OT Hours</span>
-          {showPercent ? (
-            <span className="radf-bullet__pct-header">% of Total</span>
-          ) : null}
+          <div className="radf-bullet__name-cell" />
+          <div className="radf-bullet__bar-cell">
+            <span className="radf-bullet__axis-label">OT Hours</span>
+          </div>
+          {showPercent && (
+            <div className="radf-bullet__pct-cell radf-bullet__pct-header">% of Total</div>
+          )}
         </div>
 
-        <div className="radf-bullet__chart">
-          <ResponsiveContainer width="100%" height={chartHeight}>
-            <BarChart
-              data={filteredData}
-              layout="vertical"
-              margin={{ top: 8, right: showPercent ? 48 : 16, left: 32, bottom: 8 }}
-              barCategoryGap="25%"
-            >
-              <CartesianGrid stroke="var(--radf-chart-grid)" strokeDasharray="3 3" />
-              <XAxis
-                type="number"
-                dataKey={xKey}
-                ticks={ticks}
-                tick={{ fill: 'var(--radf-text-muted)', fontSize: 12 }}
-                axisLine={{ stroke: 'var(--radf-border-divider)' }}
-              />
-              <YAxis
-                type="category"
-                dataKey={yKey}
-                tick={renderYAxisTick}
-                axisLine={{ stroke: 'var(--radf-border-divider)' }}
-                width={180}
-              />
-              <Tooltip
-                cursor={{ fill: 'var(--radf-accent-primary-soft)' }}
-                content={(
-                  <BulletChartTooltip
-                    nameKey={yKey}
-                    valueKey={xKey}
-                    colorKey={colorKey}
-                    percentKey={percentKey}
-                    colorMap={barColorMap}
-                    markerLabel={markerLabel}
-                    getMarkerValue={getMarkerValue}
-                    getExceeds={getExceeds}
+        {/* Data rows */}
+        <div className="radf-bullet__body">
+          {/* Vertical grid lines container */}
+          <div className="radf-bullet__grid-lines">
+            <div className="radf-bullet__name-cell" />
+            <div className="radf-bullet__bar-cell">
+              <div className="radf-bullet__grid-container">
+                {xTicks.map((tick) => (
+                  <div
+                    key={tick}
+                    className="radf-bullet__grid-line"
+                    style={{ left: `${(tick / maxValue) * 100}%` }}
                   />
-                )}
-              />
-              <Bar
-                dataKey={xKey}
-                barSize={barSize}
-                radius={[4, 4, 4, 4]}
-                background={{ fill: 'var(--radf-surface-well)', radius: 4 }}
-                onClick={handlers.onClick}
-              >
-                {filteredData.map((row, index) => {
-                  const categoryValue = normalizeKey(row[colorKey]);
-                  const entry = categoryValue ? barColorMap.get(categoryValue) : null;
-                  const fill = entry?.color || getSeriesVar(0);
-                  const exceeded = getExceeds(row);
-                  return (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={fill}
-                      className={exceeded ? 'radf-bullet__bar--exceeded' : undefined}
-                      stroke={exceeded ? 'var(--radf-accent-danger)' : undefined}
-                      strokeWidth={exceeded ? 2 : 0}
-                    />
-                  );
-                })}
-                <LabelList content={renderValueLabel} />
-                {showPercent ? <LabelList content={renderPercentLabel} /> : null}
-              </Bar>
-              <Customized component={renderMarkerLines} />
-            </BarChart>
-          </ResponsiveContainer>
+                ))}
+              </div>
+            </div>
+            {showPercent && <div className="radf-bullet__pct-cell" />}
+          </div>
+
+          {filteredData.map((row, index) => (
+            <BulletRow
+              key={row[yKey] || index}
+              row={row}
+              xKey={xKey}
+              yKey={yKey}
+              colorKey={colorKey}
+              dotColorKey={leftAnnotationKey}
+              barColorMap={barColorMap}
+              dotColorMap={annotationColorMap}
+              showAnnotations={showAnnotations}
+              maxValue={maxValue}
+              markerValue={getMarkerValue(row)}
+              markerConfig={markerConfig}
+              outlierBound={getOutlierBound(row)}
+              percentKey={percentKey}
+              showPercent={showPercent}
+              onClick={handlers.onClick}
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+            />
+          ))}
         </div>
 
-        {(legendItems.length > 0 || markerEnabled || hasExceeded) && (
+        {/* X-axis */}
+        <div className="radf-bullet__axis">
+          <div className="radf-bullet__name-cell" />
+          <div className="radf-bullet__bar-cell">
+            <div className="radf-bullet__axis-ticks">
+              {xTicks.map((tick) => (
+                <span
+                  key={tick}
+                  className="radf-bullet__tick"
+                  style={{ left: `${(tick / maxValue) * 100}%` }}
+                >
+                  {tick.toLocaleString()}
+                </span>
+              ))}
+            </div>
+          </div>
+          {showPercent && <div className="radf-bullet__pct-cell" />}
+        </div>
+
+        {/* Legend */}
+        {(legendItems.length > 0 || markerEnabled || hasExceededThreshold) && (
           <div className="radf-bullet__legend">
             <ul className="radf-bullet__legend-list">
               {legendItems.map((item) => {
@@ -654,17 +668,16 @@ function BulletChart({
               })}
               {markerEnabled && (
                 <li className="radf-bullet__legend-item radf-bullet__legend-item--threshold">
-                  <svg
+                  <span
                     className="radf-bullet__legend-line"
-                    viewBox="0 0 4 16"
-                    aria-hidden="true"
-                  >
-                    <line x1="2" x2="2" y1="0" y2="16" stroke={markerColor} />
-                  </svg>
+                    style={{
+                      background: markerColor,
+                    }}
+                  />
                   <span className="radf-bullet__legend-label">{markerLabel}</span>
                 </li>
               )}
-              {hasExceeded && (
+              {hasExceededThreshold && (
                 <li className="radf-bullet__legend-item radf-bullet__legend-item--exceeded">
                   <span className="radf-bullet__legend-exceeded-swatch" />
                   <span className="radf-bullet__legend-label">Higher than most peers</span>
@@ -673,6 +686,21 @@ function BulletChart({
             </ul>
           </div>
         )}
+
+        {/* Custom Tooltip */}
+        <BulletChartTooltip
+          row={tooltip.row}
+          nameKey={yKey}
+          valueKey={xKey}
+          colorKey={colorKey}
+          percentKey={percentKey}
+          markerLabel={markerLabel}
+          colorMap={barColorMap}
+          position={tooltip.position}
+          visible={tooltip.visible}
+          getMarkerValue={getMarkerValue}
+          getExceeds={getExceeds}
+        />
       </div>
     </ChartContainer>
   );

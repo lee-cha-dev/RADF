@@ -1,5 +1,7 @@
 /**
- * Bullet chart styles for Recharts-based bullet chart.
+ * Bullet chart table styles
+ * Three-column layout: names | bars with marker lines | percent
+ * Includes vertical grid lines and exceeded peer legend
  */
 
 .radf-bullet {
@@ -10,12 +12,18 @@
     font-family: var(--radf-font-family);
 }
 
+/* Header */
 .radf-bullet__header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: var(--radf-space-2) var(--radf-space-1) var(--radf-space-2) var(--radf-space-2);
+    display: grid;
+    grid-template-columns: minmax(140px, 2fr) 5fr minmax(80px, 1fr);
+    gap: var(--radf-space-2);
+    padding: var(--radf-space-2) 0;
     border-bottom: 1px solid var(--radf-border-subtle);
+}
+
+.radf-bullet__header .radf-bullet__bar-cell {
+    display: flex;
+    justify-content: center;
 }
 
 .radf-bullet__axis-label {
@@ -32,43 +40,185 @@
     color: var(--radf-text-muted);
     text-transform: uppercase;
     letter-spacing: 0.03em;
+    text-align: center;
+    line-height: 1.2;
 }
 
-.radf-bullet__chart {
+/* Body */
+.radf-bullet__body {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Vertical Grid Lines */
+.radf-bullet__grid-lines {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: grid;
+    grid-template-columns: minmax(140px, 2fr) 5fr minmax(80px, 1fr);
+    gap: var(--radf-space-2);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.radf-bullet__grid-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.radf-bullet__grid-line {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--radf-chart-grid, rgba(148, 163, 184, 0.2));
+    transform: translateX(-50%);
+}
+
+.radf-bullet__grid-line:first-child {
+    transform: translateX(0);
+}
+
+/* Row */
+.radf-bullet__row {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(140px, 2fr) 5fr minmax(80px, 1fr);
+    gap: var(--radf-space-2);
+    align-items: center;
     padding: var(--radf-space-2) 0;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    z-index: 1;
 }
 
-.radf-bullet__axis-tick text,
-.radf-bullet__axis-text {
-    font-size: 0.8rem;
-    fill: var(--radf-text-primary);
+.radf-bullet__row:hover {
+    background: var(--radf-accent-primary-soft);
+}
+
+.radf-bullet__row:focus-visible {
+    outline: var(--radf-focus-ring-size) solid var(--radf-border-focus);
+    outline-offset: -2px;
+}
+
+/* Name cell */
+.radf-bullet__name-cell {
+    display: flex;
+    align-items: center;
+    gap: var(--radf-space-2);
+    padding-right: var(--radf-space-2);
+}
+
+.radf-bullet__dot {
+    flex-shrink: 0;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.radf-bullet__name {
+    font-size: 0.85rem;
     font-weight: var(--radf-font-weight-semibold);
+    color: var(--radf-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.radf-bullet__axis-dot {
-    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+/* Bar cell */
+.radf-bullet__bar-cell {
+    position: relative;
+    height: 28px;
 }
 
-.radf-bullet__value-label {
-    font-size: 0.7rem;
-    font-weight: var(--radf-font-weight-bold);
-    fill: var(--radf-text-inverse, #fff);
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+.radf-bullet__track {
+    position: relative;
+    width: 100%;
+    height: 100%;
 }
 
-.radf-bullet__percent-label {
-    font-size: 0.8rem;
-    fill: var(--radf-text-secondary);
-    font-weight: 500;
+.radf-bullet__track-bg {
+    position: absolute;
+    inset: 0;
+    background: var(--radf-surface-well, rgba(128, 128, 128, 0.15));
+    border-radius: 2px;
+}
+
+.radf-bullet__bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    min-width: 2px;
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: var(--radf-space-2);
+    transition: width 0.4s ease-out;
 }
 
 .radf-bullet__bar--exceeded {
-    stroke: var(--radf-accent-danger);
-    stroke-width: 2px;
+    box-shadow: inset 0 0 0 2px var(--radf-accent-danger);
 }
 
-.radf-bullet__marker-line {
-    stroke-width: 2px;
+.radf-bullet__value-label {
+    font-size: 0.75rem;
+    font-weight: var(--radf-font-weight-bold);
+    color: var(--radf-text-inverse, #fff);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    white-space: nowrap;
+}
+
+/* Marker line - vertical line on the bar */
+.radf-bullet__threshold {
+    position: absolute;
+    top: -2px;
+    bottom: -2px;
+    width: 4px;
+    border-radius: 2px;
+    transform: translateX(-50%);
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+    z-index: 2;
+}
+
+/* Percent cell */
+.radf-bullet__pct-cell {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--radf-text-secondary);
+    text-align: center;
+}
+
+/* X-axis */
+.radf-bullet__axis {
+    display: grid;
+    grid-template-columns: minmax(140px, 2fr) 5fr minmax(80px, 1fr);
+    gap: var(--radf-space-2);
+    padding: var(--radf-space-2) 0;
+    border-top: 1px solid var(--radf-border-subtle);
+}
+
+.radf-bullet__axis-ticks {
+    position: relative;
+    height: 20px;
+}
+
+.radf-bullet__tick {
+    position: absolute;
+    transform: translateX(-50%);
+    font-size: 0.7rem;
+    color: var(--radf-text-muted);
+}
+
+.radf-bullet__tick:first-child {
+    transform: translateX(0);
 }
 
 /* Legend */
@@ -140,10 +290,13 @@
 }
 
 .radf-bullet__legend-line {
-    width: 6px;
+    display: inline-block;
+    width: 4px;
     height: 16px;
+    border-radius: 2px;
 }
 
+/* Exceeded Peers Legend Item */
 .radf-bullet__legend-item--exceeded {
     display: inline-flex;
     align-items: center;
@@ -164,12 +317,39 @@
     flex-shrink: 0;
 }
 
+/* Responsive: collapse to simpler layout on small screens */
 @media (max-width: 600px) {
-    .radf-bullet__header {
-        padding-left: var(--radf-space-1);
+    .radf-bullet__header,
+    .radf-bullet__row,
+    .radf-bullet__axis,
+    .radf-bullet__grid-lines {
+        grid-template-columns: minmax(100px, 1.5fr) 4fr minmax(60px, 1fr);
+    }
+
+    .radf-bullet__name {
+        font-size: 0.75rem;
+    }
+
+    .radf-bullet__value-label {
+        font-size: 0.65rem;
+    }
+
+    .radf-bullet__pct-cell {
+        font-size: 0.75rem;
     }
 
     .radf-bullet__legend-list {
         gap: var(--radf-space-2);
     }
+}
+
+/* Animation */
+@keyframes radf-bullet-bar-enter {
+    from {
+        width: 0;
+    }
+}
+
+.radf-bullet__bar {
+    animation: radf-bullet-bar-enter 0.5s ease-out;
 }
