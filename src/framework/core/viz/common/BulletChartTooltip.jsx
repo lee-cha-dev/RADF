@@ -4,7 +4,6 @@
  * Displays a comprehensive overview of the hovered row.
  */
 import React from 'react';
-import './bulletChartTooltip.css';
 
 /**
  * @typedef {Object} BulletChartTooltipProps
