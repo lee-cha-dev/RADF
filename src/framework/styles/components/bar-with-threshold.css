@@ -1,65 +1,215 @@
 /**
- * BarWithThresholdPanel styles
- * Supports horizontal/vertical orientation, threshold markers, department legends
+ * Bullet chart table styles
+ * Three-column layout: names | bars with threshold markers | percent
  */
 
-.radf-bar-threshold {
+.radf-bullet {
     display: flex;
     flex-direction: column;
-    gap: var(--radf-space-4);
     width: 100%;
-}
-
-.radf-bar-threshold__cell {
-    transition: fill-opacity 0.2s ease, stroke 0.2s ease;
-    cursor: pointer;
-}
-
-.radf-bar-threshold__cell:hover {
-    fill-opacity: 1;
-}
-
-.radf-bar-threshold__dot {
-    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15));
-    transition: r 0.2s ease;
-}
-
-.radf-bar-threshold__tick-label {
     font-family: var(--radf-font-family);
-    transition: fill 0.2s ease;
 }
 
-/* Legend container */
-.radf-bar-threshold__legend {
-    padding: var(--radf-space-3) 0;
-    border-top: 1px solid var(--radf-border-subtle, var(--radf-color-border));
+/* Header */
+.radf-bullet__header {
+    display: grid;
+    grid-template-columns: minmax(140px, 2fr) 5fr minmax(80px, 1fr);
+    gap: var(--radf-space-2);
+    padding: var(--radf-space-2) 0;
+    border-bottom: 1px solid var(--radf-border-subtle);
 }
 
-.radf-bar-threshold__legend-list {
+.radf-bullet__header .radf-bullet__bar-cell {
+    display: flex;
+    justify-content: center;
+}
+
+.radf-bullet__axis-label {
+    font-size: 0.75rem;
+    font-weight: var(--radf-font-weight-semibold);
+    color: var(--radf-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.radf-bullet__pct-header {
+    font-size: 0.7rem;
+    font-weight: var(--radf-font-weight-semibold);
+    color: var(--radf-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    text-align: center;
+    line-height: 1.2;
+}
+
+/* Body */
+.radf-bullet__body {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Row */
+.radf-bullet__row {
+    display: grid;
+    grid-template-columns: minmax(140px, 2fr) 5fr minmax(80px, 1fr);
+    gap: var(--radf-space-2);
+    align-items: center;
+    padding: var(--radf-space-2) 0;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.radf-bullet__row:hover {
+    background: var(--radf-accent-primary-soft);
+}
+
+.radf-bullet__row:focus-visible {
+    outline: var(--radf-focus-ring-size) solid var(--radf-border-focus);
+    outline-offset: -2px;
+}
+
+/* Name cell */
+.radf-bullet__name-cell {
+    display: flex;
+    align-items: center;
+    gap: var(--radf-space-2);
+    padding-right: var(--radf-space-2);
+}
+
+.radf-bullet__dot {
+    flex-shrink: 0;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.radf-bullet__name {
+    font-size: 0.85rem;
+    font-weight: var(--radf-font-weight-semibold);
+    color: var(--radf-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Bar cell */
+.radf-bullet__bar-cell {
+    position: relative;
+    height: 28px;
+}
+
+.radf-bullet__track {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.radf-bullet__track-bg {
+    position: absolute;
+    inset: 0;
+    background: var(--radf-surface-well, rgba(128, 128, 128, 0.15));
+    border-radius: 2px;
+}
+
+.radf-bullet__bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    min-width: 2px;
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: var(--radf-space-2);
+    transition: width 0.4s ease-out;
+}
+
+.radf-bullet__bar--exceeded {
+    box-shadow: inset 0 0 0 2px var(--radf-accent-danger);
+}
+
+.radf-bullet__value-label {
+    font-size: 0.75rem;
+    font-weight: var(--radf-font-weight-bold);
+    color: var(--radf-text-inverse, #fff);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    white-space: nowrap;
+}
+
+/* Threshold marker - vertical line on the bar */
+.radf-bullet__threshold {
+    position: absolute;
+    top: -2px;
+    bottom: -2px;
+    width: 4px;
+    border-radius: 2px;
+    transform: translateX(-50%);
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+    z-index: 2;
+}
+
+/* Percent cell */
+.radf-bullet__pct-cell {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--radf-text-secondary);
+    text-align: center;
+}
+
+/* X-axis */
+.radf-bullet__axis {
+    display: grid;
+    grid-template-columns: minmax(140px, 2fr) 5fr minmax(80px, 1fr);
+    gap: var(--radf-space-2);
+    padding: var(--radf-space-2) 0;
+    border-top: 1px solid var(--radf-border-subtle);
+}
+
+.radf-bullet__axis-ticks {
+    position: relative;
+    height: 20px;
+}
+
+.radf-bullet__tick {
+    position: absolute;
+    transform: translateX(-50%);
+    font-size: 0.7rem;
+    color: var(--radf-text-muted);
+}
+
+.radf-bullet__tick:first-child {
+    transform: translateX(0);
+}
+
+/* Legend */
+.radf-bullet__legend {
+    padding: var(--radf-space-4) 0 var(--radf-space-2);
+    border-top: 1px solid var(--radf-border-subtle);
+    margin-top: var(--radf-space-2);
+}
+
+.radf-bullet__legend-list {
     list-style: none;
     display: flex;
     flex-wrap: wrap;
     gap: var(--radf-space-4);
     padding: 0;
     margin: 0;
-    justify-content: flex-start;
-    align-items: center;
+    justify-content: center;
 }
 
-.radf-bar-threshold__legend-item {
+.radf-bullet__legend-item {
     display: inline-flex;
     align-items: center;
 }
 
-.radf-bar-threshold__legend-item--hidden {
+.radf-bullet__legend-item--hidden {
     opacity: 0.4;
 }
 
-.radf-bar-threshold__legend-item--hidden .radf-bar-threshold__legend-swatch {
-    background: var(--radf-text-muted) !important;
-}
-
-.radf-bar-threshold__legend-button {
+.radf-bullet__legend-button {
     display: inline-flex;
     align-items: center;
     gap: var(--radf-space-2);
@@ -70,157 +220,76 @@
     font: inherit;
     cursor: pointer;
     border-radius: var(--radf-radius-sm);
-    transition: background 0.15s ease, transform 0.15s ease;
+    transition: background 0.15s ease;
 }
 
-.radf-bar-threshold__legend-button:hover {
+.radf-bullet__legend-button:hover {
     background: var(--radf-accent-primary-soft);
-    transform: translateY(-1px);
 }
 
-.radf-bar-threshold__legend-button:focus-visible {
-    outline: var(--radf-focus-ring-size) solid var(--radf-border-focus);
-    outline-offset: var(--radf-focus-ring-offset);
-}
-
-.radf-bar-threshold__legend-swatch {
+.radf-bullet__legend-swatch {
     display: inline-block;
-    width: 12px;
-    height: 12px;
+    width: 14px;
+    height: 14px;
     border-radius: 3px;
     flex-shrink: 0;
-    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
 }
 
-.radf-bar-threshold__legend-label {
+.radf-bullet__legend-label {
     font-size: 0.8rem;
     font-weight: 500;
-    color: var(--radf-text-secondary, var(--radf-color-text));
-    white-space: nowrap;
+    color: var(--radf-text-secondary);
 }
 
-/* Threshold line legend item */
-.radf-bar-threshold__legend-item--threshold {
+.radf-bullet__legend-item--threshold {
     display: inline-flex;
     align-items: center;
     gap: var(--radf-space-2);
     padding: var(--radf-space-1) var(--radf-space-2);
-    margin-left: var(--radf-space-2);
+    margin-left: var(--radf-space-3);
     border-left: 1px solid var(--radf-border-subtle);
     padding-left: var(--radf-space-4);
 }
 
-.radf-bar-threshold__legend-line {
+.radf-bullet__legend-line {
     display: inline-block;
-    width: 20px;
-    height: 3px;
+    width: 4px;
+    height: 16px;
     border-radius: 2px;
-    background: var(--radf-accent-warning);
-    background-image: repeating-linear-gradient(
-            90deg,
-            transparent,
-            transparent 4px,
-            var(--radf-surface-bg) 4px,
-            var(--radf-surface-bg) 6px
-    );
 }
 
-/* Tooltip enhancements */
-.radf-chart-tooltip__item--department {
-    margin-top: var(--radf-space-2);
-    padding-top: var(--radf-space-2);
-    border-top: 1px solid var(--radf-border-subtle);
-}
-
-/* Responsive adjustments */
-@media (max-width: 640px) {
-    .radf-bar-threshold__legend-list {
-        gap: var(--radf-space-2);
+/* Responsive: collapse to simpler layout on small screens */
+@media (max-width: 600px) {
+    .radf-bullet__header,
+    .radf-bullet__row,
+    .radf-bullet__axis {
+        grid-template-columns: minmax(100px, 1.5fr) 4fr minmax(60px, 1fr);
     }
 
-    .radf-bar-threshold__legend-button {
-        padding: var(--radf-space-1);
-    }
-
-    .radf-bar-threshold__legend-label {
+    .radf-bullet__name {
         font-size: 0.75rem;
     }
 
-    .radf-bar-threshold__legend-item--threshold {
-        margin-left: 0;
-        border-left: none;
-        padding-left: var(--radf-space-2);
-        width: 100%;
-        margin-top: var(--radf-space-2);
-        padding-top: var(--radf-space-2);
-        border-top: 1px solid var(--radf-border-subtle);
+    .radf-bullet__value-label {
+        font-size: 0.65rem;
+    }
+
+    .radf-bullet__pct-cell {
+        font-size: 0.75rem;
+    }
+
+    .radf-bullet__legend-list {
+        gap: var(--radf-space-2);
     }
 }
 
-/* Large container enhancements */
-@container (min-width: 800px) {
-    .radf-bar-threshold__legend-list {
-        gap: var(--radf-space-5);
-    }
-
-    .radf-bar-threshold__legend-swatch {
-        width: 14px;
-        height: 14px;
-    }
-
-    .radf-bar-threshold__legend-label {
-        font-size: 0.85rem;
-    }
-}
-
-/* Animation for bars */
-@keyframes radf-bar-enter {
+/* Animation */
+@keyframes radf-bullet-bar-enter {
     from {
-        opacity: 0;
-        transform: scaleX(0);
-        transform-origin: left center;
-    }
-    to {
-        opacity: 1;
-        transform: scaleX(1);
+        width: 0;
     }
 }
 
-.radf-bar-threshold .recharts-bar-rectangle {
-    animation: radf-bar-enter 0.4s ease-out backwards;
-}
-
-.radf-bar-threshold .recharts-bar-rectangle:nth-child(1) { animation-delay: 0ms; }
-.radf-bar-threshold .recharts-bar-rectangle:nth-child(2) { animation-delay: 30ms; }
-.radf-bar-threshold .recharts-bar-rectangle:nth-child(3) { animation-delay: 60ms; }
-.radf-bar-threshold .recharts-bar-rectangle:nth-child(4) { animation-delay: 90ms; }
-.radf-bar-threshold .recharts-bar-rectangle:nth-child(5) { animation-delay: 120ms; }
-.radf-bar-threshold .recharts-bar-rectangle:nth-child(6) { animation-delay: 150ms; }
-.radf-bar-threshold .recharts-bar-rectangle:nth-child(7) { animation-delay: 180ms; }
-.radf-bar-threshold .recharts-bar-rectangle:nth-child(8) { animation-delay: 210ms; }
-.radf-bar-threshold .recharts-bar-rectangle:nth-child(9) { animation-delay: 240ms; }
-.radf-bar-threshold .recharts-bar-rectangle:nth-child(10) { animation-delay: 270ms; }
-.radf-bar-threshold .recharts-bar-rectangle:nth-child(n+11) { animation-delay: 300ms; }
-
-/* Reference line pulse for threshold */
-.radf-bar-threshold .recharts-reference-line line {
-    stroke-linecap: round;
-}
-
-/* Exceeded threshold highlight */
-.radf-bar-threshold__exceeded {
-    position: relative;
-}
-
-.radf-bar-threshold__exceeded::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 8px;
-    height: 8px;
-    background: var(--radf-accent-danger);
-    border-radius: 50%;
-    transform: translate(50%, -50%);
-    box-shadow: 0 0 0 2px var(--radf-surface-bg);
+.radf-bullet__bar {
+    animation: radf-bullet-bar-enter 0.5s ease-out;
 }
