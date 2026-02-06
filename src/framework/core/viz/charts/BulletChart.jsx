@@ -323,9 +323,15 @@ function BulletRow({
       {/* Name column */}
       <div className="radf-bullet__name-cell">
         {showAnnotations ? (
-          <span className={['radf-bullet__dot', dotColorClass].join(' ')} />
+          <span
+            className={[
+              'radf-bullet__dot',
+              dotColorClass,
+              'slide-from-left-strong'
+            ].join(' ')}
+          />
         ) : null}
-        <span className="radf-bullet__name">{label}</span>
+        <span className="radf-bullet__name slide-from-left">{label}</span>
       </div>
 
       {/* Bar column */}
@@ -340,6 +346,7 @@ function BulletRow({
               'radf-bullet__bar',
               barColorClass,
               exceedsThreshold ? 'radf-bullet__bar--exceeded' : '',
+              'expand-in',
             ]
               .filter(Boolean)
               .join(' ')}
@@ -356,7 +363,7 @@ function BulletRow({
           {/* Marker line */}
           {markerPercent != null && markerEnabled && (
             <div
-              className="radf-bullet__marker"
+              className="radf-bullet__marker fade-in"
               style={{
                 left: `${markerPercent}%`,
                 background: markerColor || 'var(--radf-text-muted)',
@@ -368,7 +375,7 @@ function BulletRow({
 
       {/* Percent column */}
       {showPercent && (
-        <div className="radf-bullet__pct-cell">
+        <div className="radf-bullet__pct-cell slide-from-right">
           {percent != null ? `${percent.toFixed(1)}%` : '—'}
         </div>
       )}
@@ -702,9 +709,12 @@ function BulletChart({ data = [], encodings = {}, options = {}, handlers = {}, h
                         className={[
                           'radf-bullet__legend-swatch',
                           `radf-chart-color-${item.index}`,
+                          'slide-from-bottom',
                         ].join(' ')}
                       />
-                      <span className="radf-bullet__legend-label">{item.label}</span>
+                      <span className="radf-bullet__legend-label slide-from-bottom">
+                        {item.label}
+                      </span>
                     </button>
                   </li>
                 );
@@ -712,18 +722,20 @@ function BulletChart({ data = [], encodings = {}, options = {}, handlers = {}, h
               {markerEnabled && (
                 <li className="radf-bullet__legend-item radf-bullet__legend-item--marker">
                   <span
-                    className="radf-bullet__legend-line"
+                    className="radf-bullet__legend-line slide-from-bottom"
                     style={{
                       background: markerColor,
                     }}
                   />
-                  <span className="radf-bullet__legend-label">{markerLabel}</span>
+                  <span className="radf-bullet__legend-label slide-from-bottom">{markerLabel}</span>
                 </li>
               )}
               {hasExceededThreshold && (
                 <li className="radf-bullet__legend-item radf-bullet__legend-item--exceeded">
-                  <span className="radf-bullet__legend-exceeded-swatch" />
-                  <span className="radf-bullet__legend-label">Higher than most peers</span>
+                  <span className="radf-bullet__legend-exceeded-swatch slide-from-bottom" />
+                  <span className="radf-bullet__legend-label slide-from-bottom">
+                    Higher than most peers
+                  </span>
                 </li>
               )}
             </ul>

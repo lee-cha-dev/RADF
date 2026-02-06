@@ -10,6 +10,7 @@
     flex-direction: column;
     width: 100%;
     font-family: var(--radf-font-family);
+    overflow: hidden;
 }
 
 /* Header */
@@ -208,6 +209,7 @@
     transform: translateX(-50%);
     box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
     z-index: 2;
+    opacity: 1;
 }
 
 /* Percent cell */
