@@ -163,12 +163,7 @@
 .radf-bullet__track-bg {
     position: absolute;
     inset: 0;
-    /*background: var(--radf-surface-well, rgba(128, 128, 128, 0.15));*/
-    /*background: #E0E0E0;*/
-    /*background: #D6D6D6;*/
-    /*background: #CCCCCC;*/
-    /* #B8B8B8 is for dark mode :: #E0E0E0 || #FFFFFF is for light mode */
-    background: #B8B8B8;
+    background: var(--radf-viz-bar-muted);
     border-radius: 6px;
 }
 
@@ -208,6 +203,7 @@
     border-radius: 2px;
     transform: translateX(-50%);
     box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+    background: var(--radf-viz-marker);
     z-index: 2;
     opacity: 1;
 }
@@ -320,6 +316,7 @@
     width: 4px;
     height: 16px;
     border-radius: 2px;
+    background: var(--radf-viz-marker);
 }
 
 /* Exceeded Peers Legend Item */

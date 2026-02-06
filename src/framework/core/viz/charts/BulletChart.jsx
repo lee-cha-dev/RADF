@@ -364,10 +364,16 @@ function BulletRow({
           {markerPercent != null && markerEnabled && (
             <div
               className="radf-bullet__marker fade-in"
-              style={{
-                left: `${markerPercent}%`,
-                background: markerColor || 'var(--radf-text-muted)',
-              }}
+              style={
+                markerColor
+                  ? {
+                      left: `${markerPercent}%`,
+                      background: markerColor,
+                    }
+                  : {
+                      left: `${markerPercent}%`,
+                    }
+              }
             />
           )}
         </div>
@@ -598,8 +604,8 @@ function BulletChart({ data = [], encodings = {}, options = {}, handlers = {}, h
 
   /* Sanitize legacy label — strip threshold / sigma language */
   const markerLabel = sanitizeMarkerLabel(markerConfig.label);
-  /* Use explicit markerLines color, otherwise neutral token */
-  const markerColor = options.markerLines?.color || '#E0E000';
+  /* Use explicit markerLines color, otherwise theme token */
+  const markerColor = options.markerLines?.color ?? null;
   const xTitle = options.headerTitles.xTitle || '';
   const yTitle = options.headerTitles.yTitle || '';
   const percentTitle = options.headerTitles.percentTitle || '';
@@ -723,9 +729,7 @@ function BulletChart({ data = [], encodings = {}, options = {}, handlers = {}, h
                 <li className="radf-bullet__legend-item radf-bullet__legend-item--marker">
                   <span
                     className="radf-bullet__legend-line slide-from-bottom"
-                    style={{
-                      background: markerColor,
-                    }}
+                    style={markerColor ? { background: markerColor } : undefined}
                   />
                   <span className="radf-bullet__legend-label slide-from-bottom">{markerLabel}</span>
                 </li>

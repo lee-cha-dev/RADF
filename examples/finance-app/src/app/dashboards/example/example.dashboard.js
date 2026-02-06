@@ -141,6 +141,31 @@ const exampleDashboard = {
         dimensions: ['date_month'],
       },
     },
+    {
+      id: 'bullet-performance',
+      panelType: 'viz',
+      title: 'Regional Revenue Benchmarks',
+      subtitle: 'Average revenue marker across regions.',
+      layout: { x: 1, y: 6, w: 12, h: 2 },
+      vizType: 'bulletChart',
+      datasetId: 'example_dataset',
+      query: {
+        measures: ['total_revenue'],
+        dimensions: ['region'],
+      },
+      encodings: { x: 'total_revenue', y: 'region' },
+      options: {
+        showPercentColumn: false,
+        headerTitles: {
+          xTitle: 'Region',
+          yTitle: 'Total Revenue',
+          percentTitle: '% of Total',
+        },
+        markerLines: {
+          label: 'Avg revenue',
+        },
+      },
+    },
   ],
 };
 
