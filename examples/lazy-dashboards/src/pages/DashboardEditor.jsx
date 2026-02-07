@@ -1,20 +1,77 @@
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import useDashboardRegistry from '../hooks/useDashboardRegistry.js';
 
 const DashboardEditor = () => {
   const { dashboardId } = useParams();
+  const { getDashboardById, touchDashboard } = useDashboardRegistry();
+  const dashboard = getDashboardById(dashboardId);
+  const [lastSavedAt, setLastSavedAt] = useState(
+    dashboard?.updatedAt || null
+  );
+
+  useEffect(() => {
+    setLastSavedAt(dashboard?.updatedAt || null);
+  }, [dashboard?.updatedAt]);
+
+  const formattedSavedAt = useMemo(() => {
+    if (!lastSavedAt) {
+      return 'Not saved yet';
+    }
+    const date = new Date(lastSavedAt);
+    if (Number.isNaN(date.getTime())) {
+      return 'Not saved yet';
+    }
+    return date.toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+    });
+  }, [lastSavedAt]);
+
+  const handleSave = () => {
+    const updated = touchDashboard(dashboardId);
+    if (updated?.updatedAt) {
+      setLastSavedAt(updated.updatedAt);
+    }
+  };
+
+  if (!dashboard) {
+    return (
+      <section className="lazy-editor">
+        <header className="lazy-editor__header">
+          <div>
+            <p className="lazy-editor__eyebrow">Dashboard Editor</p>
+            <h1 className="lazy-editor__title">Dashboard not found</h1>
+            <p className="lazy-editor__subtitle">
+              That dashboard may have been deleted or renamed.
+            </p>
+          </div>
+          <div className="lazy-editor__actions">
+            <Link className="lazy-button ghost" to="/">
+              Back to Library
+            </Link>
+          </div>
+        </header>
+      </section>
+    );
+  }
 
   return (
     <section className="lazy-editor">
       <header className="lazy-editor__header">
         <div>
           <p className="lazy-editor__eyebrow">Dashboard Editor</p>
-          <h1 className="lazy-editor__title">{dashboardId}</h1>
+          <h1 className="lazy-editor__title">{dashboard.name}</h1>
           <p className="lazy-editor__subtitle">
             Drag widgets, tune encodings, and preview live as you edit.
           </p>
+          <p className="lazy-editor__subtitle">Last saved: {formattedSavedAt}</p>
         </div>
         <div className="lazy-editor__actions">
-          <button className="lazy-button" type="button">
+          <button className="lazy-button" type="button" onClick={handleSave}>
             Save Draft
           </button>
           <button className="lazy-button ghost" type="button">

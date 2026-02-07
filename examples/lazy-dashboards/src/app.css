@@ -184,6 +184,36 @@ a {
   gap: var(--lazy-gap);
 }
 
+.lazy-empty {
+  padding: 32px;
+  border-radius: var(--lazy-radius);
+  border: 1px dashed var(--radf-border-strong);
+  background: var(--radf-surface-2);
+  text-align: center;
+  display: grid;
+  gap: 12px;
+  place-items: center;
+}
+
+.lazy-empty__title {
+  margin: 0;
+  font-size: 1.4rem;
+  font-family: var(--lazy-font-display);
+}
+
+.lazy-empty__subtitle {
+  margin: 0;
+  color: var(--radf-text-secondary);
+  max-width: 52ch;
+}
+
+.lazy-empty__actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
 .lazy-card {
   padding: 22px;
   border-radius: var(--lazy-radius);
