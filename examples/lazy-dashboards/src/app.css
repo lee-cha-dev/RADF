@@ -152,6 +152,7 @@ a {
   gap: 16px;
   margin: 24px 0;
   flex-wrap: wrap;
+  align-items: flex-end;
 }
 
 .lazy-input {
@@ -178,10 +179,80 @@ a {
   font-family: var(--lazy-font-body);
 }
 
+.lazy-library__count {
+  font-size: 0.9rem;
+  color: var(--radf-text-muted);
+  margin-left: auto;
+}
+
+.lazy-library__section {
+  margin-top: 28px;
+  display: grid;
+  gap: 16px;
+}
+
+.lazy-library__section-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.lazy-library__section-title {
+  margin: 0;
+  font-size: 1.3rem;
+  font-family: var(--lazy-font-display);
+}
+
+.lazy-library__section-subtitle {
+  margin: 6px 0 0;
+  color: var(--radf-text-secondary);
+}
+
+.lazy-template-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--lazy-gap);
+}
+
+.lazy-template-card {
+  padding: 18px;
+  border-radius: var(--lazy-radius);
+  background: var(--radf-surface-1);
+  border: 1px solid var(--radf-border-subtle);
+  box-shadow: var(--radf-shadow-low);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.lazy-template-card__title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-family: var(--lazy-font-display);
+}
+
+.lazy-template-card__description {
+  margin: 0;
+  color: var(--radf-text-secondary);
+}
+
+.lazy-template-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .lazy-library__grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: var(--lazy-gap);
+}
+
+.lazy-library__grid.list {
+  display: flex;
+  flex-direction: column;
 }
 
 .lazy-empty {
@@ -225,6 +296,13 @@ a {
   gap: 16px;
 }
 
+.lazy-card__main {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
 .lazy-card__header {
   display: flex;
   flex-direction: column;
@@ -265,6 +343,17 @@ a {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
+  margin-top: auto;
+}
+
+.lazy-card.is-list {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.lazy-card.is-list .lazy-card__actions {
+  justify-content: flex-end;
 }
 
 .lazy-button {
@@ -451,6 +540,10 @@ a {
   .lazy-status {
     width: 100%;
   }
+
+  .lazy-library__count {
+    margin-left: 0;
+  }
 }
 
 @media (max-width: 640px) {
@@ -464,5 +557,10 @@ a {
 
   .lazy-hero {
     padding: 24px;
+  }
+
+  .lazy-card.is-list {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
