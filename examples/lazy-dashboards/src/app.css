@@ -429,6 +429,12 @@ a {
   gap: var(--lazy-gap);
 }
 
+.lazy-editor__column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lazy-gap);
+}
+
 .lazy-panel {
   padding: 20px;
   border-radius: var(--lazy-radius);
@@ -449,6 +455,14 @@ a {
 .lazy-panel__body {
   margin: 0;
   color: var(--radf-text-secondary);
+}
+
+.lazy-panel__split {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
 }
 
 .lazy-widget-list {
@@ -509,6 +523,81 @@ a {
   flex-direction: column;
   gap: 16px;
   margin-top: 12px;
+}
+
+.lazy-semantic {
+  display: grid;
+  gap: 16px;
+}
+
+.lazy-semantic__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.lazy-semantic__grid {
+  display: grid;
+  gap: 16px;
+}
+
+.lazy-semantic__section {
+  display: grid;
+  gap: 10px;
+}
+
+.lazy-semantic__list {
+  display: grid;
+  gap: 10px;
+}
+
+.lazy-semantic__item {
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--radf-border-subtle);
+  background: var(--radf-surface-2);
+  display: grid;
+  gap: 10px;
+}
+
+.lazy-semantic__simple {
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px dashed var(--radf-border-strong);
+  background: var(--radf-surface-2);
+}
+
+.lazy-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+}
+
+.lazy-checkbox input {
+  width: 16px;
+  height: 16px;
+}
+
+.lazy-metric-group {
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--radf-border-subtle);
+  background: var(--radf-surface-1);
+  display: grid;
+  gap: 12px;
+}
+
+.lazy-metric-group__title {
+  margin: 0;
+  font-weight: 600;
+}
+
+.lazy-metric-group__list {
+  display: grid;
+  gap: 10px;
 }
 
 .lazy-dropzone {

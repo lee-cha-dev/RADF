@@ -68,7 +68,7 @@ const generateModule = (name, payload) => {
 const generateDatasetModule = (datasetId, model) => {
   const dataset = {
     id: datasetId,
-    title: model.meta?.title || 'Dataset',
+    label: model.meta?.title || 'Dataset',
     description: model.meta?.description || '',
     dimensions: model.semanticLayer?.dimensions || [],
     metrics: model.semanticLayer?.metrics || [],
@@ -88,6 +88,7 @@ export const compileAuthoringModel = ({ dashboard, authoringModel }) => {
   });
   const datasetId =
     normalized.datasetBinding?.datasetId ||
+    normalized.datasetBinding?.id ||
     `${dashboard?.id || 'dashboard'}_dataset`;
   const config = {
     id: dashboard?.id || 'dashboard',
