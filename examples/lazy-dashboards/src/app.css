@@ -931,6 +931,23 @@ a {
   color: var(--radf-text-secondary);
 }
 
+.lazy-canvas-item__preview {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.lazy-canvas-item__preview .radf-panel__body {
+  flex: 1;
+}
+
+.lazy-preview__unsupported {
+  padding: 12px;
+  font-size: 0.8rem;
+  color: var(--radf-text-muted);
+}
+
 .lazy-canvas-item__resize {
   position: absolute;
   right: 6px;

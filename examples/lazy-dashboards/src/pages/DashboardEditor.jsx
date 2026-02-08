@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { DashboardProvider, ErrorBoundary, MockDataProvider } from 'radf';
 import useDashboardRegistry from '../hooks/useDashboardRegistry.js';
 import {
   addWidgetToModel,
@@ -18,6 +19,8 @@ import {
   listVizManifests,
 } from '../authoring/vizManifest.js';
 import DatasetImporter from '../components/DatasetImporter.jsx';
+import LivePreviewPanel from '../components/LivePreviewPanel.jsx';
+import { createLocalDataProvider } from '../data/localDataProvider.js';
 import {
   buildDefaultSemanticLayer,
   buildDimensionSuggestions,
@@ -99,10 +102,18 @@ const DashboardEditor = () => {
     [authoringModel]
   );
 
-  const compiled = useMemo(
+  const compiledImmediate = useMemo(
     () => compileAuthoringModel({ dashboard, authoringModel }),
     [dashboard, authoringModel]
   );
+  const [compiledPreview, setCompiledPreview] = useState(() => compiledImmediate);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setCompiledPreview(compiledImmediate);
+    }, 250);
+    return () => clearTimeout(timeout);
+  }, [compiledImmediate]);
 
   const vizManifests = useMemo(() => listVizManifests(), []);
   const datasetBinding = authoringModel.datasetBinding || null;
@@ -112,6 +123,26 @@ const DashboardEditor = () => {
     metrics: [],
     dimensions: [],
   };
+  const compiledPanelMap = useMemo(
+    () =>
+      new Map(
+        (compiledPreview.config?.panels || []).map((panel) => [
+          panel.id,
+          panel,
+        ])
+      ),
+    [compiledPreview]
+  );
+  const previewProvider = useMemo(() => {
+    if (datasetBinding?.rows?.length) {
+      return createLocalDataProvider({
+        rows: datasetBinding.rows,
+        columns: datasetBinding.columns || [],
+        semanticLayer: semanticLayer.enabled ? semanticLayer : null,
+      });
+    }
+    return MockDataProvider;
+  }, [datasetBinding, semanticLayer]);
 
   const dimensionSuggestions = useMemo(
     () => buildDimensionSuggestions(datasetColumns),
@@ -161,7 +192,7 @@ const DashboardEditor = () => {
   const handleSave = () => {
     const updated = updateDashboard(dashboardId, {
       authoringModel,
-      compiledConfig: compiled.config,
+      compiledConfig: compiledImmediate.config,
       datasetBinding: authoringModel.datasetBinding || null,
     });
     if (updated?.updatedAt) {
@@ -684,7 +715,7 @@ const DashboardEditor = () => {
     const timeout = setTimeout(() => {
       const updated = updateDashboard(dashboardId, {
         authoringModel,
-        compiledConfig: compiled.config,
+        compiledConfig: compiledImmediate.config,
         datasetBinding: authoringModel.datasetBinding || null,
       });
       if (updated?.updatedAt) {
@@ -695,7 +726,7 @@ const DashboardEditor = () => {
     return () => clearTimeout(timeout);
   }, [
     authoringModel,
-    compiled.config,
+    compiledImmediate.config,
     dashboard,
     dashboardId,
     updateDashboard,
@@ -1024,64 +1055,83 @@ const DashboardEditor = () => {
             </button>
           </div>
           <div className="lazy-canvas__stage">
-            <div className="lazy-canvas__grid" ref={gridRef}>
-              {authoringModel.widgets.length === 0 ? (
-                <p className="lazy-canvas__empty">
-                  Panels render here once widgets are configured.
-                </p>
-              ) : (
-                authoringModel.widgets.map((widget) => {
-                  const status =
-                    validation.widgets[widget.id]?.status || 'draft';
-                  const issues =
-                    validation.widgets[widget.id]?.errors?.length || 0;
-                  return (
-                    <div
-                      key={widget.id}
-                      className={`lazy-canvas-item ${gridClasses(widget.layout)}${
-                        widget.id === activeWidgetId ? ' active' : ''
-                      }`}
-                      onClick={() => setActiveWidgetId(widget.id)}
-                    >
-                      <div
-                        className="lazy-canvas-item__header"
-                        onPointerDown={(event) => {
-                          setActiveWidgetId(widget.id);
-                          beginInteraction(event, widget, 'move');
-                        }}
-                      >
-                        <span className="lazy-canvas-item__title">
-                          {widget.title}
-                        </span>
-                        <div className="lazy-canvas-item__meta">
-                          {issues > 0 ? (
-                            <span className="lazy-widget-issues">
-                              {issues} issues
+            <DashboardProvider
+              initialState={{
+                dashboardId:
+                  compiledPreview.config?.id || dashboard.id,
+                datasetId:
+                  compiledPreview.config?.datasetId ||
+                  datasetBinding?.id ||
+                  `${dashboard.id}_dataset`,
+              }}
+            >
+              <ErrorBoundary
+                title="Preview failed"
+                message="Fix the configuration or reload the preview to try again."
+              >
+                <div className="lazy-canvas__grid" ref={gridRef}>
+                  {authoringModel.widgets.length === 0 ? (
+                    <p className="lazy-canvas__empty">
+                      Panels render here once widgets are configured.
+                    </p>
+                  ) : (
+                    authoringModel.widgets.map((widget) => {
+                      const status =
+                        validation.widgets[widget.id]?.status || 'draft';
+                      const issues =
+                        validation.widgets[widget.id]?.errors?.length || 0;
+                      const previewPanel = compiledPanelMap.get(widget.id);
+                      return (
+                        <div
+                          key={widget.id}
+                          className={`lazy-canvas-item ${gridClasses(widget.layout)}${
+                            widget.id === activeWidgetId ? ' active' : ''
+                          }`}
+                          onClick={() => setActiveWidgetId(widget.id)}
+                        >
+                          <div
+                            className="lazy-canvas-item__header"
+                            onPointerDown={(event) => {
+                              setActiveWidgetId(widget.id);
+                              beginInteraction(event, widget, 'move');
+                            }}
+                          >
+                            <span className="lazy-canvas-item__title">
+                              {widget.title}
                             </span>
-                          ) : null}
-                          <span className={`lazy-widget-status ${status}`}>
-                            {status}
-                          </span>
+                            <div className="lazy-canvas-item__meta">
+                              {issues > 0 ? (
+                                <span className="lazy-widget-issues">
+                                  {issues} issues
+                                </span>
+                              ) : null}
+                              <span className={`lazy-widget-status ${status}`}>
+                                {status}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="lazy-canvas-item__preview">
+                            <LivePreviewPanel
+                              panel={previewPanel}
+                              dataProvider={previewProvider}
+                            />
+                          </div>
+                          <button
+                            className="lazy-canvas-item__resize"
+                            type="button"
+                            aria-label="Resize widget"
+                            onPointerDown={(event) => {
+                              setActiveWidgetId(widget.id);
+                              beginInteraction(event, widget, 'resize');
+                            }}
+                          />
                         </div>
-                      </div>
-                      <div className="lazy-canvas-item__body">
-                        <span>{widget.vizType}</span>
-                        <span>{widget.layout.w}x{widget.layout.h}</span>
-                      </div>
-                      <button
-                        className="lazy-canvas-item__resize"
-                        type="button"
-                        aria-label="Resize widget"
-                        onPointerDown={(event) => {
-                          setActiveWidgetId(widget.id);
-                          beginInteraction(event, widget, 'resize');
-                        }}
-                      />
-                    </div>
-                  );
-                })
-              )}
-            </div>
+                      );
+                    })
+                  )}
+                </div>
+              </ErrorBoundary>
+            </DashboardProvider>
           </div>
         </section>
         <section className="lazy-panel">
