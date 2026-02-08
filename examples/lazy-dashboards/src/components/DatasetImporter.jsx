@@ -3,14 +3,12 @@ import * as XLSX from 'xlsx';
 import {
   buildApiDatasetBinding,
   buildDatasetBinding,
-  buildTableFromObjectRows,
   collectDatasetWarnings,
   formatBytes,
   parseCsvText,
   parseRowMatrix,
   sanitizeFieldId,
 } from '../data/datasetImport.js';
-import { fetchApiRows } from '../data/externalApiProvider.js';
 import { inferSchemaForTable } from '../data/schemaInference.js';
 import { trackTelemetryEvent } from '../data/telemetry.js';
 
@@ -92,8 +90,9 @@ const DatasetImporter = ({ datasetBinding, onUpdate }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isParsing, setIsParsing] = useState(false);
   const [error, setError] = useState('');
-  const [apiError, setApiError] = useState('');
-  const [isApiLoading, setIsApiLoading] = useState(false);
+  const [isFieldEditorOpen, setIsFieldEditorOpen] = useState(false);
+  const [fieldSearch, setFieldSearch] = useState('');
+  const [fieldRoleFilter, setFieldRoleFilter] = useState('all');
   const [datasetMode, setDatasetMode] = useState(
     datasetBinding?.source?.type === 'api' ? 'api' : 'file'
   );
@@ -129,6 +128,35 @@ const DatasetImporter = ({ datasetBinding, onUpdate }) => {
   }, [datasetBinding]);
   const datasetColumns = datasetBinding?.columns || [];
   const previewRows = datasetBinding?.previewRows || [];
+  const fieldRoleCounts = useMemo(() => {
+    const counts = { metric: 0, dimension: 0, unknown: 0 };
+    datasetColumns.forEach((column) => {
+      const role = column.role || column.inferredRole;
+      if (role === 'metric') {
+        counts.metric += 1;
+      } else if (role === 'dimension') {
+        counts.dimension += 1;
+      } else {
+        counts.unknown += 1;
+      }
+    });
+    return counts;
+  }, [datasetColumns]);
+  const filteredColumns = useMemo(() => {
+    const normalizedSearch = fieldSearch.trim().toLowerCase();
+    return datasetColumns.filter((column) => {
+      const role = column.role || column.inferredRole || 'unassigned';
+      if (fieldRoleFilter !== 'all' && role !== fieldRoleFilter) {
+        return false;
+      }
+      if (!normalizedSearch) {
+        return true;
+      }
+      const label = (column.label || '').toLowerCase();
+      const id = (column.id || '').toLowerCase();
+      return label.includes(normalizedSearch) || id.includes(normalizedSearch);
+    });
+  }, [datasetColumns, fieldRoleFilter, fieldSearch]);
 
   useEffect(() => {
     const nextMode =
@@ -140,10 +168,7 @@ const DatasetImporter = ({ datasetBinding, onUpdate }) => {
   }, [datasetBinding]);
 
   useEffect(() => {
-    if (datasetMode === 'file') {
-      setApiError('');
-      setIsApiLoading(false);
-    }
+    setError('');
   }, [datasetMode]);
 
   const applyDataset = useCallback(
@@ -193,6 +218,42 @@ const DatasetImporter = ({ datasetBinding, onUpdate }) => {
     [buildFieldProfiles]
   );
 
+  const applyTableAsDataset = useCallback(
+    (table, fileMeta = {}) => {
+      const inference = applyInference(table);
+      const tableWithColumns = {
+        ...table,
+        columns: inference.columns,
+      };
+      if (datasetMode === 'api') {
+        const normalized = normalizeApiConfigForSave(apiConfig);
+        const dataset = buildApiDatasetBinding({
+          apiConfig: normalized,
+          table: tableWithColumns,
+          fieldProfiles: inference.fieldProfiles,
+        });
+        applyDataset(dataset);
+        return;
+      }
+      const dataset = buildDatasetBinding({
+        fileName: fileMeta.fileName,
+        fileSize: fileMeta.fileSize,
+        fileType: fileMeta.fileType,
+        sheetName: fileMeta.sheetName,
+        sheetNames: fileMeta.sheetNames,
+        table: tableWithColumns,
+        fieldProfiles: inference.fieldProfiles,
+      });
+      applyDataset(dataset);
+    },
+    [
+      applyDataset,
+      applyInference,
+      apiConfig,
+      datasetMode,
+    ]
+  );
+
   const parseCsvFile = useCallback(
     async (file, extraWarnings = []) => {
       const text = await file.text();
@@ -206,18 +267,14 @@ const DatasetImporter = ({ datasetBinding, onUpdate }) => {
         );
       }
       table.warnings = [...extraWarnings, ...collectDatasetWarnings(table)];
-      const inference = applyInference(table);
-      const dataset = buildDatasetBinding({
+      setPendingWorkbook(null);
+      applyTableAsDataset(table, {
         fileName: file.name,
         fileSize: file.size,
         fileType: 'csv',
-        table: { ...table, columns: inference.columns },
-        fieldProfiles: inference.fieldProfiles,
       });
-      setPendingWorkbook(null);
-      applyDataset(dataset);
     },
-    [applyDataset, applyInference]
+    [applyTableAsDataset]
   );
 
   const parseWorkbook = useCallback(
@@ -245,16 +302,13 @@ const DatasetImporter = ({ datasetBinding, onUpdate }) => {
           error: `Inconsistent rows detected. Expected ${table.expectedColumnCount} columns, but ${table.inconsistentRowCount} rows differ.`,
         };
       }
-      table.warnings = collectDatasetWarnings(table);
-      const inference = applyInference(table);
       return {
-        table: { ...table, columns: inference.columns },
-        fieldProfiles: inference.fieldProfiles,
+        table: { ...table, warnings: collectDatasetWarnings(table) },
         sheetNames: workbook.SheetNames || [],
         sheetName: targetSheetName,
       };
     },
-    [applyInference]
+    []
   );
 
   const parseXlsxFile = useCallback(
@@ -272,17 +326,8 @@ const DatasetImporter = ({ datasetBinding, onUpdate }) => {
       }
       parsed.table.warnings = [
         ...extraWarnings,
-        ...collectDatasetWarnings(parsed.table),
+        ...(parsed.table.warnings || []),
       ];
-      const dataset = buildDatasetBinding({
-        fileName: file.name,
-        fileSize: file.size,
-        fileType: 'xlsx',
-        sheetName: parsed.sheetName,
-        sheetNames: parsed.sheetNames,
-        table: parsed.table,
-        fieldProfiles: parsed.fieldProfiles,
-      });
       setPendingWorkbook({
         arrayBuffer,
         fileName: file.name,
@@ -290,9 +335,15 @@ const DatasetImporter = ({ datasetBinding, onUpdate }) => {
         sheetNames: parsed.sheetNames,
         sheetName: parsed.sheetName,
       });
-      applyDataset(dataset);
+      applyTableAsDataset(parsed.table, {
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: 'xlsx',
+        sheetName: parsed.sheetName,
+        sheetNames: parsed.sheetNames,
+      });
     },
-    [applyDataset, parseWorkbook, reportImportError]
+    [applyTableAsDataset, parseWorkbook, reportImportError]
   );
 
   const handleFile = useCallback(
@@ -409,15 +460,6 @@ const DatasetImporter = ({ datasetBinding, onUpdate }) => {
         });
         return;
       }
-      const dataset = buildDatasetBinding({
-        fileName: pendingWorkbook.fileName,
-        fileSize: pendingWorkbook.fileSize,
-        fileType: 'xlsx',
-        sheetName: parsed.sheetName,
-        sheetNames: pendingWorkbook.sheetNames,
-        table: parsed.table,
-        fieldProfiles: parsed.fieldProfiles,
-      });
       setPendingWorkbook((current) =>
         current
           ? {
@@ -426,9 +468,15 @@ const DatasetImporter = ({ datasetBinding, onUpdate }) => {
             }
           : current
       );
-      applyDataset(dataset);
+      applyTableAsDataset(parsed.table, {
+        fileName: pendingWorkbook.fileName,
+        fileSize: pendingWorkbook.fileSize,
+        fileType: 'xlsx',
+        sheetName: parsed.sheetName,
+        sheetNames: pendingWorkbook.sheetNames,
+      });
     },
-    [applyDataset, parseWorkbook, pendingWorkbook]
+    [applyTableAsDataset, parseWorkbook, pendingWorkbook]
   );
 
   const updateApiConfigField = useCallback((field, value) => {
@@ -489,44 +537,7 @@ const DatasetImporter = ({ datasetBinding, onUpdate }) => {
       fieldProfiles: datasetBinding?.fieldProfiles || [],
     });
     applyDataset(dataset);
-    setApiError('');
   }, [apiConfig, applyDataset, datasetBinding]);
-
-  const handleApiFetchSample = useCallback(async () => {
-    const normalized = normalizeApiConfigForSave(apiConfig);
-    setApiError('');
-    setIsApiLoading(true);
-    try {
-      const rows = await fetchApiRows(normalized);
-      const table = buildTableFromObjectRows(rows, {
-        maxRows: DEFAULT_MAX_ROWS,
-        previewRows: DEFAULT_PREVIEW_ROWS,
-      });
-      const inference = inferSchemaForTable({
-        columns: table.columns,
-        rows: table.rows,
-      });
-      const dataset = buildApiDatasetBinding({
-        apiConfig: normalized,
-        table: { ...table, columns: inference.columns },
-        fieldProfiles: buildFieldProfiles(inference.columns),
-      });
-      applyDataset(dataset);
-      setWarnings(dataset.warnings || []);
-    } catch (err) {
-      const message =
-        err instanceof Error
-          ? err.message
-          : 'Unable to reach this API.';
-      setApiError(message);
-      reportImportError(message, {
-        source: 'api',
-        baseUrl: normalized.baseUrl,
-      });
-    } finally {
-      setIsApiLoading(false);
-    }
-  }, [apiConfig, applyDataset, buildFieldProfiles]);
 
   useEffect(() => {
     if (!datasetBinding?.columns?.length) {
@@ -747,17 +758,64 @@ const DatasetImporter = ({ datasetBinding, onUpdate }) => {
         <div className="lazy-api">
           <div className="lazy-api__intro">
             <p className="lazy-panel__body">
-              Configure a GET endpoint and preview the response shape. Use the
-              response path to target the array of rows (for example,
-              data.items).
+              Upload a sample file to shape fields and preview the dashboard.
+              The composer does not call your API. The Base URL and options
+              below are saved into the exported DataProvider so your environment
+              can fetch real data later.
             </p>
             <div className="lazy-alert warning">
-              <strong>CORS matters.</strong>
+              <strong>Export note.</strong>
               <span>
-                The browser must be allowed to call the API. Secret headers are
-                visible to anyone using this dashboard.
+                The exported dashboard runs in the browser, so CORS and secrets
+                still apply when it calls your API.
               </span>
             </div>
+          </div>
+          <div className="lazy-api__sample">
+            <div
+              className={`lazy-dropzone ${
+                isDragging ? 'is-active' : ''
+              }`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              role="button"
+              tabIndex={0}
+              onClick={handlePickFile}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  handlePickFile();
+                }
+              }}
+            >
+              <input
+                ref={inputRef}
+                className="lazy-dropzone__input"
+                type="file"
+                accept=".csv,.xlsx,.xls"
+                onChange={handleFileChange}
+              />
+              <div className="lazy-dropzone__content">
+                <p className="lazy-dropzone__title">
+                  Upload a sample CSV or XLSX
+                </p>
+                <p className="lazy-dropzone__subtitle">
+                  This sample powers the editor preview only.
+                </p>
+                <button className="lazy-button ghost" type="button">
+                  Choose Sample File
+                </button>
+              </div>
+            </div>
+
+            {isParsing && (
+              <div className="lazy-alert">
+                Parsing dataset, please wait…
+              </div>
+            )}
+            {error && (
+              <div className="lazy-alert danger">{error}</div>
+            )}
           </div>
           <div className="lazy-api__form">
             <label className="lazy-input">
@@ -917,19 +975,9 @@ const DatasetImporter = ({ datasetBinding, onUpdate }) => {
               type="button"
               onClick={handleApiSave}
             >
-              Save API source
-            </button>
-            <button
-              className="lazy-button"
-              type="button"
-              onClick={handleApiFetchSample}
-              disabled={isApiLoading}
-            >
-              {isApiLoading ? 'Fetching...' : 'Fetch sample'}
+              Save API settings
             </button>
           </div>
-
-          {apiError && <div className="lazy-alert danger">{apiError}</div>}
         </div>
       )}
 
@@ -974,8 +1022,7 @@ const DatasetImporter = ({ datasetBinding, onUpdate }) => {
             ) : null}
           </div>
 
-          {datasetSummary.sourceType === 'file' &&
-            pendingWorkbook?.sheetNames?.length > 1 ? (
+          {pendingWorkbook?.sheetNames?.length > 1 ? (
             <label className="lazy-input">
               <span className="lazy-input__label">Sheet</span>
               <select
@@ -1026,47 +1073,146 @@ const DatasetImporter = ({ datasetBinding, onUpdate }) => {
           </div>
 
           {datasetColumns.length > 0 && (
-            <div className="lazy-fields">
+            <div className="lazy-fields lazy-fields--summary">
               <div className="lazy-fields__header">
-                <p className="lazy-dataset__label">Fields</p>
-                <p className="lazy-fields__hint">
-                  Adjust inferred types, roles, and export-ready names.
-                </p>
+                <div>
+                  <p className="lazy-dataset__label">Fields</p>
+                  <p className="lazy-fields__hint">
+                    Edit labels, types, and roles in the field editor.
+                  </p>
+                </div>
+                <button
+                  className="lazy-button ghost"
+                  type="button"
+                  onClick={() => setIsFieldEditorOpen(true)}
+                >
+                  Edit fields
+                </button>
               </div>
-              <div className="lazy-fields__list">
-                {datasetColumns.map((column) => (
-                  <div key={column.id} className="lazy-field">
-                    <div className="lazy-field__header">
-                      <label className="lazy-input">
-                        <span className="lazy-input__label">
-                          Field name
-                        </span>
-                        <input
-                          className="lazy-input__field"
-                          type="text"
-                          value={column.label || column.id}
-                          onChange={(event) =>
-                            handleFieldRename(
-                              column.id,
-                              event.target.value
-                            )
-                          }
-                        />
-                      </label>
-                      <div className="lazy-field__badges">
-                        <span className="lazy-pill">
-                          Type: {column.type || 'string'}
-                        </span>
-                        <span className="lazy-pill">
-                          Role: {column.role || 'dimension'}
-                        </span>
+              <div className="lazy-fields__summary">
+                <span className="lazy-pill">
+                  Total: {datasetColumns.length}
+                </span>
+                <span className="lazy-pill">
+                  Metrics: {fieldRoleCounts.metric}
+                </span>
+                <span className="lazy-pill">
+                  Dimensions: {fieldRoleCounts.dimension}
+                </span>
+                {fieldRoleCounts.unknown ? (
+                  <span className="lazy-pill">
+                    Unassigned: {fieldRoleCounts.unknown}
+                  </span>
+                ) : null}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+      {isFieldEditorOpen ? (
+        <div className="lazy-modal__backdrop" role="dialog" aria-modal="true">
+          <div className="lazy-modal lazy-modal--compact lazy-modal--fields">
+            <div className="lazy-modal__header">
+              <div>
+                <p className="lazy-modal__eyebrow">Dataset fields</p>
+                <h2 className="lazy-modal__title">Edit field metadata</h2>
+              </div>
+              <button
+                className="lazy-button ghost"
+                type="button"
+                onClick={() => setIsFieldEditorOpen(false)}
+              >
+                Close
+              </button>
+            </div>
+            <div className="lazy-modal__body">
+              <div className="lazy-field-modal__controls">
+                <label className="lazy-input">
+                  <span className="lazy-input__label">Search</span>
+                  <input
+                    className="lazy-input__field"
+                    type="text"
+                    value={fieldSearch}
+                    onChange={(event) => setFieldSearch(event.target.value)}
+                    placeholder="Filter by name or id"
+                  />
+                </label>
+                <label className="lazy-input">
+                  <span className="lazy-input__label">Role</span>
+                  <select
+                    className="lazy-input__field"
+                    value={fieldRoleFilter}
+                    onChange={(event) =>
+                      setFieldRoleFilter(event.target.value)
+                    }
+                  >
+                    <option value="all">All</option>
+                    <option value="dimension">Dimensions</option>
+                    <option value="metric">Metrics</option>
+                    <option value="unassigned">Unassigned</option>
+                  </select>
+                </label>
+              </div>
+              <div className="lazy-field-modal__list">
+                {filteredColumns.length === 0 ? (
+                  <p className="lazy-panel__body">No matching fields.</p>
+                ) : (
+                  filteredColumns.map((column) => (
+                    <div key={column.id} className="lazy-field-row">
+                      <div className="lazy-field-row__main">
+                        <label className="lazy-input">
+                          <span className="lazy-input__label">
+                            Field name
+                          </span>
+                          <input
+                            className="lazy-input__field"
+                            type="text"
+                            value={column.label || column.id}
+                            onChange={(event) =>
+                              handleFieldRename(
+                                column.id,
+                                event.target.value
+                              )
+                            }
+                          />
+                        </label>
+                        <div className="lazy-field-row__meta">
+                          <span>Id: {column.id}</span>
+                          <span>
+                            Nulls: {column.stats?.nullRate ?? 0}%
+                          </span>
+                          <span>
+                            Distinct: {column.stats?.distinctCount ?? 0}
+                          </span>
+                          <span>
+                            Min:{' '}
+                            {formatStatValue(
+                              column.stats?.min,
+                              column.type
+                            )}
+                          </span>
+                          <span>
+                            Max:{' '}
+                            {formatStatValue(
+                              column.stats?.max,
+                              column.type
+                            )}
+                          </span>
+                        </div>
+                        {column.sampleValues?.length > 0 ? (
+                          <p className="lazy-field-row__samples">
+                            Samples: {column.sampleValues.join(', ')}
+                          </p>
+                        ) : null}
+                        {(column.inferredType || column.inferredRole) && (
+                          <p className="lazy-field-row__hint">
+                            Inferred as {column.inferredType || 'string'} /{' '}
+                            {column.inferredRole || 'dimension'}.
+                          </p>
+                        )}
                       </div>
-                    </div>
-                    <div className="lazy-field__controls">
                       <label className="lazy-input">
-                        <span className="lazy-input__label">
-                          Field type
-                        </span>
+                        <span className="lazy-input__label">Field type</span>
                         <select
                           className="lazy-input__field"
                           value={column.type || 'string'}
@@ -1084,12 +1230,10 @@ const DatasetImporter = ({ datasetBinding, onUpdate }) => {
                         </select>
                       </label>
                       <label className="lazy-input">
-                        <span className="lazy-input__label">
-                          Field role
-                        </span>
+                        <span className="lazy-input__label">Field role</span>
                         <select
                           className="lazy-input__field"
-                          value={column.role || 'dimension'}
+                          value={column.role || column.inferredRole || 'dimension'}
                           onChange={(event) =>
                             handleFieldRoleChange(
                               column.id,
@@ -1102,46 +1246,22 @@ const DatasetImporter = ({ datasetBinding, onUpdate }) => {
                         </select>
                       </label>
                     </div>
-                    <div className="lazy-field__stats">
-                      <span>
-                        Nulls: {column.stats?.nullRate ?? 0}%
-                      </span>
-                      <span>
-                        Distinct: {column.stats?.distinctCount ?? 0}
-                      </span>
-                      <span>
-                        Min:{' '}
-                        {formatStatValue(
-                          column.stats?.min,
-                          column.type
-                        )}
-                      </span>
-                      <span>
-                        Max:{' '}
-                        {formatStatValue(
-                          column.stats?.max,
-                          column.type
-                        )}
-                      </span>
-                    </div>
-                    {column.sampleValues?.length > 0 && (
-                      <p className="lazy-field__samples">
-                        Samples: {column.sampleValues.join(', ')}
-                      </p>
-                    )}
-                    {(column.inferredType || column.inferredRole) && (
-                      <p className="lazy-field__hint">
-                        Inferred as {column.inferredType || 'string'} /{' '}
-                        {column.inferredRole || 'dimension'}.
-                      </p>
-                    )}
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
-          )}
+            <div className="lazy-modal__footer">
+              <button
+                className="lazy-button ghost"
+                type="button"
+                onClick={() => setIsFieldEditorOpen(false)}
+              >
+                Done
+              </button>
+            </div>
+          </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 };

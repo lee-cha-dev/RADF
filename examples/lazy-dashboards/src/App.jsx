@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { NavLink, Route, Routes } from 'react-router-dom';
+import { NavLink, Route, Routes, useLocation } from 'react-router-dom';
 import DashboardLibrary from './pages/DashboardLibrary.jsx';
 import DashboardEditor from './pages/DashboardEditor.jsx';
 import useThemeSettings from './hooks/useThemeSettings.js';
@@ -7,6 +7,7 @@ import SettingsDrawer from './components/SettingsDrawer.jsx';
 import EditorErrorBoundary from './components/EditorErrorBoundary.jsx';
 
 const App = () => {
+  const location = useLocation();
   const {
     themeFamily,
     themeMode,
@@ -22,6 +23,8 @@ const App = () => {
 
   const openSettings = () => setIsSettingsOpen(true);
   const closeSettings = () => setIsSettingsOpen(false);
+
+  const isEditorRoute = location.pathname.startsWith('/editor');
 
   return (
     <div className="lazy-app">
@@ -58,7 +61,7 @@ const App = () => {
           <span className="lazy-status__item">Palette: {paletteId}</span>
         </div>
       </header>
-      <main className="lazy-shell">
+      <main className={`lazy-shell${isEditorRoute ? ' lazy-shell--editor' : ''}`}>
         <Routes>
           <Route path="/" element={<DashboardLibrary />} />
           <Route

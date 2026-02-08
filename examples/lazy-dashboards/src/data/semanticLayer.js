@@ -1,4 +1,4 @@
-const METRIC_OPERATORS = [
+export const METRIC_OPERATORS = [
   { key: 'sum', label: 'Sum', op: 'SUM', format: 'number' },
   { key: 'avg', label: 'Average', op: 'AVG', format: 'number' },
   { key: 'min', label: 'Minimum', op: 'MIN', format: 'number' },
@@ -44,15 +44,21 @@ const isDimensionColumn = (column) => {
   return getColumnType(column) !== 'number';
 };
 
-export const buildDimensionSuggestions = (columns = []) =>
-  columns
-    .filter((column) => column?.id && isDimensionColumn(column))
+export const buildDimensionSuggestions = (columns = []) => {
+  const dimensionColumns = columns.filter(
+    (column) => column?.id && isDimensionColumn(column)
+  );
+  const fallbackColumns = dimensionColumns.length ? dimensionColumns : columns;
+
+  return fallbackColumns
+    .filter((column) => column?.id)
     .map((column) => ({
       id: column.id,
       label: getColumnLabel(column),
       type: normalizeDimensionType(getColumnType(column)),
       sourceField: column.id,
     }));
+};
 
 export const buildMetricSuggestions = (columns = []) =>
   columns
