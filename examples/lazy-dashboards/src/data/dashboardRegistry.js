@@ -1,5 +1,10 @@
 const STORAGE_KEY = 'lazyDashboards.registry';
 const DEFAULT_SCHEMA_VERSION = 1;
+const DEFAULT_SEMANTIC_LAYER = {
+  enabled: false,
+  metrics: [],
+  dimensions: [],
+};
 
 const getEmptyRegistry = () => ({
   dashboards: [],
@@ -39,10 +44,17 @@ const ensureAuthoringModel = (model = {}) => ({
     typeof model.schemaVersion === 'number'
       ? model.schemaVersion
       : DEFAULT_SCHEMA_VERSION,
+  meta: {
+    ...(model.meta || {}),
+  },
   widgets: Array.isArray(model.widgets) ? model.widgets : [],
   layout: Array.isArray(model.layout) ? model.layout : [],
   datasetBinding:
     model.datasetBinding === undefined ? null : model.datasetBinding,
+  semanticLayer: {
+    ...DEFAULT_SEMANTIC_LAYER,
+    ...(model.semanticLayer || {}),
+  },
 });
 
 function normalizeRegistry(registry) {
