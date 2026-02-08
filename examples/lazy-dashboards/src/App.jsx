@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import { NavLink, Route, Routes } from 'react-router-dom';
 import DashboardLibrary from './pages/DashboardLibrary.jsx';
 import DashboardEditor from './pages/DashboardEditor.jsx';
-import Settings from './pages/Settings.jsx';
 import useThemeSettings from './hooks/useThemeSettings.js';
+import SettingsDrawer from './components/SettingsDrawer.jsx';
+import EditorErrorBoundary from './components/EditorErrorBoundary.jsx';
 
 const App = () => {
   const {
@@ -16,6 +18,10 @@ const App = () => {
     setThemeMode,
     setPaletteId,
   } = useThemeSettings();
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  const openSettings = () => setIsSettingsOpen(true);
+  const closeSettings = () => setIsSettingsOpen(false);
 
   return (
     <div className="lazy-app">
@@ -35,9 +41,15 @@ const App = () => {
           <NavLink className="lazy-nav__link" to="/" end>
             Library
           </NavLink>
-          <NavLink className="lazy-nav__link" to="/settings">
+          <button
+            className="lazy-nav__link"
+            type="button"
+            onClick={openSettings}
+            aria-haspopup="dialog"
+            aria-expanded={isSettingsOpen}
+          >
             Settings
-          </NavLink>
+          </button>
         </nav>
         <div className="lazy-status">
           <span className="lazy-status__item">
@@ -49,25 +61,29 @@ const App = () => {
       <main className="lazy-shell">
         <Routes>
           <Route path="/" element={<DashboardLibrary />} />
-          <Route path="/editor/:dashboardId" element={<DashboardEditor />} />
           <Route
-            path="/settings"
+            path="/editor/:dashboardId"
             element={
-              <Settings
-                themeFamily={themeFamily}
-                themeMode={themeMode}
-                paletteId={paletteId}
-                resolvedMode={resolvedMode}
-                themeFamilies={themeFamilies}
-                paletteOptions={paletteOptions}
-                setThemeFamily={setThemeFamily}
-                setThemeMode={setThemeMode}
-                setPaletteId={setPaletteId}
-              />
+              <EditorErrorBoundary>
+                <DashboardEditor />
+              </EditorErrorBoundary>
             }
           />
         </Routes>
       </main>
+      <SettingsDrawer
+        isOpen={isSettingsOpen}
+        onClose={closeSettings}
+        themeFamily={themeFamily}
+        themeMode={themeMode}
+        paletteId={paletteId}
+        resolvedMode={resolvedMode}
+        themeFamilies={themeFamilies}
+        paletteOptions={paletteOptions}
+        setThemeFamily={setThemeFamily}
+        setThemeMode={setThemeMode}
+        setPaletteId={setPaletteId}
+      />
     </div>
   );
 };

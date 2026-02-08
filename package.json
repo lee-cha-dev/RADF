@@ -33,6 +33,7 @@
     "smoke:consumer": "node scripts/smoke-consumer.mjs",
     "test:css": "node scripts/test-css-import.mjs",
     "test": "vitest run --passWithNoTests",
+    "test:vite": "vitest run",
     "test:watch": "vitest"
   },
   "peerDependencies": {
@@ -42,7 +43,6 @@
     "recharts": "^2.12.7"
   },
   "devDependencies": {
-    "@playwright/test": "^1.47.2",
     "@eslint/js": "^9.9.1",
     "@testing-library/jest-dom": "^6.5.0",
     "@testing-library/react": "^16.0.1",

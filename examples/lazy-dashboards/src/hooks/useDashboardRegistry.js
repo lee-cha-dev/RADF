@@ -10,6 +10,7 @@ import {
   touchDashboard,
   updateDashboard,
 } from '../data/dashboardRegistry.js';
+import { deleteDashboardAndCleanup } from '../data/dashboardCleanup.js';
 
 const useDashboardRegistry = () => {
   const [dashboards, setDashboards] = useState(() => listDashboards());
@@ -80,6 +81,15 @@ const useDashboardRegistry = () => {
     [refresh]
   );
 
+  const removeWithCleanup = useCallback(
+    async (dashboard, options) => {
+      const result = await deleteDashboardAndCleanup(dashboard, options);
+      refresh();
+      return result;
+    },
+    [refresh]
+  );
+
   const touch = useCallback(
     (id) => {
       const record = touchDashboard(id);
@@ -103,6 +113,7 @@ const useDashboardRegistry = () => {
       renameDashboard: rename,
       duplicateDashboard: duplicate,
       deleteDashboard: remove,
+      deleteDashboardAndCleanup: removeWithCleanup,
       touchDashboard: touch,
       getDashboardById: getById,
     }),
@@ -114,6 +125,7 @@ const useDashboardRegistry = () => {
       rename,
       duplicate,
       remove,
+      removeWithCleanup,
       touch,
       getById,
     ]

@@ -365,18 +365,37 @@ This way it can be ran on a server separate from the library as a standalone too
 ## feature/option_coverage_audit_and_editor_parity
 
 * Inventory all RADF viz components and their config options.
+* Build an **Option Coverage Matrix** (one row per option):
+
+    * widget type + option path (e.g., `axes.y.tickFormat`)
+    * option type, default, required/optional, valid enum values
+    * editor control mapping (dropdown, toggle, number, color, etc.)
+    * status: supported | partial | deferred
+    * notes + links to RADF source/docs for traceability
 * For each viz type:
 
     * ensure manifest includes all supported options
-    * mark advanced/rare ones accordingly
-* Provide “expert mode” escape hatch:
+    * define editor defaults that match RADF runtime defaults
+    * mark advanced/rare ones as “Advanced” (collapsed group)
+    * keep unsupported options as pass-through (preserve on save)
+* Provide an “expert mode” escape hatch:
 
-    * raw JSON editor for a widget (optional)
-    * shows compiled config for transparency
-* Considerations:
+    * raw JSON editor per widget with validation
+    * toggleable read-only view of compiled runtime config
+    * warn on fields that the visual editor cannot represent yet
+* Parity rules:
 
-    * avoid blocking v1 on total parity
-    * enforce parity for the “supported widget set” first
+    * v1 only guarantees parity for the “supported widget set”
+    * a widget cannot be marked supported unless all required options
+      and common options are mapped in the editor
+    * avoid blocking v1 on rare/edge options; track them as deferred
+* Deliverables:
+
+    * coverage matrix stored as JSON + markdown table
+    * manifest updates for each widget
+    * editor field catalog (reusable control definitions)
+    * test: schema validation ensures no “supported” widget is missing
+      required options
 
 ---
 
@@ -399,8 +418,29 @@ This way it can be ran on a server separate from the library as a standalone too
 * Provide “starter dashboards”:
 
     * basic KPI + bar + table layout
-    * auto-bind fields based on schema inference
-* Helps users get value in 30 seconds.
+    * include a compact filter bar variant (optional toggle)
+    * preconfigured layout sizes that fit common screens (laptop + 1080p)
+* Template library:
+
+    * KPI overview, trend + comparison, operational table, and empty grid
+    * each template ships with manifest-backed defaults (no invalid configs)
+    * visible preview thumbnail + short description
+* Auto-binding rules:
+
+    * map inferred numeric fields to KPI + y-axis defaults
+    * map inferred date/time to x-axis when present
+    * map top categorical to grouping/series
+    * fall back to first compatible field when inference is weak
+* UX flow:
+
+    * “Start from template” CTA in the library and in the empty editor
+    * allow “replace layout” vs “add widgets to existing”
+    * one-click create + immediate edit with bindings prefilled
+* Persistence + export:
+
+    * templates are stored as authoring model JSON (schemaVersioned)
+    * generated dashboards export cleanly without manual edits
+* Goal: users reach a meaningful preview in under 30 seconds.
 
 ---
 
@@ -411,8 +451,27 @@ This way it can be ran on a server separate from the library as a standalone too
     * schema inference unit tests
     * compiler output snapshot tests
     * manifest validation tests
-* Lint + build pipelines aligned with RADF.
-* Export zip correctness verification.
+    * dataset import parsing tests (csv/xlsx edge cases)
+    * dashboard registry CRUD tests (id, timestamps, schemaVersion)
+    * template instantiation tests (bindings + layout validity)
+* Test matrices:
+
+    * minimal dataset, large dataset (sampling on)
+    * missing values, duplicate headers, mixed-type columns
+    * dashboard with and without semantic layer enabled
+* CI alignment:
+
+    * lint + typecheck + build pipelines aligned with RADF
+    * ensure example app build stays green
+* Release checks:
+
+    * export zip correctness verification (file names, structure, content)
+    * compiled runtime config smoke tests in preview
+    * versioned schema migration check (load older authoring models)
+* Instrumentation:
+
+    * basic telemetry hooks (opt-in) for import errors and export failures
+    * log validation errors with widget id and manifest option path
 
 ---
 

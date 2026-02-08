@@ -18,6 +18,14 @@ import {
   getVizOptionDefaults,
   listVizManifests,
 } from '../authoring/vizManifest.js';
+import { resolveEditorControl } from '../authoring/editorFieldCatalog.js';
+import {
+  flattenOptionPaths,
+  getNestedValue,
+  isPlainObject,
+  setNestedValue,
+} from '../authoring/optionUtils.js';
+import { validateManifestCoverage } from '../authoring/manifestValidation.js';
 import DatasetImporter from '../components/DatasetImporter.jsx';
 import LivePreviewPanel from '../components/LivePreviewPanel.jsx';
 import { createLocalDataProvider } from '../data/localDataProvider.js';
@@ -27,14 +35,38 @@ import {
   buildDimensionSuggestions,
   buildMetricSuggestions,
 } from '../data/semanticLayer.js';
+import {
+  buildDashboardExport,
+  downloadDashboardZip,
+} from '../data/dashboardExport.js';
+import {
+  applyTemplateBindings,
+  buildTemplateAuthoringModel,
+  getDashboardTemplate,
+  getTemplatePreview,
+  listDashboardTemplates,
+} from '../data/dashboardTemplates.js';
+import {
+  getSyncEnabled,
+  isFileSystemAccessSupported,
+  loadCustomDashboardsDirectory,
+  requestCustomDashboardsDirectory,
+  setSyncEnabled,
+  writeDashboardExportToDirectory,
+} from '../data/fileSystemSync.js';
+import { trackTelemetryEvent } from '../data/telemetry.js';
 
 const DashboardEditor = () => {
   const { dashboardId } = useParams();
-  const { getDashboardById, updateDashboard } = useDashboardRegistry();
-  const dashboard = getDashboardById(dashboardId);
+  const { dashboards, updateDashboard } = useDashboardRegistry();
+  const dashboard = useMemo(
+    () => dashboards.find((item) => item.id === dashboardId) || null,
+    [dashboards, dashboardId]
+  );
   const gridRef = useRef(null);
   const interactionRef = useRef(null);
   const lastSavedModelRef = useRef('');
+  const unsupportedOptionLogRef = useRef(new Set());
   const [lastSavedAt, setLastSavedAt] = useState(
     dashboard?.updatedAt || null
   );
@@ -48,13 +80,54 @@ const DashboardEditor = () => {
     dashboard?.authoringModel?.widgets?.[0]?.id || null
   );
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
+  const [showExpertOptions, setShowExpertOptions] = useState(false);
+  const [rawOptionsText, setRawOptionsText] = useState('');
+  const [rawOptionsError, setRawOptionsError] = useState('');
+  const [showCompiledConfig, setShowCompiledConfig] = useState(false);
   const [isAddWidgetOpen, setIsAddWidgetOpen] = useState(false);
   const [selectedVizType, setSelectedVizType] = useState('kpi');
+  const [isTemplateOpen, setIsTemplateOpen] = useState(false);
+  const [selectedTemplateId, setSelectedTemplateId] = useState('');
+  const [templateMode, setTemplateMode] = useState('replace');
+  const [includeTemplateFilterBar, setIncludeTemplateFilterBar] =
+    useState(false);
   const [pendingRemoveWidgetId, setPendingRemoveWidgetId] = useState(null);
+  const [syncEnabled, setSyncEnabledState] = useState(() => getSyncEnabled());
+  const [syncHandle, setSyncHandle] = useState(null);
+  const [syncStatus, setSyncStatus] = useState({
+    state: 'idle',
+    error: '',
+    lastSyncedAt: null,
+  });
   const GRID_COLUMNS = 12;
   const GRID_ROWS = 24;
   const GRID_GAP = 12;
   const GRID_ROW_HEIGHT = 48;
+  const syncSupported = useMemo(() => isFileSystemAccessSupported(), []);
+
+  useEffect(() => {
+    if (!syncSupported) {
+      return;
+    }
+    let mounted = true;
+    loadCustomDashboardsDirectory().then((handle) => {
+      if (!mounted) {
+        return;
+      }
+      setSyncHandle(handle);
+      if (!handle && syncEnabled) {
+        setSyncEnabledState(false);
+        setSyncEnabled(false);
+      }
+    });
+    return () => {
+      mounted = false;
+    };
+  }, [syncSupported, syncEnabled]);
+
+  useEffect(() => {
+    setSyncEnabled(syncEnabled);
+  }, [syncEnabled]);
 
   useEffect(() => {
     setLastSavedAt(dashboard?.updatedAt || null);
@@ -79,6 +152,8 @@ const DashboardEditor = () => {
 
   useEffect(() => {
     setShowAdvancedOptions(false);
+    setShowExpertOptions(false);
+    setRawOptionsError('');
   }, [activeWidgetId]);
 
   const formattedSavedAt = useMemo(() => {
@@ -97,6 +172,70 @@ const DashboardEditor = () => {
       minute: '2-digit',
     });
   }, [lastSavedAt]);
+
+  const formattedSyncedAt = useMemo(() => {
+    if (!syncStatus.lastSyncedAt) {
+      return 'Not synced yet';
+    }
+    const date = new Date(syncStatus.lastSyncedAt);
+    if (Number.isNaN(date.getTime())) {
+      return 'Not synced yet';
+    }
+    return date.toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+    });
+  }, [syncStatus.lastSyncedAt]);
+
+  const buildPersistedDatasetBinding = useCallback((binding) => {
+    if (!binding) {
+      return null;
+    }
+    const { rows, preview, ...rest } = binding;
+    return {
+      ...rest,
+      rows: [],
+      preview: [],
+    };
+  }, []);
+
+  const buildPersistedAuthoringModel = useCallback(
+    (model) => {
+      if (!model) {
+        return model;
+      }
+      return {
+        ...model,
+        datasetBinding: buildPersistedDatasetBinding(model.datasetBinding),
+      };
+    },
+    [buildPersistedDatasetBinding]
+  );
+
+  const syncStatusLabel = useMemo(() => {
+    if (!syncEnabled) {
+      return 'Off';
+    }
+    if (!syncHandle) {
+      return 'Choose a sync folder to start syncing.';
+    }
+    if (syncStatus.state === 'syncing') {
+      return 'Syncing to CustomDashboards...';
+    }
+    if (syncStatus.state === 'error') {
+      return `Error: ${syncStatus.error || 'Unknown issue.'}`;
+    }
+    return `Synced ${formattedSyncedAt}`;
+  }, [
+    formattedSyncedAt,
+    syncEnabled,
+    syncHandle,
+    syncStatus.error,
+    syncStatus.state,
+  ]);
 
   const validation = useMemo(
     () => validateAuthoringModel(authoringModel),
@@ -117,6 +256,12 @@ const DashboardEditor = () => {
   }, [compiledImmediate]);
 
   const vizManifests = useMemo(() => listVizManifests(), []);
+  const dashboardTemplates = useMemo(() => listDashboardTemplates(), []);
+  const selectedTemplate = useMemo(
+    () => getDashboardTemplate(selectedTemplateId),
+    [selectedTemplateId]
+  );
+  const manifestCoverage = useMemo(() => validateManifestCoverage(), []);
   const datasetBinding = authoringModel.datasetBinding || null;
   const datasetColumns = datasetBinding?.columns || [];
   const semanticLayer = authoringModel.semanticLayer || {
@@ -181,6 +326,31 @@ const DashboardEditor = () => {
     return rawValue;
   };
 
+  const getOptionPath = (schema, optionKey) =>
+    schema?.path || optionKey;
+
+  const getOptionValue = (schema, optionKey, options) =>
+    getNestedValue(options, getOptionPath(schema, optionKey));
+
+  const buildOptionPatch = (schema, optionKey, value) =>
+    setNestedValue({}, getOptionPath(schema, optionKey), value);
+
+  const parseStringList = (rawValue) =>
+    rawValue
+      .split(',')
+      .map((item) => item.trim())
+      .filter(Boolean);
+
+  const formatStringList = (value) =>
+    Array.isArray(value) ? value.join(', ') : value ?? '';
+
+  const normalizeColorValue = (value, fallback = '#000000') => {
+    if (typeof value === 'string' && value.startsWith('#')) {
+      return value;
+    }
+    return fallback;
+  };
+
   const isOptionVisible = (schema, options) => {
     if (!schema?.visibleWhen) {
       return true;
@@ -189,7 +359,7 @@ const DashboardEditor = () => {
     if (!option) {
       return true;
     }
-    const current = options?.[option];
+    const current = getNestedValue(options, option);
     if (Array.isArray(equals)) {
       return equals.includes(current);
     }
@@ -197,15 +367,91 @@ const DashboardEditor = () => {
   };
 
   const handleSave = () => {
+    const persistedModel = buildPersistedAuthoringModel(authoringModel);
+    const persistedBinding = buildPersistedDatasetBinding(
+      authoringModel.datasetBinding
+    );
     const updated = updateDashboard(dashboardId, {
-      authoringModel,
+      authoringModel: persistedModel,
       compiledConfig: compiledImmediate.config,
-      datasetBinding: authoringModel.datasetBinding || null,
+      datasetBinding: persistedBinding,
     });
     if (updated?.updatedAt) {
       setLastSavedAt(updated.updatedAt);
     }
     lastSavedModelRef.current = JSON.stringify(authoringModel);
+  };
+
+  const handleExport = async () => {
+    if (!dashboard) {
+      return;
+    }
+    try {
+      const exportPlan = buildDashboardExport({
+        dashboard,
+        authoringModel,
+        compiled: compiledImmediate,
+      });
+      if (!exportPlan) {
+        trackTelemetryEvent('export_failure', {
+          reason: 'build_failed',
+          dashboardId: dashboard.id,
+          dashboardName: dashboard.name,
+        });
+        window.alert('Export failed to build.');
+        return;
+      }
+      const downloaded = await downloadDashboardZip(exportPlan);
+      if (!downloaded) {
+        trackTelemetryEvent('export_failure', {
+          reason: 'download_failed',
+          dashboardId: dashboard.id,
+          dashboardName: dashboard.name,
+        });
+        window.alert('Export failed to download.');
+      }
+    } catch (error) {
+      trackTelemetryEvent('export_failure', {
+        reason: error?.message || 'unknown_error',
+        dashboardId: dashboard.id,
+        dashboardName: dashboard.name,
+      });
+      window.alert('Export failed.');
+    }
+  };
+
+  const handleEnableSync = async () => {
+    if (!syncSupported) {
+      return;
+    }
+    try {
+      const handle = await requestCustomDashboardsDirectory();
+      if (!handle) {
+        return;
+      }
+      setSyncHandle(handle);
+      setSyncEnabledState(true);
+      setSyncStatus((current) => ({
+        ...current,
+        state: 'idle',
+        error: '',
+      }));
+    } catch (error) {
+      setSyncStatus((current) => ({
+        ...current,
+        state: 'error',
+        error: error?.message || 'Unable to access the selected folder.',
+      }));
+    }
+  };
+
+  const handleDisableSync = () => {
+    setSyncEnabledState(false);
+    setSyncStatus((current) => ({
+      ...current,
+      state: 'idle',
+      error: '',
+    }));
   };
 
   const handleDatasetUpdate = useCallback((nextDataset) => {
@@ -235,6 +481,91 @@ const DashboardEditor = () => {
       return next;
     });
     setPendingRemoveWidgetId(null);
+  };
+
+  const getMaxRow = (widgets) =>
+    (widgets || []).reduce((max, widget) => {
+      const layout = widget.layout || { y: 1, h: 1 };
+      return Math.max(max, layout.y + layout.h - 1);
+    }, 0);
+
+  const buildUniqueWidgetId = (base, used) => {
+    let nextId = base || 'widget';
+    while (used.has(nextId)) {
+      nextId = `${base || 'widget'}-${Math.random().toString(36).slice(2, 6)}`;
+    }
+    used.add(nextId);
+    return nextId;
+  };
+
+  const applyTemplateToModel = (templateId) => {
+    const template = getDashboardTemplate(templateId);
+    if (!template) {
+      return;
+    }
+    const includeFilterBar =
+      includeTemplateFilterBar && template.supportsFilterBar;
+    const templateModel = buildTemplateAuthoringModel(templateId, {
+      includeFilterBar,
+    });
+    if (!templateModel) {
+      return;
+    }
+    const boundTemplate = applyTemplateBindings(
+      templateModel,
+      datasetColumns
+    );
+
+    setAuthoringModel((current) => {
+      if (templateMode === 'replace') {
+        const nextModel = normalizeAuthoringModel(
+          {
+            ...boundTemplate,
+            datasetBinding: current.datasetBinding,
+            semanticLayer: current.semanticLayer,
+            meta: {
+              ...boundTemplate.meta,
+              title: current.meta?.title || dashboard?.name || boundTemplate.meta?.title,
+              description:
+                current.meta?.description || boundTemplate.meta?.description,
+            },
+          },
+          { title: dashboard?.name }
+        );
+        setActiveWidgetId(nextModel.widgets[0]?.id || null);
+        return nextModel;
+      }
+
+      const usedIds = new Set((current.widgets || []).map((widget) => widget.id));
+      const offsetY = getMaxRow(current.widgets) + 1;
+      const idMap = new Map();
+      const appendedWidgets = (boundTemplate.widgets || []).map((widget) => {
+        const nextId = buildUniqueWidgetId(widget.id, usedIds);
+        idMap.set(widget.id, nextId);
+        return {
+          ...widget,
+          id: nextId,
+          layout: {
+            ...widget.layout,
+            y: (widget.layout?.y || 1) + offsetY,
+          },
+        };
+      });
+      const appendedLayout = appendedWidgets.map((widget) => ({
+        id: widget.id,
+        ...widget.layout,
+      }));
+      const nextModel = normalizeAuthoringModel({
+        ...current,
+        widgets: [...(current.widgets || []), ...appendedWidgets],
+        layout: [...(current.layout || []), ...appendedLayout],
+      });
+      setActiveWidgetId(
+        appendedWidgets[0]?.id || current.widgets?.[0]?.id || null
+      );
+      return nextModel;
+    });
+    setIsTemplateOpen(false);
   };
 
   const handleWidgetFieldChange = (widgetId, key, value) => {
@@ -267,13 +598,55 @@ const DashboardEditor = () => {
     );
   };
 
-  const handleOptionChange = (widgetId, key, value) => {
+  const handleOptionChange = (widgetId, optionKey, schema, value) => {
+    const patch = buildOptionPatch(schema, optionKey, value);
     setAuthoringModel((current) =>
       updateWidgetInModel(current, widgetId, {
-        options: { [key]: value },
+        options: patch,
         draft: false,
       })
     );
+  };
+
+  const handleToggleExpertOptions = () => {
+    setShowExpertOptions((current) => {
+      const next = !current;
+      if (next && activeWidget) {
+        setRawOptionsText(JSON.stringify(activeWidget.options || {}, null, 2));
+      }
+      setRawOptionsError('');
+      return next;
+    });
+  };
+
+  const handleApplyRawOptions = () => {
+    if (!activeWidget) {
+      return;
+    }
+    try {
+      const parsed = rawOptionsText ? JSON.parse(rawOptionsText) : {};
+      if (!isPlainObject(parsed)) {
+        throw new Error('Options JSON must be an object.');
+      }
+      setAuthoringModel((current) =>
+        updateWidgetInModel(current, activeWidget.id, {
+          options: parsed,
+          replaceOptions: true,
+          draft: false,
+        })
+      );
+      setRawOptionsError('');
+    } catch (error) {
+      setRawOptionsError(error?.message || 'Options JSON is invalid.');
+    }
+  };
+
+  const handleResetRawOptions = () => {
+    if (!activeWidget) {
+      return;
+    }
+    setRawOptionsText(JSON.stringify(activeWidget.options || {}, null, 2));
+    setRawOptionsError('');
   };
 
   const updateSemanticLayer = useCallback((updater) => {
@@ -393,6 +766,13 @@ const DashboardEditor = () => {
   const activeWidget = authoringModel.widgets.find(
     (widget) => widget.id === activeWidgetId
   );
+  useEffect(() => {
+    if (!activeWidget || showExpertOptions) {
+      return;
+    }
+    setRawOptionsText(JSON.stringify(activeWidget.options || {}, null, 2));
+    setRawOptionsError('');
+  }, [activeWidget, showExpertOptions]);
   const activeVizManifest = useMemo(
     () => getVizManifest(activeWidget?.vizType),
     [activeWidget?.vizType]
@@ -405,16 +785,63 @@ const DashboardEditor = () => {
   );
   const basicOptions = visibleOptions.filter(([, schema]) => !schema.advanced);
   const advancedOptions = visibleOptions.filter(([, schema]) => schema.advanced);
+  const supportedOptionPaths = useMemo(() => {
+    const paths = new Set();
+    optionEntries.forEach(([key, schema]) => {
+      paths.add(getOptionPath(schema, key));
+    });
+    return paths;
+  }, [optionEntries]);
+  const unsupportedOptionPaths = useMemo(() => {
+    if (!activeWidget) {
+      return [];
+    }
+    return flattenOptionPaths(activeWidget.options || {}).filter(
+      (path) => !supportedOptionPaths.has(path)
+    );
+  }, [activeWidget, supportedOptionPaths]);
+  useEffect(() => {
+    if (!activeWidget || unsupportedOptionPaths.length === 0) {
+      return;
+    }
+    const logged = unsupportedOptionLogRef.current;
+    unsupportedOptionPaths.forEach((path) => {
+      const key = `${activeWidget.id}:${path}`;
+      if (logged.has(key)) {
+        return;
+      }
+      logged.add(key);
+      trackTelemetryEvent('widget_option_unsupported', {
+        widgetId: activeWidget.id,
+        vizType: activeWidget.vizType,
+        optionPath: path,
+      });
+    });
+  }, [activeWidget, unsupportedOptionPaths, trackTelemetryEvent]);
+  const compiledActivePanel = activeWidget
+    ? compiledPanelMap.get(activeWidget.id)
+    : null;
+  const compiledPanelJson = useMemo(
+    () => (compiledActivePanel ? JSON.stringify(compiledActivePanel, null, 2) : ''),
+    [compiledActivePanel]
+  );
 
   const renderOptionField = (optionKey, schema) => {
     if (!activeWidget) {
       return null;
     }
-    const optionValue = activeWidget.options?.[optionKey];
+    const optionValue = getOptionValue(
+      schema,
+      optionKey,
+      activeWidget.options
+    );
     const label = schema.label || optionKey;
     const helpText = schema.help;
     const fieldId = `${activeWidget.id}-${optionKey}`;
-    if (schema.type === 'boolean') {
+    const control = resolveEditorControl(schema);
+    const listId =
+      schema.suggestFrom === 'fields' ? fieldOptionsListId : undefined;
+    if (control === 'toggle') {
       return (
         <label key={optionKey} className="lazy-form__field">
           <span className="lazy-input__label">{label}</span>
@@ -424,23 +851,33 @@ const DashboardEditor = () => {
             type="checkbox"
             checked={Boolean(optionValue)}
             onChange={(event) =>
-              handleOptionChange(activeWidget.id, optionKey, event.target.checked)
+              handleOptionChange(
+                activeWidget.id,
+                optionKey,
+                schema,
+                event.target.checked
+              )
             }
           />
           {helpText ? <span className="lazy-input__help">{helpText}</span> : null}
         </label>
       );
     }
-    if (schema.type === 'enum') {
+    if (control === 'select') {
       return (
         <label key={optionKey} className="lazy-form__field">
           <span className="lazy-input__label">{label}</span>
           <select
             id={fieldId}
             className="lazy-input__field"
-            value={optionValue ?? ''}
+            value={optionValue ?? schema.default ?? ''}
             onChange={(event) =>
-              handleOptionChange(activeWidget.id, optionKey, event.target.value)
+              handleOptionChange(
+                activeWidget.id,
+                optionKey,
+                schema,
+                event.target.value
+              )
             }
           >
             {(schema.options || []).map((option) => (
@@ -453,7 +890,7 @@ const DashboardEditor = () => {
         </label>
       );
     }
-    if (schema.type === 'number') {
+    if (control === 'number') {
       return (
         <label key={optionKey} className="lazy-form__field">
           <span className="lazy-input__label">{label}</span>
@@ -468,12 +905,53 @@ const DashboardEditor = () => {
               const rawValue = event.target.value;
               const parsed =
                 rawValue === '' ? null : Number(rawValue);
+              handleOptionChange(activeWidget.id, optionKey, schema, Number.isNaN(parsed) ? null : parsed);
+            }}
+          />
+          {helpText ? <span className="lazy-input__help">{helpText}</span> : null}
+        </label>
+      );
+    }
+    if (control === 'list') {
+      return (
+        <label key={optionKey} className="lazy-form__field">
+          <span className="lazy-input__label">{label}</span>
+          <input
+            id={fieldId}
+            className="lazy-input__field"
+            type="text"
+            placeholder="Comma-separated values"
+            value={formatStringList(optionValue)}
+            onChange={(event) =>
               handleOptionChange(
                 activeWidget.id,
                 optionKey,
-                Number.isNaN(parsed) ? null : parsed
-              );
-            }}
+                schema,
+                parseStringList(event.target.value)
+              )
+            }
+          />
+          {helpText ? <span className="lazy-input__help">{helpText}</span> : null}
+        </label>
+      );
+    }
+    if (control === 'color') {
+      return (
+        <label key={optionKey} className="lazy-form__field">
+          <span className="lazy-input__label">{label}</span>
+          <input
+            id={fieldId}
+            className="lazy-input__field"
+            type="color"
+            value={normalizeColorValue(optionValue, schema.default)}
+            onChange={(event) =>
+              handleOptionChange(
+                activeWidget.id,
+                optionKey,
+                schema,
+                event.target.value
+              )
+            }
           />
           {helpText ? <span className="lazy-input__help">{helpText}</span> : null}
         </label>
@@ -486,9 +964,15 @@ const DashboardEditor = () => {
           id={fieldId}
           className="lazy-input__field"
           type="text"
+          list={listId}
           value={optionValue ?? ''}
           onChange={(event) =>
-            handleOptionChange(activeWidget.id, optionKey, event.target.value)
+            handleOptionChange(
+              activeWidget.id,
+              optionKey,
+              schema,
+              event.target.value
+            )
           }
         />
         {helpText ? <span className="lazy-input__help">{helpText}</span> : null}
@@ -533,6 +1017,26 @@ const DashboardEditor = () => {
     return Array.from(options);
   }, [datasetColumns, semanticLayer]);
   const fieldOptionsListId = 'lazy-field-options';
+  useEffect(() => {
+    if (!selectedTemplateId && dashboardTemplates.length > 0) {
+      setSelectedTemplateId(dashboardTemplates[0].id);
+    }
+  }, [dashboardTemplates, selectedTemplateId]);
+  useEffect(() => {
+    if (selectedTemplate && !selectedTemplate.supportsFilterBar) {
+      setIncludeTemplateFilterBar(false);
+    }
+  }, [selectedTemplate]);
+
+  const openTemplateModal = (templateId) => {
+    if (templateId) {
+      setSelectedTemplateId(templateId);
+    }
+    setIsTemplateOpen(true);
+  };
+  const closeTemplateModal = () => {
+    setIsTemplateOpen(false);
+  };
   const openAddWidgetModal = () => {
     setSelectedVizType(vizManifests[0]?.id || 'kpi');
     setIsAddWidgetOpen(true);
@@ -720,10 +1224,14 @@ const DashboardEditor = () => {
       return undefined;
     }
     const timeout = setTimeout(() => {
+      const persistedModel = buildPersistedAuthoringModel(authoringModel);
+      const persistedBinding = buildPersistedDatasetBinding(
+        authoringModel.datasetBinding
+      );
       const updated = updateDashboard(dashboardId, {
-        authoringModel,
+        authoringModel: persistedModel,
         compiledConfig: compiledImmediate.config,
-        datasetBinding: authoringModel.datasetBinding || null,
+        datasetBinding: persistedBinding,
       });
       if (updated?.updatedAt) {
         setLastSavedAt(updated.updatedAt);
@@ -733,10 +1241,65 @@ const DashboardEditor = () => {
     return () => clearTimeout(timeout);
   }, [
     authoringModel,
+    buildPersistedAuthoringModel,
+    buildPersistedDatasetBinding,
     compiledImmediate.config,
     dashboard,
     dashboardId,
     updateDashboard,
+  ]);
+
+  useEffect(() => {
+    if (!dashboard || !syncEnabled || !syncHandle) {
+      return undefined;
+    }
+    const exportPlan = buildDashboardExport({
+      dashboard,
+      authoringModel,
+      compiled: compiledImmediate,
+    });
+    if (!exportPlan) {
+      return undefined;
+    }
+    let active = true;
+    const timeout = setTimeout(async () => {
+      try {
+        setSyncStatus((current) => ({
+          ...current,
+          state: 'syncing',
+          error: '',
+        }));
+        await writeDashboardExportToDirectory(exportPlan, syncHandle);
+        if (!active) {
+          return;
+        }
+        setSyncStatus((current) => ({
+          ...current,
+          state: 'synced',
+          error: '',
+          lastSyncedAt: new Date().toISOString(),
+        }));
+      } catch (error) {
+        if (!active) {
+          return;
+        }
+        setSyncStatus((current) => ({
+          ...current,
+          state: 'error',
+          error: error?.message || 'Sync failed.',
+        }));
+      }
+    }, 700);
+    return () => {
+      active = false;
+      clearTimeout(timeout);
+    };
+  }, [
+    authoringModel,
+    compiledImmediate,
+    dashboard,
+    syncEnabled,
+    syncHandle,
   ]);
 
   if (!dashboard) {
@@ -765,23 +1328,61 @@ const DashboardEditor = () => {
       <header className="lazy-editor__header">
         <div>
           <p className="lazy-editor__eyebrow">Dashboard Editor</p>
-          <h1 className="lazy-editor__title">{dashboard.name}</h1>
-          <p className="lazy-editor__subtitle">
-            Drag widgets, tune encodings, and preview live as you edit.
-          </p>
-          <p className="lazy-editor__subtitle">Last saved: {formattedSavedAt}</p>
-        </div>
-        <div className="lazy-editor__actions">
-          <button className="lazy-button" type="button" onClick={handleSave}>
-            Save Draft
-          </button>
-          <button className="lazy-button ghost" type="button">
-            Export
-          </button>
-          <Link className="lazy-button ghost" to="/">
-            Back to Library
-          </Link>
-        </div>
+            <h1 className="lazy-editor__title">{dashboard.name}</h1>
+            <p className="lazy-editor__subtitle">
+              Drag widgets, tune encodings, and preview live as you edit.
+            </p>
+            <p className="lazy-editor__subtitle">Last saved: {formattedSavedAt}</p>
+            {syncSupported ? (
+              <p className="lazy-editor__subtitle">Disk sync: {syncStatusLabel}</p>
+            ) : null}
+          </div>
+          <div className="lazy-editor__actions">
+            <button className="lazy-button" type="button" onClick={handleSave}>
+              Save Draft
+            </button>
+            <button
+              className="lazy-button ghost"
+              type="button"
+              onClick={() => openTemplateModal()}
+            >
+              Templates
+            </button>
+            <button className="lazy-button ghost" type="button" onClick={handleExport}>
+              Export
+            </button>
+            {syncSupported ? (
+              syncEnabled ? (
+                <>
+                  <button
+                    className="lazy-button ghost"
+                    type="button"
+                    onClick={handleEnableSync}
+                  >
+                    Change Sync Folder
+                  </button>
+                  <button
+                    className="lazy-button ghost"
+                    type="button"
+                    onClick={handleDisableSync}
+                  >
+                    Disable Sync
+                  </button>
+                </>
+              ) : (
+                <button
+                  className="lazy-button ghost"
+                  type="button"
+                  onClick={handleEnableSync}
+                >
+                  Enable Disk Sync
+                </button>
+              )
+            ) : null}
+            <Link className="lazy-button ghost" to="/">
+              Back to Library
+            </Link>
+          </div>
       </header>
 
       <div className="lazy-editor__grid">
@@ -993,9 +1594,27 @@ const DashboardEditor = () => {
             </p>
             <div className="lazy-widget-list">
               {authoringModel.widgets.length === 0 ? (
-                <p className="lazy-panel__body">
-                  Add a widget to start defining your layout.
-                </p>
+                <div className="lazy-template-empty">
+                  <p className="lazy-panel__body">
+                    Start with a template or add widgets one by one.
+                  </p>
+                  <div className="lazy-template-empty__actions">
+                    <button
+                      className="lazy-button"
+                      type="button"
+                      onClick={() => openTemplateModal()}
+                    >
+                      Start from template
+                    </button>
+                    <button
+                      className="lazy-button ghost"
+                      type="button"
+                      onClick={openAddWidgetModal}
+                    >
+                      Add widget
+                    </button>
+                  </div>
+                </div>
               ) : (
                 authoringModel.widgets.map((widget) => {
                   const status = validation.widgets[widget.id]?.status || 'draft';
@@ -1145,6 +1764,12 @@ const DashboardEditor = () => {
         </section>
         <section className="lazy-panel">
           <h2 className="lazy-panel__title">Widget Properties</h2>
+          {manifestCoverage.errors.length > 0 ? (
+            <div className="lazy-alert danger">
+              <strong>Manifest coverage check failed.</strong>
+              <span>{manifestCoverage.errors.join(' ')}</span>
+            </div>
+          ) : null}
           {!activeWidget ? (
             <p className="lazy-panel__body">
               Select a widget to tune encodings, options, and filters.
@@ -1200,12 +1825,34 @@ const DashboardEditor = () => {
                   }
                 >
                   {vizManifests.map((manifest) => (
-                    <option key={manifest.id} value={manifest.id}>
+                    <option
+                      key={manifest.id}
+                      value={manifest.id}
+                      disabled={manifest.supportLevel === 'deferred'}
+                    >
                       {manifest.label}
                     </option>
                   ))}
                 </select>
               </label>
+              {activeVizManifest?.supportLevel === 'partial' ? (
+                <div className="lazy-alert warning">
+                  <strong>Partial support.</strong>
+                  <span>
+                    Some options for this widget are only editable in Expert
+                    mode.
+                  </span>
+                </div>
+              ) : null}
+              {activeVizManifest?.supportLevel === 'deferred' ? (
+                <div className="lazy-alert danger">
+                  <strong>Deferred widget.</strong>
+                  <span>
+                    This widget is not fully supported yet. Preview output may
+                    be incomplete.
+                  </span>
+                </div>
+              ) : null}
               {requiredEncodings.length > 0 ? (
                 <p className="lazy-panel__body">Required encodings</p>
               ) : null}
@@ -1290,6 +1937,74 @@ const DashboardEditor = () => {
                     renderOptionField(optionKey, schema)
                   )
                 : null}
+              {unsupportedOptionPaths.length > 0 ? (
+                <div className="lazy-alert warning">
+                  <strong>Unsupported options detected.</strong>
+                  <span>
+                    These fields are preserved but not editable yet:{' '}
+                    {unsupportedOptionPaths.join(', ')}
+                  </span>
+                </div>
+              ) : null}
+              <div className="lazy-expert__actions">
+                <button
+                  className="lazy-button ghost"
+                  type="button"
+                  onClick={handleToggleExpertOptions}
+                >
+                  {showExpertOptions ? 'Hide expert mode' : 'Show expert mode'}
+                </button>
+                <button
+                  className="lazy-button ghost"
+                  type="button"
+                  onClick={() =>
+                    setShowCompiledConfig((current) => !current)
+                  }
+                >
+                  {showCompiledConfig
+                    ? 'Hide compiled config'
+                    : 'Show compiled config'}
+                </button>
+              </div>
+              {showExpertOptions ? (
+                <div className="lazy-expert">
+                  <label className="lazy-form__field">
+                    <span className="lazy-input__label">Options JSON</span>
+                    <textarea
+                      className="lazy-input__field lazy-input__field--code"
+                      rows={8}
+                      value={rawOptionsText}
+                      onChange={(event) =>
+                        setRawOptionsText(event.target.value)
+                      }
+                    />
+                  </label>
+                  {rawOptionsError ? (
+                    <div className="lazy-alert danger">{rawOptionsError}</div>
+                  ) : null}
+                  <div className="lazy-form__actions">
+                    <button
+                      className="lazy-button ghost"
+                      type="button"
+                      onClick={handleResetRawOptions}
+                    >
+                      Reset JSON
+                    </button>
+                    <button
+                      className="lazy-button"
+                      type="button"
+                      onClick={handleApplyRawOptions}
+                    >
+                      Apply JSON
+                    </button>
+                  </div>
+                </div>
+              ) : null}
+              {showCompiledConfig ? (
+                <pre className="lazy-code-block lazy-code-block--panel">
+                  {compiledPanelJson || 'No compiled config available.'}
+                </pre>
+              ) : null}
               {widgetErrors.length > 0 ? (
                 <div className="lazy-validation">
                   <p className="lazy-validation__title">Needs attention</p>
@@ -1313,6 +2028,142 @@ const DashboardEditor = () => {
           )}
         </section>
       </div>
+      {isTemplateOpen ? (
+        <div className="lazy-modal__backdrop" role="dialog" aria-modal="true">
+          <div className="lazy-modal lazy-template-modal">
+            <div className="lazy-modal__header">
+              <div>
+                <p className="lazy-modal__eyebrow">Starter templates</p>
+                <h2 className="lazy-modal__title">Choose a layout</h2>
+              </div>
+              <button
+                className="lazy-button ghost"
+                type="button"
+                onClick={closeTemplateModal}
+              >
+                Close
+              </button>
+            </div>
+            <div className="lazy-modal__body">
+              <div className="lazy-template-modal__controls">
+                <div>
+                  <p className="lazy-panel__body">
+                    Pick a template and decide whether to replace or append the
+                    current layout.
+                  </p>
+                  {templateMode === 'replace' &&
+                  authoringModel.widgets.length > 0 ? (
+                    <div className="lazy-alert warning">
+                      Replacing will remove existing widgets.
+                    </div>
+                  ) : null}
+                  {!datasetBinding ? (
+                    <div className="lazy-alert warning">
+                      Import a dataset to auto-bind fields in the template.
+                    </div>
+                  ) : null}
+                </div>
+                <div className="lazy-template-modal__options">
+                  <div className="lazy-input">
+                    <span className="lazy-input__label">Apply mode</span>
+                    <div className="lazy-toggle">
+                      <button
+                        className={`lazy-toggle__button ${
+                          templateMode === 'replace' ? 'active' : ''
+                        }`}
+                        type="button"
+                        onClick={() => setTemplateMode('replace')}
+                      >
+                        Replace layout
+                      </button>
+                      <button
+                        className={`lazy-toggle__button ${
+                          templateMode === 'add' ? 'active' : ''
+                        }`}
+                        type="button"
+                        onClick={() => setTemplateMode('add')}
+                      >
+                        Add to existing
+                      </button>
+                    </div>
+                  </div>
+                  {selectedTemplate?.supportsFilterBar ? (
+                    <label className="lazy-template-card__toggle">
+                      <input
+                        type="checkbox"
+                        checked={includeTemplateFilterBar}
+                        onChange={(event) =>
+                          setIncludeTemplateFilterBar(event.target.checked)
+                        }
+                      />
+                      <span>Include filter bar</span>
+                    </label>
+                  ) : null}
+                </div>
+              </div>
+              <div className="lazy-template-grid">
+                {dashboardTemplates.map((template) => {
+                  const isActive = template.id === selectedTemplateId;
+                  const showFilter = isActive ? includeTemplateFilterBar : false;
+                  return (
+                    <button
+                      key={template.id}
+                      type="button"
+                      className={`lazy-template-card lazy-template-card--selectable ${
+                        isActive ? 'is-active' : ''
+                      }`}
+                      onClick={() => setSelectedTemplateId(template.id)}
+                    >
+                      <div className="lazy-template-card__preview">
+                        <div className="lazy-template-preview">
+                          {getTemplatePreview(template.id, showFilter).map(
+                            (block, index) => (
+                              <span
+                                key={`${template.id}-${index}`}
+                                className={`lazy-template-preview__block ${block.type || ''} lazy-grid-x-${block.x} lazy-grid-y-${block.y} lazy-grid-w-${block.w} lazy-grid-h-${block.h}`}
+                              />
+                            )
+                          )}
+                        </div>
+                      </div>
+                      <h3 className="lazy-template-card__title">
+                        {template.name}
+                      </h3>
+                      <p className="lazy-template-card__description">
+                        {template.description}
+                      </p>
+                      <div className="lazy-template-card__tags">
+                        {template.tags.map((tag) => (
+                          <span className="lazy-pill" key={tag}>
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="lazy-modal__footer">
+              <button
+                className="lazy-button ghost"
+                type="button"
+                onClick={closeTemplateModal}
+              >
+                Cancel
+              </button>
+              <button
+                className="lazy-button"
+                type="button"
+                onClick={() => applyTemplateToModel(selectedTemplateId)}
+                disabled={!selectedTemplateId}
+              >
+                Apply template
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
       {isAddWidgetOpen ? (
         <div className="lazy-modal__backdrop" role="dialog" aria-modal="true">
           <div className="lazy-modal">
@@ -1333,6 +2184,8 @@ const DashboardEditor = () => {
               <div className="lazy-viz-grid">
                 {vizManifests.map((manifest) => {
                   const prereqs = getVizPrereqs(manifest);
+                  const isDeferred = manifest.supportLevel === 'deferred';
+                  const isPartial = manifest.supportLevel === 'partial';
                   return (
                     <button
                       key={manifest.id}
@@ -1340,6 +2193,7 @@ const DashboardEditor = () => {
                         selectedVizType === manifest.id ? ' active' : ''
                       }`}
                       type="button"
+                      disabled={isDeferred}
                       onClick={() => setSelectedVizType(manifest.id)}
                     >
                       <div className="lazy-viz-card__header">
@@ -1350,6 +2204,12 @@ const DashboardEditor = () => {
                           {manifest.id}
                         </span>
                       </div>
+                      {isDeferred ? (
+                        <span className="lazy-pill">Deferred</span>
+                      ) : null}
+                      {isPartial ? (
+                        <span className="lazy-pill">Partial</span>
+                      ) : null}
                       <p className="lazy-viz-card__description">
                         {manifest.description}
                       </p>

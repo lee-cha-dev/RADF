@@ -8,17 +8,20 @@ const Settings = ({
   setThemeFamily,
   setThemeMode,
   setPaletteId,
+  showHeader = true,
 }) => (
   <section className="lazy-settings">
-    <header className="lazy-settings__header">
-      <div>
-        <p className="lazy-settings__eyebrow">Global Settings</p>
-        <h1 className="lazy-settings__title">Themes & Palettes</h1>
-        <p className="lazy-settings__subtitle">
-          Settings apply across every dashboard and persist in your browser.
-        </p>
-      </div>
-    </header>
+    {showHeader ? (
+      <header className="lazy-settings__header">
+        <div>
+          <p className="lazy-settings__eyebrow">Global Settings</p>
+          <h1 className="lazy-settings__title">Themes & Palettes</h1>
+          <p className="lazy-settings__subtitle">
+            Settings apply across every dashboard and persist in your browser.
+          </p>
+        </div>
+      </header>
+    ) : null}
 
     <div className="lazy-settings__grid">
       <section className="lazy-panel">

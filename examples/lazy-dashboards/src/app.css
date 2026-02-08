@@ -103,9 +103,9 @@ a {
 
 .lazy-shell {
   width: 100%;
-  max-width: var(--lazy-max-width);
+  /*max-width: var(--lazy-max-width);*/
   margin: 0 auto;
-  padding: 32px;
+  padding: 32px 5vw;
 }
 
 .lazy-hero {
@@ -186,6 +186,13 @@ a {
   border-radius: 4px;
 }
 
+.lazy-input__field--code {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.85rem;
+  min-height: 160px;
+  resize: vertical;
+}
+
 .lazy-input__help {
   font-size: 0.75rem;
   color: var(--radf-text-muted);
@@ -254,6 +261,80 @@ a {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+.lazy-template-card__preview {
+  border-radius: 14px;
+  border: 1px solid var(--radf-border-subtle);
+  padding: 12px;
+  background: var(--radf-surface-2);
+}
+
+.lazy-template-preview {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-auto-rows: 8px;
+  gap: 4px;
+}
+
+.lazy-template-preview__block {
+  border-radius: 6px;
+  border: 1px solid var(--radf-border-subtle);
+  background: var(--radf-surface-1);
+}
+
+.lazy-template-preview__block.kpi {
+  background: var(--radf-accent-primary-soft);
+}
+
+.lazy-template-preview__block.chart {
+  background: var(--radf-accent-secondary-soft);
+}
+
+.lazy-template-preview__block.table {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.lazy-template-preview__block.bullet {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.lazy-template-preview__block.filter {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.lazy-template-card__toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.85rem;
+  color: var(--radf-text-secondary);
+}
+
+.lazy-template-card__toggle input {
+  width: 16px;
+  height: 16px;
+}
+
+.lazy-template-card--selectable {
+  appearance: none;
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+  border: 1px solid var(--radf-border-subtle);
+  background: var(--radf-surface-1);
+  font-family: var(--lazy-font-body);
+}
+
+.lazy-template-card--selectable:hover {
+  border-color: var(--radf-border-focus);
+  box-shadow: var(--radf-shadow-low);
+  transform: translateY(-1px);
+}
+
+.lazy-template-card--selectable.is-active {
+  border-color: var(--radf-accent-primary);
+  box-shadow: var(--radf-shadow-med);
 }
 
 .lazy-library__grid {
@@ -522,6 +603,17 @@ a {
 .lazy-widget-actions {
   display: flex;
   gap: 8px;
+}
+
+.lazy-template-empty {
+  display: grid;
+  gap: 12px;
+}
+
+.lazy-template-empty__actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .lazy-widget-issues {
@@ -1062,6 +1154,24 @@ a {
   font-family: 'Courier New', Courier, monospace;
 }
 
+.lazy-code-block--panel {
+  max-height: 260px;
+  border-radius: 12px;
+  border: 1px solid var(--radf-border-subtle);
+  background: var(--radf-surface-2);
+}
+
+.lazy-expert {
+  display: grid;
+  gap: 12px;
+}
+
+.lazy-expert__actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .lazy-form {
   display: grid;
   gap: 12px;
@@ -1148,6 +1258,57 @@ a {
   border-color: var(--radf-border-focus);
 }
 
+.lazy-settings-drawer__backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(6, 10, 18, 0.55);
+  display: flex;
+  justify-content: flex-end;
+  z-index: 40;
+}
+
+.lazy-settings-drawer {
+  width: min(440px, 100%);
+  height: 100%;
+  background: var(--radf-surface-1);
+  border-left: 1px solid var(--radf-border-strong);
+  box-shadow: var(--radf-shadow-med);
+  display: flex;
+  flex-direction: column;
+}
+
+.lazy-settings-drawer__header {
+  padding: 20px;
+  border-bottom: 1px solid var(--radf-border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.lazy-settings-drawer__eyebrow {
+  margin: 0 0 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: 0.7rem;
+  color: var(--radf-text-muted);
+}
+
+.lazy-settings-drawer__title {
+  margin: 0;
+  font-size: 1.4rem;
+  font-family: var(--lazy-font-display);
+}
+
+.lazy-settings-drawer__content {
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.lazy-settings-drawer .lazy-settings__grid {
+  grid-template-columns: 1fr;
+}
+
 .lazy-modal__backdrop {
   position: fixed;
   inset: 0;
@@ -1195,6 +1356,20 @@ a {
   gap: 16px;
 }
 
+.lazy-template-modal__controls {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.lazy-template-modal__options {
+  display: grid;
+  gap: 12px;
+  min-width: 220px;
+}
+
 .lazy-modal__footer {
   display: flex;
   justify-content: flex-end;
@@ -1230,6 +1405,19 @@ a {
 .lazy-viz-card.active {
   border-color: var(--radf-accent-primary);
   box-shadow: var(--radf-shadow-med);
+}
+
+.lazy-viz-card:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  box-shadow: none;
+  transform: none;
+}
+
+.lazy-viz-card:disabled:hover {
+  border-color: var(--radf-border-subtle);
+  box-shadow: none;
+  transform: none;
 }
 
 .lazy-viz-card__header {
@@ -1390,5 +1578,10 @@ a {
 
   .lazy-api__actions {
     justify-content: stretch;
+  }
+
+  .lazy-settings-drawer__header,
+  .lazy-settings-drawer__content {
+    padding: 16px;
   }
 }

@@ -1,4 +1,5 @@
 import { getVizEncodingDefaults, getVizOptionDefaults } from './vizManifest.js';
+import { mergeDeep } from './optionUtils.js';
 
 const DEFAULT_SCHEMA_VERSION = 1;
 
@@ -14,6 +15,7 @@ const createWidgetId = () =>
 const DEFAULT_LAYOUTS_BY_TYPE = {
   kpi: { w: 4, h: 1 },
   bar: { w: 6, h: 2 },
+  barWithConditionalColoring: { w: 6, h: 2 },
   line: { w: 6, h: 2 },
   table: { w: 6, h: 3 },
   bulletChart: { w: 12, h: 2 },
@@ -54,6 +56,14 @@ export const normalizeAuthoringModel = (model = {}, { title, description } = {})
     const vizType = widget.vizType || widget.type || 'kpi';
     const encodingDefaults = getVizEncodingDefaults(vizType);
     const optionDefaults = getVizOptionDefaults(vizType);
+    const normalizedOptions = mergeDeep(optionDefaults, widget.options || {});
+    if (
+      vizType === 'kpi' &&
+      widget.options?.numberFormat &&
+      normalizedOptions.format == null
+    ) {
+      normalizedOptions.format = widget.options.numberFormat;
+    }
     return {
       ...widget,
       id: widget.id || createWidgetId(),
@@ -62,7 +72,7 @@ export const normalizeAuthoringModel = (model = {}, { title, description } = {})
       title: widget.title || 'Untitled Panel',
       subtitle: widget.subtitle || '',
       encodings: { ...encodingDefaults, ...(widget.encodings || {}) },
-      options: { ...optionDefaults, ...(widget.options || {}) },
+      options: normalizedOptions,
       layout: widget.layout || getWidgetLayout(widgets, vizType),
     };
   });
@@ -136,7 +146,7 @@ export const updateWidgetInModel = (model, widgetId, changes) => {
     if (patch.options) {
       next.options = replaceOptions
         ? patch.options
-        : { ...widget.options, ...patch.options };
+        : mergeDeep(widget.options || {}, patch.options);
     }
     if (patch.layout) {
       next.layout = { ...widget.layout, ...patch.layout };

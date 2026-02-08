@@ -12,11 +12,13 @@ import {
 } from '../data/datasetImport.js';
 import { fetchApiRows } from '../data/externalApiProvider.js';
 import { inferSchemaForTable } from '../data/schemaInference.js';
+import { trackTelemetryEvent } from '../data/telemetry.js';
 
-const MAX_FILE_BYTES = 15 * 1024 * 1024;
-const WARN_FILE_BYTES = 5 * 1024 * 1024;
-const DEFAULT_PREVIEW_ROWS = 10;
-const DEFAULT_MAX_ROWS = 5000;
+// The user really only needs about 100 rows to preview the data within the dashboard builder
+const MAX_FILE_BYTES = 150 * 1024 * 1024; // max 150mb file
+const WARN_FILE_BYTES = 50 * 1024 * 1024; // warn at 50mb file
+const DEFAULT_PREVIEW_ROWS = 10;  // preview rows
+const DEFAULT_MAX_ROWS = 500000;  // max rows
 const DEFAULT_API_CONFIG = {
   baseUrl: '',
   method: 'GET',
@@ -102,6 +104,9 @@ const DatasetImporter = ({ datasetBinding, onUpdate }) => {
     datasetBinding?.warnings || []
   );
   const [pendingWorkbook, setPendingWorkbook] = useState(null);
+  const reportImportError = useCallback((message, details = {}) => {
+    trackTelemetryEvent('dataset_import_error', { message, ...details });
+  }, [trackTelemetryEvent]);
 
   const datasetSummary = useMemo(() => {
     if (!datasetBinding) {
@@ -195,6 +200,11 @@ const DatasetImporter = ({ datasetBinding, onUpdate }) => {
         maxRows: DEFAULT_MAX_ROWS,
         previewRows: DEFAULT_PREVIEW_ROWS,
       });
+      if (table.inconsistentRowCount > 0) {
+        throw new Error(
+          `Inconsistent rows detected. Expected ${table.expectedColumnCount} columns, but ${table.inconsistentRowCount} rows differ.`
+        );
+      }
       table.warnings = [...extraWarnings, ...collectDatasetWarnings(table)];
       const inference = applyInference(table);
       const dataset = buildDatasetBinding({
@@ -223,10 +233,18 @@ const DatasetImporter = ({ datasetBinding, onUpdate }) => {
         raw: false,
         blankrows: false,
       });
+      if (!rows || rows.length === 0) {
+        return { error: 'The selected sheet is empty.' };
+      }
       const table = parseRowMatrix(rows, {
         maxRows: DEFAULT_MAX_ROWS,
         previewRows: DEFAULT_PREVIEW_ROWS,
       });
+      if (table.inconsistentRowCount > 0) {
+        return {
+          error: `Inconsistent rows detected. Expected ${table.expectedColumnCount} columns, but ${table.inconsistentRowCount} rows differ.`,
+        };
+      }
       table.warnings = collectDatasetWarnings(table);
       const inference = applyInference(table);
       return {
@@ -245,6 +263,11 @@ const DatasetImporter = ({ datasetBinding, onUpdate }) => {
       const parsed = parseWorkbook(arrayBuffer);
       if (parsed.error) {
         setError(parsed.error);
+        reportImportError(parsed.error, {
+          source: 'xlsx',
+          fileName: file.name,
+          fileSize: file.size,
+        });
         return;
       }
       parsed.table.warnings = [
@@ -269,7 +292,7 @@ const DatasetImporter = ({ datasetBinding, onUpdate }) => {
       });
       applyDataset(dataset);
     },
-    [applyDataset, parseWorkbook]
+    [applyDataset, parseWorkbook, reportImportError]
   );
 
   const handleFile = useCallback(
@@ -281,13 +304,17 @@ const DatasetImporter = ({ datasetBinding, onUpdate }) => {
       setWarnings([]);
       const sizeWarnings = [];
       if (file.size > MAX_FILE_BYTES) {
-        setError(
-          `This file is ${formatBytes(
-            file.size
-          )}. Please import a file smaller than ${formatBytes(
-            MAX_FILE_BYTES
-          )}.`
-        );
+        const message = `This file is ${formatBytes(
+          file.size
+        )}. Please import a file smaller than ${formatBytes(
+          MAX_FILE_BYTES
+        )}.`;
+        setError(message);
+        reportImportError(message, {
+          source: getFileType(file) || 'unknown',
+          fileName: file.name,
+          fileSize: file.size,
+        });
         return;
       }
       if (file.size > WARN_FILE_BYTES) {
@@ -304,14 +331,28 @@ const DatasetImporter = ({ datasetBinding, onUpdate }) => {
           await parseXlsxFile(file, sizeWarnings);
         } else {
           setError('Unsupported file type. Please use CSV or XLSX.');
+          reportImportError('Unsupported file type.', {
+            source: 'unknown',
+            fileName: file.name,
+            fileSize: file.size,
+          });
         }
-      } catch {
-        setError('Unable to parse this file. Please check the format.');
+      } catch (err) {
+        const message =
+          err instanceof Error
+            ? err.message
+            : 'Unable to parse this file. Please check the format.';
+        setError(message);
+        reportImportError(message, {
+          source: fileType || 'unknown',
+          fileName: file.name,
+          fileSize: file.size,
+        });
       } finally {
         setIsParsing(false);
       }
     },
-    [parseCsvFile, parseXlsxFile]
+    [parseCsvFile, parseXlsxFile, reportImportError]
   );
 
   const handleFileChange = useCallback(
@@ -362,6 +403,10 @@ const DatasetImporter = ({ datasetBinding, onUpdate }) => {
       );
       if (parsed.error) {
         setError(parsed.error);
+        reportImportError(parsed.error, {
+          source: 'xlsx',
+          sheetName: nextSheet,
+        });
         return;
       }
       const dataset = buildDatasetBinding({
@@ -469,11 +514,15 @@ const DatasetImporter = ({ datasetBinding, onUpdate }) => {
       applyDataset(dataset);
       setWarnings(dataset.warnings || []);
     } catch (err) {
-      setApiError(
+      const message =
         err instanceof Error
           ? err.message
-          : 'Unable to reach this API.'
-      );
+          : 'Unable to reach this API.';
+      setApiError(message);
+      reportImportError(message, {
+        source: 'api',
+        baseUrl: normalized.baseUrl,
+      });
     } finally {
       setIsApiLoading(false);
     }

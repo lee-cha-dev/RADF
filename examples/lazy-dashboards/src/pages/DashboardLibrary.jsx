@@ -1,6 +1,15 @@
 import { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import useDashboardRegistry from '../hooks/useDashboardRegistry.js';
+import {
+  buildDashboardExport,
+  downloadDashboardZip,
+} from '../data/dashboardExport.js';
+import {
+  buildTemplateAuthoringModel,
+  getTemplatePreview,
+  listDashboardTemplates,
+} from '../data/dashboardTemplates.js';
 
 const formatTimestamp = (value) => {
   if (!value) {
@@ -19,27 +28,6 @@ const formatTimestamp = (value) => {
   });
 };
 
-const dashboardTemplates = [
-  {
-    id: 'kpi-starter',
-    name: 'KPI Starter',
-    description: 'Single-row KPIs with a compact trend panel.',
-    tags: ['kpi', 'summary'],
-  },
-  {
-    id: 'ops-overview',
-    name: 'Ops Overview',
-    description: 'Operational snapshot with core metrics and alerts.',
-    tags: ['ops', 'alerts'],
-  },
-  {
-    id: 'ot-sample',
-    name: 'OT Sample',
-    description: 'Production and throughput view with quick filters.',
-    tags: ['ot', 'production'],
-  },
-];
-
 const DashboardLibrary = () => {
   const navigate = useNavigate();
   const {
@@ -47,11 +35,21 @@ const DashboardLibrary = () => {
     createDashboard,
     renameDashboard,
     duplicateDashboard,
-    deleteDashboard,
+    deleteDashboardAndCleanup,
   } = useDashboardRegistry();
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState('updated');
   const [viewMode, setViewMode] = useState('grid');
+  const templates = useMemo(() => listDashboardTemplates(), []);
+  const [templateOptions, setTemplateOptions] = useState(() => {
+    const options = {};
+    templates.forEach((template) => {
+      options[template.id] = {
+        includeFilterBar: false,
+      };
+    });
+    return options;
+  });
 
   const filteredDashboards = useMemo(() => {
     const normalized = search.trim().toLowerCase();
@@ -95,20 +93,35 @@ const DashboardLibrary = () => {
     duplicateDashboard(dashboard.id);
   };
 
-  const handleDelete = (dashboard) => {
+  const handleDelete = async (dashboard) => {
     const confirmDelete = window.confirm(
       `Delete "${dashboard.name}"? This cannot be undone.`
     );
     if (!confirmDelete) {
       return;
     }
-    deleteDashboard(dashboard.id);
+    const result = await deleteDashboardAndCleanup(dashboard);
+    if (!result.success) {
+      window.alert('Unable to delete that dashboard.');
+      return;
+    }
+    if (result.syncAttempted && !result.syncRemoved) {
+      window.alert(
+        'Dashboard deleted, but the CustomDashboards export could not be removed.'
+      );
+    }
   };
 
-  const handleExport = (dashboard) => {
-    window.alert(
-      `Export for "${dashboard.name}" is coming soon. This will package the dashboard config when export tooling lands.`
-    );
+  const handleExport = async (dashboard) => {
+    const exportPlan = buildDashboardExport({
+      dashboard,
+      authoringModel: dashboard.authoringModel,
+    });
+    if (!exportPlan) {
+      window.alert('Export failed to build.');
+      return;
+    }
+    await downloadDashboardZip(exportPlan);
   };
 
   const handleImportDataset = () => {
@@ -126,9 +139,15 @@ const DashboardLibrary = () => {
   };
 
   const handleCreateFromTemplate = (template) => {
+    const includeFilterBar =
+      templateOptions[template.id]?.includeFilterBar || false;
+    const authoringModel = buildTemplateAuthoringModel(template.id, {
+      includeFilterBar,
+    });
     const record = createDashboard({
       name: template.name,
       template: {
+        authoringModel,
         tags: template.tags,
         description: template.description,
       },
@@ -136,6 +155,16 @@ const DashboardLibrary = () => {
     if (record) {
       navigate(`/editor/${record.id}`);
     }
+  };
+
+  const handleTemplateOptionChange = (templateId, field, value) => {
+    setTemplateOptions((current) => ({
+      ...current,
+      [templateId]: {
+        ...current[templateId],
+        [field]: value,
+      },
+    }));
   };
 
   return (
@@ -175,12 +204,43 @@ const DashboardLibrary = () => {
           </div>
         </div>
         <div className="lazy-template-grid">
-          {dashboardTemplates.map((template) => (
+          {templates.map((template) => (
             <article className="lazy-template-card" key={template.id}>
+              <div className="lazy-template-card__preview">
+                <div className="lazy-template-preview">
+                  {getTemplatePreview(
+                    template.id,
+                    templateOptions[template.id]?.includeFilterBar
+                  ).map((block, index) => (
+                    <span
+                      key={`${template.id}-${index}`}
+                      className={`lazy-template-preview__block ${block.type || ''} lazy-grid-x-${block.x} lazy-grid-y-${block.y} lazy-grid-w-${block.w} lazy-grid-h-${block.h}`}
+                    />
+                  ))}
+                </div>
+              </div>
               <h3 className="lazy-template-card__title">{template.name}</h3>
               <p className="lazy-template-card__description">
                 {template.description}
               </p>
+              {template.supportsFilterBar ? (
+                <label className="lazy-template-card__toggle">
+                  <input
+                    type="checkbox"
+                    checked={
+                      templateOptions[template.id]?.includeFilterBar || false
+                    }
+                    onChange={(event) =>
+                      handleTemplateOptionChange(
+                        template.id,
+                        'includeFilterBar',
+                        event.target.checked
+                      )
+                    }
+                  />
+                  <span>Include filter bar</span>
+                </label>
+              ) : null}
               <div className="lazy-template-card__tags">
                 {template.tags.map((tag) => (
                   <span className="lazy-pill" key={tag}>

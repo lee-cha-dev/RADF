@@ -1,4 +1,6 @@
-const VIZ_MANIFEST_VERSION = 1;
+import { setNestedValue } from './optionUtils.js';
+
+const VIZ_MANIFEST_VERSION = 2;
 
 const createEncodingDefaults = (encodings = []) =>
   encodings.reduce((acc, encoding) => {
@@ -9,10 +11,44 @@ const createEncodingDefaults = (encodings = []) =>
 const createOptionDefaults = (options = {}) =>
   Object.entries(options).reduce((acc, [key, schema]) => {
     if (schema.default !== undefined) {
-      acc[key] = schema.default;
+      const path = schema.path || key;
+      return setNestedValue(acc, path, schema.default);
     }
     return acc;
   }, {});
+
+const LEGEND_OPTIONS = {
+  legend: {
+    type: 'boolean',
+    label: 'Show legend',
+    default: true,
+    advanced: true,
+  },
+  legendMode: {
+    type: 'enum',
+    label: 'Legend mode',
+    options: ['auto', 'series', 'category'],
+    default: 'auto',
+    advanced: true,
+  },
+  legendPosition: {
+    type: 'enum',
+    label: 'Legend position',
+    options: ['bottom', 'top', 'right'],
+    default: 'bottom',
+    advanced: true,
+  },
+};
+
+const SERIES_OPTIONS = {
+  seriesKeys: {
+    type: 'stringList',
+    label: 'Series keys',
+    help: 'Comma-separated list of series keys to render.',
+    default: [],
+    advanced: true,
+  },
+};
 
 const VIZ_CAPABILITIES = {
   version: VIZ_MANIFEST_VERSION,
@@ -21,6 +57,7 @@ const VIZ_CAPABILITIES = {
       id: 'kpi',
       label: 'KPI',
       panelType: 'viz',
+      supportLevel: 'supported',
       description: 'Single value summary with optional comparison.',
       encodings: {
         required: [
@@ -47,29 +84,28 @@ const VIZ_CAPABILITIES = {
         ],
       },
       options: {
-        numberFormat: {
+        format: {
           type: 'enum',
           label: 'Number format',
-          options: ['number', 'currency', 'percent'],
+          options: ['number', 'currency', 'percent', 'integer'],
           default: 'number',
         },
-        precision: {
-          type: 'number',
-          label: 'Precision',
-          min: 0,
-          max: 6,
-          default: 2,
+        currency: {
+          type: 'string',
+          label: 'Currency',
+          default: 'USD',
           advanced: true,
         },
-        showDelta: {
-          type: 'boolean',
-          label: 'Show delta',
-          default: true,
+        label: {
+          type: 'string',
+          label: 'Label override',
+          default: '',
+          advanced: true,
         },
-        showTrend: {
-          type: 'boolean',
-          label: 'Show trend',
-          default: false,
+        caption: {
+          type: 'string',
+          label: 'Caption',
+          default: '',
           advanced: true,
         },
       },
@@ -78,6 +114,7 @@ const VIZ_CAPABILITIES = {
       id: 'bar',
       label: 'Bar',
       panelType: 'viz',
+      supportLevel: 'supported',
       description: 'Categorical comparison with optional grouping.',
       encodings: {
         required: [
@@ -100,41 +137,45 @@ const VIZ_CAPABILITIES = {
         ],
       },
       options: {
-        orientation: {
-          type: 'enum',
-          label: 'Orientation',
-          options: ['vertical', 'horizontal'],
-          default: 'vertical',
+        tooltip: {
+          type: 'boolean',
+          label: 'Show tooltip',
+          default: true,
         },
         stacked: {
           type: 'boolean',
           label: 'Stacked',
           default: false,
         },
-        showLegend: {
+        stackedKeys: {
+          type: 'stringList',
+          label: 'Stacked series keys',
+          help: 'Comma-separated list of series keys to stack.',
+          default: [],
+          advanced: true,
+        },
+        colorBy: {
+          type: 'enum',
+          label: 'Color by',
+          options: ['series', 'category'],
+          default: 'series',
+          advanced: true,
+        },
+        diverging: {
           type: 'boolean',
-          label: 'Show legend',
-          default: true,
+          label: 'Diverging palette',
+          default: false,
           advanced: true,
         },
-        xLabel: {
-          type: 'string',
-          label: 'X axis label',
-          default: '',
-          advanced: true,
-        },
-        yLabel: {
-          type: 'string',
-          label: 'Y axis label',
-          default: '',
-          advanced: true,
-        },
+        ...SERIES_OPTIONS,
+        ...LEGEND_OPTIONS,
       },
     },
     line: {
       id: 'line',
       label: 'Line',
       panelType: 'viz',
+      supportLevel: 'supported',
       description: 'Time series or trend lines.',
       encodings: {
         required: [
@@ -156,28 +197,63 @@ const VIZ_CAPABILITIES = {
         ],
       },
       options: {
-        smooth: {
+        tooltip: {
           type: 'boolean',
-          label: 'Smooth line',
-          default: false,
-        },
-        showPoints: {
-          type: 'boolean',
-          label: 'Show points',
+          label: 'Show tooltip',
           default: true,
-          advanced: true,
         },
-        showArea: {
+        brushEnabled: {
           type: 'boolean',
-          label: 'Fill area',
+          label: 'Enable brush',
           default: false,
           advanced: true,
+          path: 'brush.enabled',
         },
-        showLegend: {
-          type: 'boolean',
-          label: 'Show legend',
-          default: true,
+        brushStartIndex: {
+          type: 'number',
+          label: 'Brush start index',
+          min: 0,
+          path: 'brush.startIndex',
           advanced: true,
+          visibleWhen: { option: 'brush.enabled', equals: true },
+        },
+        brushEndIndex: {
+          type: 'number',
+          label: 'Brush end index',
+          min: 0,
+          path: 'brush.endIndex',
+          advanced: true,
+          visibleWhen: { option: 'brush.enabled', equals: true },
+        },
+        ...SERIES_OPTIONS,
+        ...LEGEND_OPTIONS,
+      },
+    },
+    barWithConditionalColoring: {
+      id: 'barWithConditionalColoring',
+      label: 'Conditional Bar',
+      panelType: 'viz',
+      supportLevel: 'partial',
+      description: 'Bar chart with conditional bar colors.',
+      encodings: {
+        required: [
+          { id: 'x', label: 'X Axis', role: 'dimension' },
+          { id: 'y', label: 'Y Axis', role: 'metric' },
+        ],
+        optional: [
+          {
+            id: 'color',
+            label: 'Color flag',
+            role: 'dimension',
+            help: 'Boolean field to flip warning colors.',
+          },
+        ],
+      },
+      options: {
+        tooltip: {
+          type: 'boolean',
+          label: 'Show tooltip',
+          default: true,
         },
       },
     },
@@ -185,6 +261,7 @@ const VIZ_CAPABILITIES = {
       id: 'table',
       label: 'Table',
       panelType: 'viz',
+      supportLevel: 'deferred',
       description: 'Tabular view of selected fields.',
       encodings: {
         required: [
@@ -242,44 +319,159 @@ const VIZ_CAPABILITIES = {
       id: 'bulletChart',
       label: 'Bullet',
       panelType: 'viz',
+      supportLevel: 'supported',
       description: 'Progress toward a target.',
       encodings: {
         required: [
-          { id: 'x', label: 'Category', role: 'dimension' },
-          { id: 'y', label: 'Value', role: 'metric' },
+          { id: 'x', label: 'Value', role: 'metric' },
+          { id: 'y', label: 'Category', role: 'dimension' },
         ],
         optional: [
           {
-            id: 'target',
-            label: 'Target',
-            role: 'metric',
-            help: 'Target value for comparison.',
-          },
-          {
-            id: 'range',
-            label: 'Range',
-            role: 'metric',
-            help: 'Range marker for qualitative bands.',
+            id: 'color',
+            label: 'Color',
+            role: 'dimension',
+            help: 'Categorical field to color bars.',
           },
         ],
       },
       options: {
-        showTarget: {
-          type: 'boolean',
-          label: 'Show target',
-          default: true,
-        },
-        showRange: {
-          type: 'boolean',
-          label: 'Show range',
-          default: false,
-          advanced: true,
-        },
         orientation: {
           type: 'enum',
           label: 'Orientation',
           options: ['horizontal', 'vertical'],
           default: 'horizontal',
+        },
+        colorBy: {
+          type: 'string',
+          label: 'Color by field',
+          help: 'Overrides the color encoding with a field name.',
+          default: '',
+          advanced: true,
+          suggestFrom: 'fields',
+        },
+        leftAnnotationsEnabled: {
+          type: 'boolean',
+          label: 'Show left annotations',
+          default: true,
+          advanced: true,
+          path: 'leftAnnotations.enabled',
+        },
+        leftAnnotationsType: {
+          type: 'enum',
+          label: 'Annotation type',
+          options: ['dot', 'none'],
+          default: 'dot',
+          advanced: true,
+          path: 'leftAnnotations.type',
+          visibleWhen: { option: 'leftAnnotations.enabled', equals: true },
+        },
+        leftAnnotationsColorBy: {
+          type: 'string',
+          label: 'Annotation color by',
+          default: '',
+          advanced: true,
+          path: 'leftAnnotations.colorBy',
+          suggestFrom: 'fields',
+          visibleWhen: { option: 'leftAnnotations.enabled', equals: true },
+        },
+        showPercentColumn: {
+          type: 'boolean',
+          label: 'Show percent column',
+          default: true,
+        },
+        percentKey: {
+          type: 'string',
+          label: 'Percent field',
+          default: '',
+          advanced: true,
+          suggestFrom: 'fields',
+          visibleWhen: { option: 'showPercentColumn', equals: true },
+        },
+        markerLinesEnabled: {
+          type: 'boolean',
+          label: 'Show marker lines',
+          default: true,
+          advanced: true,
+          path: 'markerLines.enabled',
+        },
+        markerLinesValueKey: {
+          type: 'string',
+          label: 'Marker value field',
+          default: 'dept_average',
+          advanced: true,
+          path: 'markerLines.valueKey',
+          suggestFrom: 'fields',
+          visibleWhen: { option: 'markerLines.enabled', equals: true },
+        },
+        markerLinesLabel: {
+          type: 'string',
+          label: 'Marker label',
+          default: 'Dept average',
+          advanced: true,
+          path: 'markerLines.label',
+          visibleWhen: { option: 'markerLines.enabled', equals: true },
+        },
+        markerLinesColor: {
+          type: 'color',
+          label: 'Marker color',
+          default: '#E0E000',
+          advanced: true,
+          path: 'markerLines.color',
+          visibleWhen: { option: 'markerLines.enabled', equals: true },
+        },
+        outlierRuleValueKey: {
+          type: 'string',
+          label: 'Outlier value field',
+          default: 'dept_threshold',
+          advanced: true,
+          path: 'outlierRule.valueKey',
+          suggestFrom: 'fields',
+        },
+        iqrValueKey: {
+          type: 'string',
+          label: 'IQR value field',
+          default: '',
+          advanced: true,
+          path: 'iqrValueKey',
+          suggestFrom: 'fields',
+        },
+        outlierValueKey: {
+          type: 'string',
+          label: 'Outlier value key',
+          default: '',
+          advanced: true,
+          path: 'outlierValueKey',
+          suggestFrom: 'fields',
+        },
+        averageKey: {
+          type: 'string',
+          label: 'Average value key',
+          default: '',
+          advanced: true,
+          path: 'averageKey',
+          suggestFrom: 'fields',
+        },
+        headerTitleX: {
+          type: 'string',
+          label: 'Header title (value)',
+          default: '',
+          advanced: true,
+          path: 'headerTitles.xTitle',
+        },
+        headerTitleY: {
+          type: 'string',
+          label: 'Header title (category)',
+          default: '',
+          advanced: true,
+          path: 'headerTitles.yTitle',
+        },
+        headerTitlePercent: {
+          type: 'string',
+          label: 'Header title (percent)',
+          default: '',
+          advanced: true,
+          path: 'headerTitles.percentTitle',
         },
       },
     },
@@ -287,6 +479,7 @@ const VIZ_CAPABILITIES = {
       id: 'filterBar',
       label: 'Filter Bar',
       panelType: 'viz',
+      supportLevel: 'supported',
       description: 'Interactive filters for the dashboard.',
       encodings: {
         required: [

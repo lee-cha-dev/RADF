@@ -9,6 +9,9 @@ export default defineConfig({
     globals: true,
     css: true,
     exclude: ['tests/**'],
-    include: ['src/framework/__tests__/**/*.test.js'],
+    include: [
+      'src/framework/__tests__/**/*.test.js',
+      'examples/lazy-dashboards/src/**/__tests__/**/*.test.js',
+    ],
   },
 });
