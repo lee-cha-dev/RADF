@@ -2,6 +2,31 @@ import { useEffect, useMemo, useState } from 'react';
 
 const STORAGE_KEY = 'lazyDashboards.themeSettings';
 
+/**
+ * @typedef {Object} ThemeFamilyOption
+ * @property {string} id
+ * @property {string} label
+ */
+
+/**
+ * @typedef {Object} PaletteOption
+ * @property {string} id
+ * @property {string} label
+ */
+
+/**
+ * @typedef {Object} ThemeSettingsState
+ * @property {string} themeFamily - The active theme family id.
+ * @property {'light'|'dark'|'system'} themeMode - The requested theme mode.
+ * @property {string} paletteId - The active palette id.
+ * @property {'light'|'dark'} resolvedMode - The computed light/dark mode.
+ * @property {ThemeFamilyOption[]} themeFamilies - The available theme families.
+ * @property {PaletteOption[]} paletteOptions - The available palette options.
+ * @property {(nextFamily: string) => void} setThemeFamily - The theme family setter.
+ * @property {(nextMode: 'light'|'dark'|'system') => void} setThemeMode - The mode setter.
+ * @property {(nextPaletteId: string) => void} setPaletteId - The palette setter.
+ */
+
 const THEME_FAMILIES = [
   { id: 'default', label: 'Default' },
   { id: 'nord', label: 'Nord' },
@@ -80,6 +105,11 @@ const ALL_PALETTE_CLASSES = PALETTE_OPTIONS.map(
   ({ id }) => `radf-palette-${id}`
 );
 
+/**
+ * Reads persisted theme settings from local storage.
+ *
+ * @returns {{ themeFamily?: string, themeMode?: string, paletteId?: string }}
+ */
 const getStoredSettings = () => {
   if (typeof window === 'undefined') {
     return {};
@@ -93,19 +123,42 @@ const getStoredSettings = () => {
   }
 };
 
+/**
+ * Validates the theme family id.
+ *
+ * @param {string} value - The stored theme family id.
+ * @returns {string} The resolved family id.
+ */
 const resolveFamily = (value) =>
   THEME_CLASS_MAP[value] ? value : 'default';
 
+/**
+ * Validates the theme mode.
+ *
+ * @param {string} value - The stored mode.
+ * @returns {'light'|'dark'|'system'} The resolved mode.
+ */
 const resolveMode = (value) =>
   value === 'light' || value === 'dark' || value === 'system'
     ? value
     : 'system';
 
+/**
+ * Validates the palette id.
+ *
+ * @param {string} value - The stored palette id.
+ * @returns {string} The resolved palette id.
+ */
 const resolvePalette = (value) =>
   PALETTE_OPTIONS.some((palette) => palette.id === value)
     ? value
     : 'analytics';
 
+/**
+ * Syncs theme settings with local storage and root theme classes.
+ *
+ * @returns {ThemeSettingsState} The theme settings state and setters.
+ */
 const useThemeSettings = () => {
   const stored = getStoredSettings();
   const [themeFamily, setThemeFamily] = useState(

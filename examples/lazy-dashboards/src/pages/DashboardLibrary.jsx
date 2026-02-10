@@ -11,6 +11,31 @@ import {
   listDashboardTemplates,
 } from '../data/dashboardTemplates.js';
 
+/**
+ * @typedef {Object} DashboardRecord
+ * @property {string} id
+ * @property {string} name
+ * @property {string} [description]
+ * @property {string} [updatedAt]
+ * @property {string[]} [tags]
+ * @property {Object} [authoringModel]
+ */
+
+/**
+ * @typedef {Object} DashboardTemplate
+ * @property {string} id
+ * @property {string} name
+ * @property {string} description
+ * @property {string[]} tags
+ * @property {boolean} supportsFilterBar
+ */
+
+/**
+ * Formats a timestamp for display in the library list.
+ *
+ * @param {string|number|Date|null|undefined} value - The timestamp to format.
+ * @returns {string} The formatted timestamp.
+ */
 const formatTimestamp = (value) => {
   if (!value) {
     return 'Unknown';
@@ -28,6 +53,11 @@ const formatTimestamp = (value) => {
   });
 };
 
+/**
+ * Displays the dashboard library and entry points for new dashboards.
+ *
+ * @returns {JSX.Element} The dashboard library page.
+ */
 const DashboardLibrary = () => {
   const navigate = useNavigate();
   const {

@@ -18,11 +18,34 @@ const GRID_GAP = 12;
 const GRID_ROW_HEIGHT = 48;
 const DEFAULT_LAYOUT = { x: 1, y: 1, w: 4, h: 2 };
 
+/**
+ * @typedef {Object} GridCanvasProps
+ * @property {string} dashboardId
+ * @property {Object} compiledConfig
+ * @property {{ widgets: Object[] }} authoringModel
+ * @property {Object} validation
+ * @property {string|null} activeWidgetId
+ * @property {(widgetId: string) => void} onWidgetSelect
+ * @property {(updater: (model: Object) => Object) => void} onUpdateAuthoringModel
+ * @property {Object} previewProvider
+ * @property {Object|null} datasetBinding
+ * @property {Object} semanticLayer
+ * @property {() => void} onAddWidget
+ * @property {'layout'|'preview'} viewMode
+ * @property {(mode: 'layout'|'preview') => void} onViewModeChange
+ */
+
 const getSafeLayout = (layout) => ({
   ...DEFAULT_LAYOUT,
   ...(layout || {}),
 });
 
+/**
+ * Canvas area for arranging and previewing dashboard widgets.
+ *
+ * @param {GridCanvasProps} props
+ * @returns {JSX.Element}
+ */
 const GridCanvas = ({
   dashboardId,
   compiledConfig,

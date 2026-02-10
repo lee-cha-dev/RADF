@@ -1,6 +1,19 @@
+/**
+ * Checks if a value is a plain object (not an array).
+ *
+ * @param {unknown} value
+ * @returns {boolean} True when the value is a plain object.
+ */
 const isPlainObject = (value) =>
   Boolean(value) && typeof value === 'object' && !Array.isArray(value);
 
+/**
+ * Deeply merges two objects without mutating inputs.
+ *
+ * @param {Object} [base]
+ * @param {Object} [patch]
+ * @returns {Object} The merged object.
+ */
 const mergeDeep = (base = {}, patch = {}) => {
   if (!isPlainObject(base)) {
     return isPlainObject(patch) ? { ...patch } : patch;
@@ -19,6 +32,13 @@ const mergeDeep = (base = {}, patch = {}) => {
   return next;
 };
 
+/**
+ * Reads a nested value using dot-separated paths.
+ *
+ * @param {Object} target
+ * @param {string} path
+ * @returns {unknown} The resolved value.
+ */
 const getNestedValue = (target, path) => {
   if (!path) {
     return undefined;
@@ -34,6 +54,14 @@ const getNestedValue = (target, path) => {
   return current;
 };
 
+/**
+ * Sets a nested value without mutating the original object.
+ *
+ * @param {Object} [target]
+ * @param {string} path
+ * @param {unknown} value
+ * @returns {Object} The updated object.
+ */
 const setNestedValue = (target = {}, path, value) => {
   if (!path) {
     return target;
@@ -54,6 +82,13 @@ const setNestedValue = (target = {}, path, value) => {
   return next;
 };
 
+/**
+ * Flattens an option object into a list of dot paths.
+ *
+ * @param {Object|Array<unknown>} value
+ * @param {string} [prefix]
+ * @returns {string[]} The flattened paths.
+ */
 const flattenOptionPaths = (value, prefix = '') => {
   if (Array.isArray(value) || !isPlainObject(value)) {
     return prefix ? [prefix] : [];

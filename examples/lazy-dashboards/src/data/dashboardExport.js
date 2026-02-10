@@ -1,6 +1,32 @@
 import JSZip from 'jszip';
 import { compileAuthoringModel } from '../authoring/compiler.js';
 
+/**
+ * @typedef {Object} DashboardExportNames
+ * @property {string} componentName
+ * @property {string} fileBase
+ * @property {string} folderName
+ */
+
+/**
+ * @typedef {Object<string, string>} DashboardExportFiles
+ */
+
+/**
+ * @typedef {Object} DashboardExportPlan
+ * @property {string} componentName
+ * @property {string} fileBase
+ * @property {string} folderName
+ * @property {DashboardExportFiles} files
+ */
+
+/**
+ * @typedef {Object} DashboardExportInput
+ * @property {{ id?: string, name?: string, meta?: { title?: string, description?: string } }} dashboard
+ * @property {Object} [authoringModel]
+ * @property {Object} [compiled]
+ */
+
 const toWords = (value = '') =>
   String(value)
     .trim()
@@ -24,11 +50,18 @@ const toCamelCase = (value) => {
   return pascal[0].toLowerCase() + pascal.slice(1);
 };
 
-const generateModule = (name, payload) => {
+const generateModule = (name, payload, options = {}) => {
   const serialized = JSON.stringify(payload ?? null, null, 2);
-  return `const ${name} = ${serialized};\n\nexport default ${name};\n`;
+  const doc = options.doc ? `${options.doc}\n` : '';
+  return `${doc}const ${name} = ${serialized};\n\nexport default ${name};\n`;
 };
 
+/**
+ * Builds stable export naming for a dashboard bundle.
+ *
+ * @param {{ id?: string, name?: string, meta?: { title?: string } }} dashboard
+ * @returns {DashboardExportNames} The resolved export names.
+ */
 export const getDashboardExportNames = (dashboard) => {
   const base =
     dashboard?.name ||
@@ -52,6 +85,14 @@ import {
   useDashboardActions,
   useDashboardState,
 } from "radf";
+
+/**
+ * @typedef {Object} LazyFilterBarProps
+ * @property {string[]|string|null} fields - The field ids to render.
+ * @property {{ columns?: Object[], rows?: Object[] }} datasetBinding - The dataset binding.
+ * @property {{ dimensions?: Object[] }} semanticLayer - The semantic layer details.
+ * @property {{ allowMultiSelect?: boolean, showSearch?: boolean, showClear?: boolean, layout?: string }} [options] - The filter bar options.
+ */
 
 const MAX_DISTINCT_VALUES = 200;
 
@@ -107,6 +148,12 @@ const sortValues = (values, type) => {
   return [...values].sort((a, b) => a.localeCompare(b));
 };
 
+/**
+ * Renders a filter bar for global dashboard filters.
+ *
+ * @param {LazyFilterBarProps} props - The component props.
+ * @returns {JSX.Element} The filter bar markup.
+ */
 const LazyFilterBar = ({ fields, datasetBinding, semanticLayer, options }) => {
   const dashboardState = useDashboardState();
   const { setGlobalFilters } = useDashboardActions();
@@ -294,6 +341,16 @@ export default LazyFilterBar;
 `;
 
 const buildLocalDataProviderSource = () => `import { createDataProvider } from "radf";
+
+/**
+ * @typedef {Object} DatasetBinding
+ * @property {Object[]} [rows] - The dataset rows.
+ * @property {Object[]} [columns] - The dataset columns.
+ */
+
+/**
+ * @typedef {function(Object): Promise<{ rows: Object[], meta: Object }>} DataProvider
+ */
 
 const normalizeValue = (value) => {
   if (value === null || value === undefined) {
@@ -572,6 +629,12 @@ const aggregateRows = (rows, measures, dimensions, resolveDimensionField) => {
   });
 };
 
+/**
+ * Builds a data provider for local dataset bindings.
+ *
+ * @param {{ rows?: Object[], columns?: Object[], semanticLayer?: Object|null }} [options] - The dataset inputs.
+ * @returns {DataProvider} The data provider.
+ */
 export const createLocalDataProvider = ({
   rows = [],
   columns = [],
@@ -687,6 +750,21 @@ import dashboardConfig from "./deps/${fileBase}.dashboard.js";${hasDataProvider 
 
   return `${imports}${providerImports}
 
+/**
+ * @typedef {function(Object): Promise<{ rows: Object[], meta: Object }>} DataProvider
+ */
+
+/**
+ * @typedef {Object} DashboardProps
+ * @property {DataProvider} [dataProvider] - The optional external data provider.
+ * @property {{ rows?: Object[], columns?: Object[], previewRows?: Object[] }} [datasetBinding] - The dataset binding.
+ * @property {{ enabled?: boolean, dimensions?: Object[], metrics?: Object[] }} [semanticLayer] - The semantic layer config.
+ */
+
+/**
+ * The API-backed data provider, when exported with an external API config.
+ * @type {DataProvider|null}
+ */
 const ApiDataProvider = ${hasDataProvider ? "createExternalApiProvider()" : "null"};
 
 const VizPanel = ({ panel, dataProvider, datasetBinding, semanticLayer }) => {
@@ -753,6 +831,12 @@ const DashboardContent = ({ dataProvider, datasetBinding, semanticLayer }) => (
   </section>
 );
 
+/**
+ * Renders the exported dashboard component.
+ *
+ * @param {DashboardProps} props - The component props.
+ * @returns {JSX.Element} The dashboard markup.
+ */
 const ${componentName} = ({ dataProvider, datasetBinding, semanticLayer }) => {
   useEffect(() => {
     registerCharts();
@@ -798,6 +882,12 @@ export default ${componentName};
 `;
 };
 
+/**
+ * Creates an export plan and file map for a dashboard bundle.
+ *
+ * @param {DashboardExportInput} [options]
+ * @returns {DashboardExportPlan|null} The export plan, or null when missing input.
+ */
 export const buildDashboardExport = ({
   dashboard,
   authoringModel,
@@ -814,20 +904,51 @@ export const buildDashboardExport = ({
   const hasFilterBar = (compiledOutput.config?.panels || []).some(
     (panel) => panel?.panelType === 'viz' && panel?.vizType === 'filterBar'
   );
-  const fallbackDataset = generateModule('datasetConfig', {
-    id: compiledOutput.config?.datasetId || `${dashboard?.id || 'dashboard'}_dataset`,
-    label: resolvedModel?.meta?.title || dashboard?.name || 'Dataset',
-    description: resolvedModel?.meta?.description || '',
-    dimensions: resolvedModel?.semanticLayer?.dimensions || [],
-    metrics: resolvedModel?.semanticLayer?.metrics || [],
-  });
+  const fallbackDataset = generateModule(
+    'datasetConfig',
+    {
+      id:
+        compiledOutput.config?.datasetId ||
+        `${dashboard?.id || 'dashboard'}_dataset`,
+      label: resolvedModel?.meta?.title || dashboard?.name || 'Dataset',
+      description: resolvedModel?.meta?.description || '',
+      dimensions: resolvedModel?.semanticLayer?.dimensions || [],
+      metrics: resolvedModel?.semanticLayer?.metrics || [],
+    },
+    {
+      doc: `/**
+ * Dataset config
+ *
+ * @typedef {Object} DatasetConfig
+ * @property {string} id - The dataset id.
+ * @property {string} label - The dataset label.
+ * @property {string} description - The dataset description.
+ * @property {Object[]} dimensions - The semantic layer dimensions.
+ * @property {Object[]} metrics - The semantic layer metrics.
+ *
+ * @type {DatasetConfig}
+ */`,
+    }
+  );
   const fallbackDimensions = generateModule(
     'dimensions',
-    resolvedModel?.semanticLayer?.dimensions || []
+    resolvedModel?.semanticLayer?.dimensions || [],
+    {
+      doc: `/**
+ * Dimension definitions
+ * @type {Object[]}
+ */`,
+    }
   );
   const fallbackMetrics = generateModule(
     'metrics',
-    resolvedModel?.semanticLayer?.metrics || []
+    resolvedModel?.semanticLayer?.metrics || [],
+    {
+      doc: `/**
+ * Metric definitions
+ * @type {Object[]}
+ */`,
+    }
   );
   const files = {};
   files[`deps/${exportNames.fileBase}.dashboard.js`] = modules.dashboard || '';
@@ -856,6 +977,12 @@ export const buildDashboardExport = ({
   };
 };
 
+/**
+ * Builds a zip archive for the export plan.
+ *
+ * @param {DashboardExportPlan|null} exportPlan
+ * @returns {Promise<Blob|null>} The zip blob, or null when there is no plan.
+ */
 export const createDashboardZip = async (exportPlan) => {
   if (!exportPlan) {
     return null;
@@ -868,6 +995,12 @@ export const createDashboardZip = async (exportPlan) => {
   return zip.generateAsync({ type: 'blob' });
 };
 
+/**
+ * Triggers a browser download for the export plan.
+ *
+ * @param {DashboardExportPlan|null} exportPlan
+ * @returns {Promise<boolean>} True when a download was initiated.
+ */
 export const downloadDashboardZip = async (exportPlan) => {
   const zipBlob = await createDashboardZip(exportPlan);
   if (!zipBlob) {

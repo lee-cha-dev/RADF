@@ -30,6 +30,14 @@ export const createInitialDashboardState = (overrides = {}) => ({
   ...overrides,
 });
 
+/**
+ * Merges a panel's UI state into the shared panel state map.
+ *
+ * @param {Record<string, Record<string, unknown>>} panelStateById
+ * @param {string} panelId
+ * @param {Record<string, unknown>} nextState
+ * @returns {Record<string, Record<string, unknown>>} Updated panel state map.
+ */
 const mergePanelState = (panelStateById, panelId, nextState) => ({
   ...panelStateById,
   [panelId]: {

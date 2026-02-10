@@ -12,6 +12,45 @@ import {
 } from '../data/dashboardRegistry.js';
 import { deleteDashboardAndCleanup } from '../data/dashboardCleanup.js';
 
+/**
+ * @typedef {Object} DashboardRecord
+ * @property {string} id
+ * @property {string} name
+ * @property {string} [description]
+ * @property {string} [updatedAt]
+ * @property {Object} [authoringModel]
+ * @property {Object} [datasetBinding]
+ * @property {Object} [compiledConfig]
+ */
+
+/**
+ * @typedef {Object} DashboardCleanupResult
+ * @property {boolean} success
+ * @property {boolean} [syncAttempted]
+ * @property {boolean} [syncRemoved]
+ */
+
+/**
+ * @typedef {Object} DashboardRegistryApi
+ * @property {DashboardRecord[]} dashboards - The current dashboard list.
+ * @property {() => void} refresh - The manual refresh helper.
+ * @property {(payload: Object) => DashboardRecord} createDashboard - The dashboard creator.
+ * @property {(id: string, updates: Object) => DashboardRecord} updateDashboard - The dashboard updater.
+ * @property {(id: string, name: string) => DashboardRecord} renameDashboard - The dashboard rename helper.
+ * @property {(id: string) => DashboardRecord} duplicateDashboard - The dashboard duplication helper.
+ * @property {(id: string) => boolean} deleteDashboard - The dashboard deletion helper.
+ * @property {(dashboard: DashboardRecord, options?: Object) => Promise<DashboardCleanupResult>} deleteDashboardAndCleanup - The deletion helper that also cleans up exports.
+ * @property {(id: string) => DashboardRecord} touchDashboard - The dashboard timestamp updater.
+ * @property {(id: string) => (DashboardRecord|null)} getDashboardById - The dashboard lookup helper.
+ */
+
+/**
+ * Provides CRUD helpers and live state for dashboards stored in local storage.
+ *
+ * Side effects: listens for `storage` changes so other tabs update automatically.
+ *
+ * @returns {DashboardRegistryApi} The dashboard registry API.
+ */
 const useDashboardRegistry = () => {
   const [dashboards, setDashboards] = useState(() => listDashboards());
 

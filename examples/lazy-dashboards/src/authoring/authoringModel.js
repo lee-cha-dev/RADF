@@ -1,6 +1,61 @@
 import { getVizEncodingDefaults, getVizOptionDefaults } from './vizManifest.js';
 import { mergeDeep } from './optionUtils.js';
 
+/**
+ * @typedef {Object} DashboardMeta
+ * @property {string} title
+ * @property {string} description
+ */
+
+/**
+ * @typedef {Object} SemanticLayer
+ * @property {boolean} enabled
+ * @property {Object[]} metrics
+ * @property {Object[]} dimensions
+ */
+
+/**
+ * @typedef {Object} WidgetLayout
+ * @property {number} x
+ * @property {number} y
+ * @property {number} w
+ * @property {number} h
+ */
+
+/**
+ * @typedef {Object} WidgetModel
+ * @property {string} id
+ * @property {string} panelType
+ * @property {string} vizType
+ * @property {string} title
+ * @property {string} subtitle
+ * @property {Object} [encodings]
+ * @property {Object} [options]
+ * @property {WidgetLayout} [layout]
+ * @property {boolean} [draft]
+ * @property {Object} [query]
+ * @property {string} [type]
+ */
+
+/**
+ * @typedef {Object} AuthoringModel
+ * @property {number} schemaVersion
+ * @property {DashboardMeta} meta
+ * @property {Object|null} datasetBinding
+ * @property {SemanticLayer} semanticLayer
+ * @property {WidgetModel[]} widgets
+ * @property {WidgetLayout[]} layout
+ */
+
+/**
+ * @typedef {Object} WidgetPatch
+ * @property {Object} [encodings]
+ * @property {Object} [options]
+ * @property {Object} [layout]
+ * @property {boolean} [replaceEncodings]
+ * @property {boolean} [replaceOptions]
+ */
+
 const DEFAULT_SCHEMA_VERSION = 1;
 
 const DEFAULT_SEMANTIC_LAYER = {
@@ -9,6 +64,11 @@ const DEFAULT_SEMANTIC_LAYER = {
   dimensions: [],
 };
 
+/**
+ * Creates a mostly-unique widget id for drafts and new panels.
+ *
+ * @returns {string} The generated widget id.
+ */
 const createWidgetId = () =>
   `widget-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
 
@@ -22,6 +82,13 @@ const DEFAULT_LAYOUTS_BY_TYPE = {
   filterBar: { w: 12, h: 1 },
 };
 
+/**
+ * Finds the next available layout slot for a widget.
+ *
+ * @param {WidgetModel[]} widgets
+ * @param {string} vizType
+ * @returns {WidgetLayout} The suggested layout placement.
+ */
 const getWidgetLayout = (widgets, vizType) => {
   const maxY = widgets.reduce((acc, widget) => {
     const layout = widget.layout || {};
@@ -37,6 +104,14 @@ const getWidgetLayout = (widgets, vizType) => {
   };
 };
 
+/**
+ * Creates a blank authoring model with safe defaults.
+ *
+ * @param {Object} [meta]
+ * @param {string} [meta.title]
+ * @param {string} [meta.description]
+ * @returns {AuthoringModel} The initialized model.
+ */
 export const createAuthoringModel = ({ title, description } = {}) => ({
   schemaVersion: DEFAULT_SCHEMA_VERSION,
   meta: {
@@ -49,6 +124,15 @@ export const createAuthoringModel = ({ title, description } = {}) => ({
   layout: [],
 });
 
+/**
+ * Normalizes a stored model into the current schema with defaults applied.
+ *
+ * @param {Object} [model]
+ * @param {Object} [metaOverrides]
+ * @param {string} [metaOverrides.title]
+ * @param {string} [metaOverrides.description]
+ * @returns {AuthoringModel} The normalized model.
+ */
 export const normalizeAuthoringModel = (model = {}, { title, description } = {}) => {
   const meta = model.meta || {};
   const widgets = Array.isArray(model.widgets) ? model.widgets : [];
@@ -96,6 +180,15 @@ export const normalizeAuthoringModel = (model = {}, { title, description } = {})
   };
 };
 
+/**
+ * Creates a new widget draft based on current model defaults.
+ *
+ * @param {AuthoringModel} model
+ * @param {Object} [options]
+ * @param {string} [options.vizType]
+ * @param {string} [options.panelType]
+ * @returns {WidgetModel} The draft widget.
+ */
 export const createWidgetDraft = (model, { vizType, panelType } = {}) => {
   const resolvedVizType = vizType || 'kpi';
   const widgets = Array.isArray(model?.widgets) ? model.widgets : [];
@@ -115,6 +208,13 @@ export const createWidgetDraft = (model, { vizType, panelType } = {}) => {
   };
 };
 
+/**
+ * Adds a widget to the model and appends its layout entry.
+ *
+ * @param {AuthoringModel} model
+ * @param {WidgetModel} widget
+ * @returns {AuthoringModel} The updated model.
+ */
 export const addWidgetToModel = (model, widget) => {
   const widgets = [...(model.widgets || []), widget];
   const layout = [
@@ -128,6 +228,14 @@ export const addWidgetToModel = (model, widget) => {
   };
 };
 
+/**
+ * Updates a widget and keeps the layout list in sync.
+ *
+ * @param {AuthoringModel} model
+ * @param {string} widgetId
+ * @param {WidgetPatch} changes
+ * @returns {AuthoringModel} The updated model.
+ */
 export const updateWidgetInModel = (model, widgetId, changes) => {
   const { replaceEncodings, replaceOptions, ...patch } = changes || {};
   const widgets = (model.widgets || []).map((widget) => {
@@ -163,10 +271,22 @@ export const updateWidgetInModel = (model, widgetId, changes) => {
   };
 };
 
+/**
+ * Removes a widget and its layout entry from the model.
+ *
+ * @param {AuthoringModel} model
+ * @param {string} widgetId
+ * @returns {AuthoringModel} The updated model.
+ */
 export const removeWidgetFromModel = (model, widgetId) => ({
   ...model,
   widgets: (model.widgets || []).filter((widget) => widget.id !== widgetId),
   layout: (model.layout || []).filter((entry) => entry.id !== widgetId),
 });
 
+/**
+ * The current authoring schema version.
+ *
+ * @type {number}
+ */
 export { DEFAULT_SCHEMA_VERSION };

@@ -1,5 +1,40 @@
 import { createDataProvider } from 'radf';
 
+/**
+ * @typedef {Object} DatasetColumn
+ * @property {string} id
+ * @property {string} [type]
+ * @property {string} [inferredType]
+ */
+
+/**
+ * @typedef {Object} SemanticLayer
+ * @property {Object[]} [dimensions]
+ * @property {Object[]} [metrics]
+ */
+
+/**
+ * @typedef {Object} LocalDataProviderInput
+ * @property {Object[]} [rows]
+ * @property {DatasetColumn[]} [columns]
+ * @property {SemanticLayer|null} [semanticLayer]
+ */
+
+/**
+ * @typedef {Object} QuerySpec
+ * @property {string[]} [measures]
+ * @property {string[]} [dimensions]
+ * @property {Object[]} [filters]
+ * @property {number} [offset]
+ * @property {number} [limit]
+ */
+
+/**
+ * @typedef {Object} DataProviderResult
+ * @property {Object[]} rows
+ * @property {{ rowCount: number, totalRows: number, filteredRows: number }} meta
+ */
+
 const normalizeValue = (value) => {
   if (value === null || value === undefined) {
     return '';
@@ -277,6 +312,12 @@ const aggregateRows = (rows, measures, dimensions, resolveDimensionField) => {
   });
 };
 
+/**
+ * Creates a data provider that filters and aggregates local rows.
+ *
+ * @param {LocalDataProviderInput} [options]
+ * @returns {function(QuerySpec): Promise<DataProviderResult>} The data provider.
+ */
 export const createLocalDataProvider = ({
   rows = [],
   columns = [],

@@ -1,3 +1,21 @@
+/**
+ * @typedef {Object} EditorSettingsPanelProps
+ * @property {boolean} autoSaveEnabled
+ * @property {(enabled: boolean) => void} onToggleAutoSave
+ * @property {boolean} syncSupported
+ * @property {boolean} syncEnabled
+ * @property {string} syncStatusLabel
+ * @property {() => void} onEnableSync
+ * @property {() => void} onDisableSync
+ * @property {() => void} [onChangeSyncFolder]
+ */
+
+/**
+ * Shows editor preferences and optional disk sync controls.
+ *
+ * @param {EditorSettingsPanelProps} props
+ * @returns {JSX.Element}
+ */
 const EditorSettingsPanel = ({
   autoSaveEnabled,
   onToggleAutoSave,

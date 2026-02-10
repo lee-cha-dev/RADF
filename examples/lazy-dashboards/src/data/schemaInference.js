@@ -1,5 +1,35 @@
 const MAX_SAMPLE_VALUES = 5;
 
+/**
+ * @typedef {Object} DatasetColumn
+ * @property {string} id
+ * @property {string} [label]
+ */
+
+/**
+ * @typedef {Object} DatasetTable
+ * @property {DatasetColumn[]} columns
+ * @property {Object[]} rows
+ */
+
+/**
+ * @typedef {Object} ColumnProfile
+ * @property {string} id
+ * @property {string} inferredType
+ * @property {string} type
+ * @property {string} inferredRole
+ * @property {string} role
+ * @property {Object} stats
+ * @property {string[]} sampleValues
+ * @property {Object} coercion
+ */
+
+/**
+ * @typedef {Object} SchemaInferenceResult
+ * @property {DatasetColumn[]} columns
+ * @property {ColumnProfile[]} profiles
+ */
+
 const normalizeValue = (value) => {
   if (value === null || value === undefined) {
     return '';
@@ -222,6 +252,12 @@ const buildProfile = (column, rows) => {
   };
 };
 
+/**
+ * Infers column types and profile stats from a dataset table.
+ *
+ * @param {DatasetTable} table
+ * @returns {SchemaInferenceResult} The inferred schema.
+ */
 export const inferSchemaForTable = (table) => {
   if (!table || !Array.isArray(table.columns) || !Array.isArray(table.rows)) {
     return { columns: [], profiles: [] };

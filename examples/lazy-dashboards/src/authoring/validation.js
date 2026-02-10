@@ -1,5 +1,23 @@
 import { getVizManifest } from './vizManifest.js';
 
+/**
+ * @typedef {Object} WidgetValidationResult
+ * @property {'valid'|'draft'} status
+ * @property {string[]} errors
+ */
+
+/**
+ * @typedef {Object} ModelValidationResult
+ * @property {boolean} isValid
+ * @property {Object<string, WidgetValidationResult>} widgets
+ */
+
+/**
+ * Checks if a value is non-empty for validation purposes.
+ *
+ * @param {unknown} value
+ * @returns {boolean} True when the value is considered present.
+ */
 const isNonEmptyValue = (value) => {
   if (Array.isArray(value)) {
     return value.length > 0;
@@ -7,11 +25,23 @@ const isNonEmptyValue = (value) => {
   return value !== undefined && value !== null && value !== '';
 };
 
+/**
+ * Reads required encodings from the viz manifest.
+ *
+ * @param {string} vizType
+ * @returns {Object[]} Required encoding definitions.
+ */
 const getRequiredEncodings = (vizType) => {
   const manifest = getVizManifest(vizType);
   return manifest?.encodings?.required || [];
 };
 
+/**
+ * Validates widget layout bounds.
+ *
+ * @param {Object} layout
+ * @returns {string|null} An error message when invalid.
+ */
 const validateLayout = (layout) => {
   if (!layout) {
     return 'Layout is required.';
@@ -26,6 +56,12 @@ const validateLayout = (layout) => {
   return null;
 };
 
+/**
+ * Validates a widget and returns its status and errors.
+ *
+ * @param {Object} widget
+ * @returns {WidgetValidationResult} The validation result.
+ */
 export const validateWidget = (widget) => {
   const errors = [];
   if (!widget?.id) {
@@ -54,6 +90,12 @@ export const validateWidget = (widget) => {
   return { status, errors };
 };
 
+/**
+ * Validates all widgets in an authoring model.
+ *
+ * @param {Object} model
+ * @returns {ModelValidationResult} The validation result.
+ */
 export const validateAuthoringModel = (model) => {
   const widgets = Array.isArray(model?.widgets) ? model.widgets : [];
   const widgetsById = {};

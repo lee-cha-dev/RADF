@@ -1,11 +1,33 @@
+/**
+ * @fileoverview Vitest coverage for compileAuthoringModel output assembly.
+ */
+
 import { describe, expect, it } from 'vitest';
 import { compileAuthoringModel } from '../authoring/compiler.js';
 
+/**
+ * @typedef {Object} BaseDashboard
+ * @property {string} id - The dashboard id.
+ * @property {string} name - The dashboard name.
+ */
+
+/**
+ * @typedef {Object} BaseAuthoringModel
+ * @property {number} schemaVersion - The authoring schema version.
+ * @property {{ title: string, description: string }} meta - The dashboard metadata.
+ * @property {{ id: string, source: { type: string, baseUrl: string, method: string, headers: Array<Object>, queryParams: Array<Object>, responsePath: string, refreshInterval: number|null } }} datasetBinding - The dataset binding.
+ * @property {{ enabled: boolean, metrics: Array<{ id: string, label: string }>, dimensions: Array<{ id: string, label: string }> }} semanticLayer - The semantic layer settings.
+ * @property {Array<Object>} widgets - The widget definitions.
+ * @property {Array<Object>} layout - The layout placements.
+ */
+
+/** @type {BaseDashboard} */
 const baseDashboard = {
   id: 'dash-1',
   name: 'Sales Board',
 };
 
+/** @type {BaseAuthoringModel} */
 const baseModel = {
   schemaVersion: 1,
   meta: {

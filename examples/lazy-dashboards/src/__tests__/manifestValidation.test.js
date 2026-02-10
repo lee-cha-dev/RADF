@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Vitest coverage for widget manifest validation.
+ */
+
 import { describe, expect, it } from 'vitest';
 import { validateManifestCoverage } from '../authoring/manifestValidation.js';
 

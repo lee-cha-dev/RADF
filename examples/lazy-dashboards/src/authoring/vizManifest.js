@@ -1,13 +1,36 @@
 import { setNestedValue } from './optionUtils.js';
 
+/**
+ * @typedef {Object} VizManifest
+ * @property {string} id
+ * @property {string} label
+ * @property {string} panelType
+ * @property {string} supportLevel
+ * @property {string} description
+ * @property {Object} encodings
+ * @property {Object} options
+ */
+
 const VIZ_MANIFEST_VERSION = 2;
 
+/**
+ * Builds default encoding values based on manifest definitions.
+ *
+ * @param {Object[]} [encodings]
+ * @returns {Object} The encoding defaults.
+ */
 const createEncodingDefaults = (encodings = []) =>
   encodings.reduce((acc, encoding) => {
     acc[encoding.id] = encoding.multi ? [] : '';
     return acc;
   }, {});
 
+/**
+ * Builds default option values from option schemas.
+ *
+ * @param {Object} [options]
+ * @returns {Object} The option defaults.
+ */
 const createOptionDefaults = (options = {}) =>
   Object.entries(options).reduce((acc, [key, schema]) => {
     if (schema.default !== undefined) {
@@ -522,12 +545,29 @@ const VIZ_CAPABILITIES = {
   },
 };
 
+/**
+ * Lists all viz manifests.
+ *
+ * @returns {VizManifest[]} The available viz manifests.
+ */
 export const listVizManifests = () =>
   Object.values(VIZ_CAPABILITIES.viz);
 
+/**
+ * Gets a specific viz manifest by id.
+ *
+ * @param {string} vizType
+ * @returns {VizManifest|null} The manifest, if available.
+ */
 export const getVizManifest = (vizType) =>
   VIZ_CAPABILITIES.viz[vizType] || null;
 
+/**
+ * Builds default encodings for a viz type.
+ *
+ * @param {string} vizType
+ * @returns {Object} The encoding defaults.
+ */
 export const getVizEncodingDefaults = (vizType) => {
   const manifest = getVizManifest(vizType);
   if (!manifest?.encodings) {
@@ -540,6 +580,12 @@ export const getVizEncodingDefaults = (vizType) => {
   };
 };
 
+/**
+ * Builds default options for a viz type.
+ *
+ * @param {string} vizType
+ * @returns {Object} The option defaults.
+ */
 export const getVizOptionDefaults = (vizType) => {
   const manifest = getVizManifest(vizType);
   if (!manifest?.options) {
@@ -548,4 +594,9 @@ export const getVizOptionDefaults = (vizType) => {
   return createOptionDefaults(manifest.options);
 };
 
+/**
+ * Returns the manifest schema version.
+ *
+ * @returns {number} The manifest version.
+ */
 export const getVizManifestVersion = () => VIZ_CAPABILITIES.version;

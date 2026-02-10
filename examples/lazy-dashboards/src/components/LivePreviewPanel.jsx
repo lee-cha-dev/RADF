@@ -8,6 +8,28 @@ import {
 } from 'radf';
 import LazyFilterBar from './LazyFilterBar.jsx';
 
+/**
+ * @typedef {Object} PreviewPanel
+ * @property {string} panelType
+ * @property {string} [vizType]
+ * @property {Object} [encodings]
+ * @property {Object} [options]
+ */
+
+/**
+ * @typedef {Object} LivePreviewPanelProps
+ * @property {PreviewPanel|null} panel
+ * @property {Object} dataProvider
+ * @property {Object} [datasetBinding]
+ * @property {Object} [semanticLayer]
+ */
+
+/**
+ * Renders a live preview of a panel or a filter bar widget.
+ *
+ * @param {LivePreviewPanelProps} props
+ * @returns {JSX.Element}
+ */
 const LivePreviewPanel = ({
   panel,
   dataProvider,

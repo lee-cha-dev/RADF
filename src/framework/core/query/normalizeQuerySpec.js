@@ -10,6 +10,12 @@
 const isPlainObject = (value) =>
   Boolean(value && typeof value === 'object' && !Array.isArray(value));
 
+/**
+ * Normalize object keys and nested objects for stable ordering.
+ *
+ * @param {Object} value - Object to normalize.
+ * @returns {Object} Normalized object.
+ */
 const normalizeObject = (value) => {
   if (!isPlainObject(value)) {
     return value;
@@ -30,6 +36,12 @@ const normalizeObject = (value) => {
     }, {});
 };
 
+/**
+ * Normalize array values, sorting primitives for stable ordering.
+ *
+ * @param {Array} values - Values to normalize.
+ * @returns {Array} Normalized values.
+ */
 const normalizeValues = (values) => {
   if (!Array.isArray(values)) {
     return values;
@@ -46,6 +58,12 @@ const normalizeValues = (values) => {
   return [...normalized].sort();
 };
 
+/**
+ * Normalize a filter object by expanding value/values and sorting arrays.
+ *
+ * @param {Object} filter - Filter entry.
+ * @returns {Object} Normalized filter.
+ */
 const normalizeFilter = (filter) => {
   if (!isPlainObject(filter)) {
     return filter;
@@ -60,6 +78,12 @@ const normalizeFilter = (filter) => {
   };
 };
 
+/**
+ * Normalize filter arrays by sorting into a stable order.
+ *
+ * @param {Array} filters - Filter list.
+ * @returns {Array} Normalized filters.
+ */
 const normalizeFilterArray = (filters) => {
   if (!Array.isArray(filters)) {
     return [];
@@ -77,6 +101,12 @@ const normalizeFilterArray = (filters) => {
     .map((entry) => entry.filter);
 };
 
+/**
+ * Normalize a string array and remove falsy values.
+ *
+ * @param {string[]} values - Values to normalize.
+ * @returns {string[]} Sorted string list.
+ */
 const normalizeStringArray = (values) => {
   if (!Array.isArray(values)) {
     return [];

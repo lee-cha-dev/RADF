@@ -1,5 +1,27 @@
 import LivePreviewPanel from '../LivePreviewPanel.jsx';
 
+/**
+ * @typedef {Object} GridWidgetProps
+ * @property {Object} widget
+ * @property {boolean} isActive
+ * @property {string} className
+ * @property {string} status
+ * @property {number} issues
+ * @property {() => void} onSelect
+ * @property {(event: React.PointerEvent) => void} [onStartMove]
+ * @property {(event: React.PointerEvent) => void} [onStartResize]
+ * @property {Object|null} previewPanel
+ * @property {Object} previewProvider
+ * @property {Object|null} datasetBinding
+ * @property {Object} semanticLayer
+ */
+
+/**
+ * Renders a single widget tile inside the grid canvas.
+ *
+ * @param {GridWidgetProps} props
+ * @returns {JSX.Element}
+ */
 const GridWidget = ({
   widget,
   isActive,

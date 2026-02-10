@@ -7,6 +7,26 @@ import {
   removeDashboardExportFromDirectory,
 } from './fileSystemSync.js';
 
+/**
+ * @typedef {Object} DashboardCleanupOptions
+ * @property {boolean} [syncEnabled] - The override for sync preference.
+ * @property {FileSystemDirectoryHandle} [syncHandle] - The directory handle to use.
+ */
+
+/**
+ * @typedef {Object} DashboardCleanupResult
+ * @property {boolean} success - The registry delete result.
+ * @property {boolean} syncAttempted - The sync attempt flag.
+ * @property {boolean} syncRemoved - The removal status from disk.
+ */
+
+/**
+ * Deletes a dashboard from the registry and removes synced exports if enabled.
+ *
+ * @param {{ id?: string, name?: string, meta?: { title?: string } }} dashboard
+ * @param {DashboardCleanupOptions} [options]
+ * @returns {Promise<DashboardCleanupResult>} The deletion and sync outcome.
+ */
 export const deleteDashboardAndCleanup = async (dashboard, options = {}) => {
   if (!dashboard?.id) {
     return { success: false, syncAttempted: false, syncRemoved: false };

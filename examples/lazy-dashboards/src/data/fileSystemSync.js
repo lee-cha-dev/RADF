@@ -3,6 +3,12 @@ const STORE_NAME = 'handles';
 const HANDLE_KEY = 'customDashboardsRoot';
 const SYNC_PREF_KEY = 'lazyDashboards.syncEnabled';
 
+/**
+ * @typedef {Object} DashboardExportPlan
+ * @property {string} folderName
+ * @property {Object<string, string>} files
+ */
+
 const openDatabase = () =>
   new Promise((resolve, reject) => {
     if (typeof indexedDB === 'undefined') {
@@ -77,9 +83,19 @@ const writeFile = async (directoryHandle, name, contents) => {
   await writable.close();
 };
 
+/**
+ * Detects whether the File System Access API is available.
+ *
+ * @returns {boolean} True when the API is supported.
+ */
 export const isFileSystemAccessSupported = () =>
   typeof window !== 'undefined' && 'showDirectoryPicker' in window;
 
+/**
+ * Reads the stored sync preference.
+ *
+ * @returns {boolean} True when sync is enabled.
+ */
 export const getSyncEnabled = () => {
   if (typeof window === 'undefined') {
     return false;
@@ -87,6 +103,12 @@ export const getSyncEnabled = () => {
   return window.localStorage.getItem(SYNC_PREF_KEY) === 'true';
 };
 
+/**
+ * Persists the sync preference.
+ *
+ * @param {boolean} enabled
+ * @returns {void}
+ */
 export const setSyncEnabled = (enabled) => {
   if (typeof window === 'undefined') {
     return;
@@ -94,6 +116,11 @@ export const setSyncEnabled = (enabled) => {
   window.localStorage.setItem(SYNC_PREF_KEY, enabled ? 'true' : 'false');
 };
 
+/**
+ * Prompts the user to pick a custom dashboards directory.
+ *
+ * @returns {Promise<FileSystemDirectoryHandle|null>} The selected handle.
+ */
 export const requestCustomDashboardsDirectory = async () => {
   if (!isFileSystemAccessSupported()) {
     return null;
@@ -108,6 +135,11 @@ export const requestCustomDashboardsDirectory = async () => {
   return handle || null;
 };
 
+/**
+ * Loads the previously selected dashboards directory, if still authorized.
+ *
+ * @returns {Promise<FileSystemDirectoryHandle|null>} The stored handle.
+ */
 export const loadCustomDashboardsDirectory = async () => {
   try {
     const handle = await readHandle();
@@ -121,10 +153,23 @@ export const loadCustomDashboardsDirectory = async () => {
   }
 };
 
+/**
+ * Clears the stored dashboards directory handle.
+ *
+ * @returns {Promise<void>}
+ */
 export const clearCustomDashboardsDirectory = async () => {
   await clearHandle();
 };
 
+/**
+ * Writes an export plan to the selected directory.
+ *
+ * @param {DashboardExportPlan} exportPlan
+ * @param {FileSystemDirectoryHandle} baseHandle
+ * @returns {Promise<boolean>} True when the write completes.
+ * @throws {Error} When permission is denied.
+ */
 export const writeDashboardExportToDirectory = async (exportPlan, baseHandle) => {
   if (!exportPlan || !baseHandle) {
     return false;
@@ -152,6 +197,13 @@ export const writeDashboardExportToDirectory = async (exportPlan, baseHandle) =>
   return true;
 };
 
+/**
+ * Removes an exported dashboard folder from the selected directory.
+ *
+ * @param {string} folderName
+ * @param {FileSystemDirectoryHandle} baseHandle
+ * @returns {Promise<boolean>} True when the folder was removed.
+ */
 export const removeDashboardExportFromDirectory = async (
   folderName,
   baseHandle
@@ -171,4 +223,3 @@ export const removeDashboardExportFromDirectory = async (
     return false;
   }
 };
-

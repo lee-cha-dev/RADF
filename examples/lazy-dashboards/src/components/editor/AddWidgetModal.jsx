@@ -1,6 +1,32 @@
+/**
+ * @typedef {Object} VizManifest
+ * @property {string} id
+ * @property {string} label
+ * @property {string} description
+ * @property {string} [supportLevel]
+ */
+
+/**
+ * @typedef {Object} AddWidgetModalProps
+ * @property {boolean} isOpen
+ * @property {VizManifest[]} vizManifests
+ * @property {string} selectedVizType
+ * @property {(vizType: string) => void} onSelectVizType
+ * @property {() => void} onClose
+ * @property {() => void} onConfirm
+ * @property {Object|null} datasetBinding
+ * @property {(manifest: VizManifest) => string[]} getVizPrereqs
+ */
+
+/**
+ * Modal for selecting a visualization type to add to the dashboard.
+ *
+ * @param {AddWidgetModalProps} props
+ * @returns {JSX.Element|null}
+ */
 const AddWidgetModal = ({
-                          isOpen,
-                          vizManifests,
+  isOpen,
+  vizManifests,
                           selectedVizType,
                           onSelectVizType,
                           onClose,

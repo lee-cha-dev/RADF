@@ -15,15 +15,21 @@ import { queryCache } from './cache';
  */
 
 /**
+ * @typedef {Object} QueryCache
+ * @property {function(string): any} get - Fetch an entry by hash.
+ * @property {function(string, Object): any} set - Store an entry by hash.
+ * @property {function(): void} [prune] - Optional prune hook for cache eviction.
+ */
+
+/**
  * @typedef {Object} UseQueryOptions
  * @property {DataProvider} provider - Provider instance with execute().
- * @property {{ get: (key: string) => any, set: (key: string, entry: any) => any, prune?: () => void }} [cache]
- *   - Cache implementation (LRU-style by default).
+ * @property {QueryCache} [cache] - Cache implementation (LRU-style by default).
  * @property {number} [staleTime=30000] - Milliseconds until cached data is stale.
  * @property {boolean} [enabled=true] - When false, skip executing the query.
- * @property {(entry: QueryState) => void} [onSuccess] - Called after successful fetch.
- * @property {(error: Error) => void} [onError] - Called after failed fetch.
- * @property {(result: ProviderResult, querySpec: QuerySpec) => (true|false|string|string[]|{valid?:boolean, errors?:string[], error?:string})} [validateResult]
+ * @property {function(QueryState): void} [onSuccess] - Called after successful fetch.
+ * @property {function(Error): void} [onError] - Called after failed fetch.
+ * @property {function(ProviderResult, QuerySpec): (boolean|string|string[]|{valid: boolean=, errors: string[]=, error: string=})} [validateResult]
  *   - Custom validation for provider results.
  * @property {boolean} [strictResultValidation=false]
  *   - When true, throw on validation errors instead of warning.
@@ -47,14 +53,25 @@ import { queryCache } from './cache';
  * @property {'idle'|'loading'|'success'|'error'} status
  * @property {number|null} updatedAt
  * @property {boolean} isStale
- * @property {() => Promise<QueryState|null>} refetch
+ * @property {function(): Promise<QueryState|null>} refetch
  */
 
+/**
+ * @returns {number} Epoch milliseconds.
+ */
 const now = () => Date.now();
 
+/**
+ * @param {unknown} value - Candidate value.
+ * @returns {boolean} True when value is a plain object.
+ */
 const isPlainObject = (value) =>
   Boolean(value && typeof value === 'object' && !Array.isArray(value));
 
+/**
+ * @param {ProviderResult} result - Provider result to validate.
+ * @returns {string[]} Validation error messages.
+ */
 const getDefaultValidationErrors = (result) => {
   const errors = [];
   if (!Array.isArray(result?.rows)) {
@@ -66,6 +83,12 @@ const getDefaultValidationErrors = (result) => {
   return errors;
 };
 
+/**
+ * @param {UseQueryOptions['validateResult']} validator - Custom validator.
+ * @param {ProviderResult} result - Provider result to validate.
+ * @param {QuerySpec} querySpec - Query spec that was executed.
+ * @returns {string[]} Validation error messages.
+ */
 const getCustomValidationErrors = (validator, result, querySpec) => {
   if (!validator) {
     return [];
@@ -99,11 +122,21 @@ const getCustomValidationErrors = (validator, result, querySpec) => {
   }
 };
 
+/**
+ * Normalize a provider result into rows/meta.
+ *
+ * @param {ProviderResult} result - Provider result.
+ * @returns {{rows: Array<Object>, meta: Record<string, unknown>|null}} Normalized result.
+ */
 const normalizeProviderResult = (result) => ({
   rows: Array.isArray(result?.rows) ? result.rows : [],
   meta: isPlainObject(result?.meta) ? result.meta : null,
 });
 
+/**
+ * @param {QueryState|null} entry - Cached entry.
+ * @returns {QueryState} Initial state for hook.
+ */
 const createInitialState = (entry) => ({
   status: entry?.status ?? 'idle',
   data: entry?.data ?? null,
@@ -112,6 +145,11 @@ const createInitialState = (entry) => ({
   updatedAt: entry?.updatedAt ?? null,
 });
 
+/**
+ * @param {QueryState|null} entry - Cached entry.
+ * @param {number} staleTime - Milliseconds until stale.
+ * @returns {boolean} True when data is stale.
+ */
 const isStale = (entry, staleTime) => {
   if (!entry?.updatedAt) {
     return true;

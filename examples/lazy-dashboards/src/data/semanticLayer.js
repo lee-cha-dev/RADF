@@ -1,3 +1,24 @@
+/**
+ * @typedef {Object} MetricOperator
+ * @property {string} key
+ * @property {string} label
+ * @property {string} op
+ * @property {string} format
+ */
+
+/**
+ * @typedef {Object} DatasetColumn
+ * @property {string} id
+ * @property {string} [label]
+ * @property {string} [type]
+ * @property {string} [inferredType]
+ * @property {string} [role]
+ * @property {string} [inferredRole]
+ */
+
+/**
+ * @type {MetricOperator[]}
+ */
 export const METRIC_OPERATORS = [
   { key: 'sum', label: 'Sum', op: 'SUM', format: 'number' },
   { key: 'avg', label: 'Average', op: 'AVG', format: 'number' },
@@ -44,6 +65,12 @@ const isDimensionColumn = (column) => {
   return getColumnType(column) !== 'number';
 };
 
+/**
+ * Builds dimension suggestions from dataset columns.
+ *
+ * @param {DatasetColumn[]} [columns]
+ * @returns {Object[]} The dimension suggestions.
+ */
 export const buildDimensionSuggestions = (columns = []) => {
   const dimensionColumns = columns.filter(
     (column) => column?.id && isDimensionColumn(column)
@@ -60,6 +87,12 @@ export const buildDimensionSuggestions = (columns = []) => {
     }));
 };
 
+/**
+ * Builds metric suggestions from dataset columns.
+ *
+ * @param {DatasetColumn[]} [columns]
+ * @returns {Object[]} The metric groups with operator variants.
+ */
 export const buildMetricSuggestions = (columns = []) =>
   columns
     .filter((column) => column?.id && isMetricColumn(column))
@@ -77,6 +110,12 @@ export const buildMetricSuggestions = (columns = []) =>
       })),
     }));
 
+/**
+ * Builds a default semantic layer from dataset columns.
+ *
+ * @param {DatasetColumn[]} [columns]
+ * @returns {{ dimensions: Object[], metrics: Object[] }} The semantic layer.
+ */
 export const buildDefaultSemanticLayer = (columns = []) => ({
   dimensions: buildDimensionSuggestions(columns),
   metrics: buildMetricSuggestions(columns).flatMap((group) => group.metrics),

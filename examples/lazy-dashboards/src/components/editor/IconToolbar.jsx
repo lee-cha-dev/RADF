@@ -1,5 +1,27 @@
 import { useState } from 'react';
 
+/**
+ * @typedef {Object} ToolbarItem
+ * @property {string} id
+ * @property {string} label
+ * @property {React.ReactNode} icon
+ */
+
+/**
+ * @typedef {Object} IconToolbarProps
+ * @property {'left'|'right'} [side]
+ * @property {ToolbarItem[]} [tools]
+ * @property {string} [activeTool]
+ * @property {boolean} isOpen
+ * @property {(toolId: string) => void} onToolClick
+ */
+
+/**
+ * Icon-only toolbar used to toggle editor side panels.
+ *
+ * @param {IconToolbarProps} props
+ * @returns {JSX.Element}
+ */
 const IconToolbar = ({
   side = 'left',
   tools = [],

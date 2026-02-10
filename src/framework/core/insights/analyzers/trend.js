@@ -17,6 +17,11 @@ import { findMeasureId } from './analysisUtils.js';
  * @property {Record<string, unknown>|null} [meta] - Provider metadata.
  */
 
+/**
+ * Format a value for narrative output.
+ * @param {number|null|undefined} value - Numeric value.
+ * @returns {string} Locale-aware label.
+ */
 const formatNumber = (value) => {
   if (value == null || Number.isNaN(value)) {
     return '0';
@@ -24,6 +29,12 @@ const formatNumber = (value) => {
   return Number(value).toLocaleString(undefined, { maximumFractionDigits: 2 });
 };
 
+/**
+ * Extract numeric values for a measure from rows.
+ * @param {Object[]} rows - Raw query rows.
+ * @param {string} measureId - Measure field id.
+ * @returns {number[]} Filtered numeric values.
+ */
 const getValues = (rows, measureId) =>
   (rows || [])
     .map((row) => Number(row?.[measureId]))

@@ -1,8 +1,19 @@
+/**
+ * @fileoverview Vitest coverage for schema inference across mixed datasets.
+ */
+
 import { describe, expect, it } from 'vitest';
 import { inferSchemaForTable } from '../data/schemaInference.js';
 
+/**
+ * @typedef {Object} InferenceTable
+ * @property {Array<{ id: string }>} columns - The column descriptors.
+ * @property {Array<Object>} rows - The row data.
+ */
+
 describe('schemaInference', () => {
   it('infers types, roles, and stats for mixed datasets', () => {
+    /** @type {InferenceTable} */
     const table = {
       columns: [
         { id: 'amount' },

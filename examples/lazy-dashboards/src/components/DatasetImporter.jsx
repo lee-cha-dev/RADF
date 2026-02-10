@@ -12,6 +12,42 @@ import {
 import { inferSchemaForTable } from '../data/schemaInference.js';
 import { trackTelemetryEvent } from '../data/telemetry.js';
 
+/**
+ * @typedef {Object} DatasetImportColumn
+ * @property {string} id
+ * @property {string} [label]
+ * @property {string} [type]
+ * @property {string} [role]
+ * @property {string} [inferredRole]
+ * @property {string} [inferredType]
+ * @property {Object} [stats]
+ * @property {number} [stats.nullRate]
+ * @property {number} [stats.distinctCount]
+ * @property {string|number|null} [stats.min]
+ * @property {string|number|null} [stats.max]
+ * @property {string[]} [sampleValues]
+ */
+
+/**
+ * @typedef {Object} DatasetBinding
+ * @property {{ type: 'file'|'api', fileName?: string, fileSize?: number, sheetName?: string, sheetNames?: string[], baseUrl?: string }} source
+ * @property {DatasetImportColumn[]} [columns]
+ * @property {Object[]} [rows]
+ * @property {Object[]} [previewRows]
+ * @property {Object[]} [warnings]
+ * @property {number} [rowCount]
+ * @property {number} [rawRowCount]
+ * @property {boolean} [truncated]
+ * @property {boolean} [sanitizedHeaders]
+ * @property {Object[]} [fieldProfiles]
+ */
+
+/**
+ * @typedef {Object} DatasetImporterProps
+ * @property {DatasetBinding|null} [datasetBinding]
+ * @property {(nextBinding: DatasetBinding) => void} [onUpdate]
+ */
+
 // The user really only needs about 100 rows to preview the data within the dashboard builder
 const MAX_FILE_BYTES = 150 * 1024 * 1024; // max 150mb file
 const WARN_FILE_BYTES = 50 * 1024 * 1024; // warn at 50mb file
@@ -26,6 +62,10 @@ const DEFAULT_API_CONFIG = {
   refreshInterval: '',
 };
 
+/**
+ * @param {File} file
+ * @returns {'csv'|'xlsx'|''}
+ */
 const getFileType = (file) => {
   const name = file?.name?.toLowerCase() || '';
   if (name.endsWith('.csv')) {
@@ -37,6 +77,10 @@ const getFileType = (file) => {
   return '';
 };
 
+/**
+ * @param {Object|null|undefined} source
+ * @returns {Object}
+ */
 const normalizeApiConfig = (source) => {
   if (!source) {
     return DEFAULT_API_CONFIG;
@@ -60,6 +104,10 @@ const normalizeApiConfig = (source) => {
   };
 };
 
+/**
+ * @param {Object} config
+ * @returns {Object}
+ */
 const normalizeApiConfigForSave = (config) => {
   const refresh =
     config.refreshInterval === '' ? null : Number(config.refreshInterval);
@@ -85,6 +133,12 @@ const buildEmptyApiTable = () => ({
   sanitizedHeaders: false,
 });
 
+/**
+ * Imports a dataset from file or API sample and emits normalized bindings.
+ *
+ * @param {DatasetImporterProps} props
+ * @returns {JSX.Element}
+ */
 const DatasetImporter = ({ datasetBinding, onUpdate }) => {
   const inputRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);

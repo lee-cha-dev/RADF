@@ -2,6 +2,58 @@ import { useEffect, useMemo, useState } from 'react';
 import { METRIC_OPERATORS } from '../../data/semanticLayer.js';
 import { sanitizeFieldId } from '../../data/datasetImport.js';
 
+/**
+ * @typedef {Object} DatasetColumn
+ * @property {string} id
+ * @property {string} [label]
+ * @property {string} [type]
+ */
+
+/**
+ * @typedef {Object} SemanticDimension
+ * @property {string} id
+ * @property {string} label
+ * @property {string} [sourceField]
+ * @property {string} [type]
+ */
+
+/**
+ * @typedef {Object} SemanticMetric
+ * @property {string} id
+ * @property {string} label
+ * @property {string} [opKey]
+ * @property {string} [opLabel]
+ */
+
+/**
+ * @typedef {Object} MetricGroup
+ * @property {string} fieldId
+ * @property {string} fieldLabel
+ * @property {SemanticMetric[]} metrics
+ */
+
+/**
+ * @typedef {Object} SemanticLayerPanelProps
+ * @property {Object|null} datasetBinding
+ * @property {DatasetColumn[]} datasetColumns
+ * @property {{ dimensions: SemanticDimension[], metrics: SemanticMetric[] }} semanticLayer
+ * @property {SemanticDimension[]} dimensionSuggestions
+ * @property {MetricGroup[]} metricGroups
+ * @property {(mode: string) => void} onModeChange
+ * @property {() => void} onReset
+ * @property {(dimensionId: string) => void} onDimensionToggle
+ * @property {(dimensionId: string, label: string) => void} onDimensionLabelChange
+ * @property {(metricId: string) => void} onMetricToggle
+ * @property {(metricId: string, label: string) => void} onMetricLabelChange
+ * @property {(metric: Object) => void} onMetricCreate
+ */
+
+/**
+ * Manages semantic layer dimensions and metrics for the editor.
+ *
+ * @param {SemanticLayerPanelProps} props
+ * @returns {JSX.Element}
+ */
 const SemanticLayerPanel = ({
   datasetBinding,
   datasetColumns,

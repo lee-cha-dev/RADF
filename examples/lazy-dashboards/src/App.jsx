@@ -6,6 +6,11 @@ import useThemeSettings from './hooks/useThemeSettings.js';
 import SettingsDrawer from './components/SettingsDrawer.jsx';
 import EditorErrorBoundary from './components/EditorErrorBoundary.jsx';
 
+/**
+ * Renders the Lazy Dashboards shell with routing, theming status, and settings controls.
+ *
+ * @returns {JSX.Element} The application shell.
+ */
 const App = () => {
   const location = useLocation();
   const {

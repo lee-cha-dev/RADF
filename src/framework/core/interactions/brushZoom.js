@@ -8,6 +8,13 @@
  * @typedef {import('../docs/jsdocTypes.js').Filter} Filter
  */
 
+/**
+ * Clamp a numeric index to a range.
+ * @param {number} value - Proposed index.
+ * @param {number} min - Minimum index.
+ * @param {number} max - Maximum index.
+ * @returns {number} Clamped index.
+ */
 const clampIndex = (value, min, max) => Math.min(max, Math.max(min, value));
 
 /**

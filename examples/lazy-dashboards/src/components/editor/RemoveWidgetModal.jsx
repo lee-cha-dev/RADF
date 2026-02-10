@@ -1,3 +1,16 @@
+/**
+ * @typedef {Object} RemoveWidgetModalProps
+ * @property {{ title: string }|null} pendingRemoveWidget
+ * @property {() => void} onCancel
+ * @property {() => void} onConfirm
+ */
+
+/**
+ * Confirmation modal for removing a widget.
+ *
+ * @param {RemoveWidgetModalProps} props
+ * @returns {JSX.Element|null}
+ */
 const RemoveWidgetModal = ({ pendingRemoveWidget, onCancel, onConfirm }) => {
   if (!pendingRemoveWidget) {
     return null;

@@ -2,6 +2,44 @@ const DEFAULT_MAX_ROWS = 5000;
 const DEFAULT_PREVIEW_ROWS = 10;
 const LARGE_ROW_WARNING_COUNT = 100000;
 
+/**
+ * @typedef {Object} DatasetColumn
+ * @property {string} id
+ * @property {string} label
+ * @property {string} [originalHeader]
+ * @property {string} [originalKey]
+ */
+
+/**
+ * @typedef {Object} DatasetTable
+ * @property {DatasetColumn[]} columns
+ * @property {Object[]} rows
+ * @property {Object[]} preview
+ * @property {string[]} warnings
+ * @property {number} rowCount
+ * @property {number} rawRowCount
+ * @property {boolean} truncated
+ * @property {boolean} sanitizedHeaders
+ * @property {number} [expectedColumnCount]
+ * @property {number} [inconsistentRowCount]
+ */
+
+/**
+ * @typedef {Object} DatasetBinding
+ * @property {string} id
+ * @property {string} importedAt
+ * @property {Object} source
+ * @property {DatasetColumn[]} columns
+ * @property {Object[]} rows
+ * @property {Object[]} previewRows
+ * @property {number} rowCount
+ * @property {number} rawRowCount
+ * @property {boolean} truncated
+ * @property {string[]} warnings
+ * @property {boolean} sanitizedHeaders
+ * @property {Object[]} fieldProfiles
+ */
+
 const trimCell = (value) => {
   if (value === null || value === undefined) {
     return '';
@@ -12,6 +50,14 @@ const trimCell = (value) => {
   return String(value);
 };
 
+/**
+ * Sanitizes a column header into a unique field id.
+ *
+ * @param {string} value
+ * @param {number} index
+ * @param {Set<string>} used
+ * @returns {{ id: string, original: string, wasSanitized: boolean }}
+ */
 export const sanitizeFieldId = (value, index, used) => {
   const raw = trimCell(value);
   let cleaned = raw.toLowerCase().replace(/[^a-z0-9]+/g, '_');
@@ -107,6 +153,14 @@ const normalizeTable = (rows, options = {}) => {
   };
 };
 
+/**
+ * Parses CSV text into a normalized table.
+ *
+ * @param {string} text
+ * @param {{ maxRows?: number, previewRows?: number }} [options]
+ * @returns {DatasetTable} The normalized table.
+ * @throws {Error} When the CSV is empty or malformed.
+ */
 export const parseCsvText = (text, options = {}) => {
   if (!text || text.trim().length === 0) {
     throw new Error('The file is empty.');
@@ -159,9 +213,23 @@ export const parseCsvText = (text, options = {}) => {
   return normalizeTable(rows, options);
 };
 
+/**
+ * Normalizes a 2D matrix of rows into a table.
+ *
+ * @param {Array<Array<unknown>>} rows
+ * @param {{ maxRows?: number, previewRows?: number }} [options]
+ * @returns {DatasetTable} The normalized table.
+ */
 export const parseRowMatrix = (rows, options = {}) =>
   normalizeTable(rows, options);
 
+/**
+ * Builds a table from an array of object rows (API payloads).
+ *
+ * @param {Object[]} [rows]
+ * @param {{ maxRows?: number, previewRows?: number }} [options]
+ * @returns {DatasetTable} The normalized table.
+ */
 export const buildTableFromObjectRows = (rows = [], options = {}) => {
   const maxRows = options.maxRows ?? DEFAULT_MAX_ROWS;
   const previewRows = options.previewRows ?? DEFAULT_PREVIEW_ROWS;
@@ -261,6 +329,12 @@ export const buildTableFromObjectRows = (rows = [], options = {}) => {
   };
 };
 
+/**
+ * Formats bytes into a readable size label.
+ *
+ * @param {number} bytes
+ * @returns {string} The formatted size.
+ */
 export const formatBytes = (bytes) => {
   if (bytes < 1024) {
     return `${bytes} B`;
@@ -273,6 +347,19 @@ export const formatBytes = (bytes) => {
   return `${mb.toFixed(1)} MB`;
 };
 
+/**
+ * Builds a dataset binding from a file import.
+ *
+ * @param {Object} options
+ * @param {string} options.fileName
+ * @param {number} options.fileSize
+ * @param {string} options.fileType
+ * @param {string} [options.sheetName]
+ * @param {string[]} [options.sheetNames]
+ * @param {DatasetTable} options.table
+ * @param {Object[]} [options.fieldProfiles]
+ * @returns {DatasetBinding} The dataset binding.
+ */
 export const buildDatasetBinding = ({
   fileName,
   fileSize,
@@ -303,6 +390,15 @@ export const buildDatasetBinding = ({
   fieldProfiles: fieldProfiles || [],
 });
 
+/**
+ * Builds a dataset binding from an API import.
+ *
+ * @param {Object} [options]
+ * @param {{ baseUrl?: string, method?: string, headers?: Object[], queryParams?: Object[], responsePath?: string, refreshInterval?: number|null }} [options.apiConfig]
+ * @param {DatasetTable} [options.table]
+ * @param {Object[]} [options.fieldProfiles]
+ * @returns {DatasetBinding} The dataset binding.
+ */
 export const buildApiDatasetBinding = ({
   apiConfig,
   table,
@@ -330,6 +426,12 @@ export const buildApiDatasetBinding = ({
   fieldProfiles: fieldProfiles || [],
 });
 
+/**
+ * Collects display warnings for a dataset table.
+ *
+ * @param {DatasetTable} table
+ * @returns {string[]} Warning messages.
+ */
 export const collectDatasetWarnings = (table) => {
   const warnings = [];
   if (table.sanitizedHeaders) {

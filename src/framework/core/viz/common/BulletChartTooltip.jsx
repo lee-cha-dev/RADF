@@ -1,10 +1,51 @@
+/**
+ * @module core/viz/common/BulletChartTooltip
+ * @description Tooltip renderer for bullet chart summaries.
+ */
 import React, { forwardRef } from 'react';
 
+/**
+ * @typedef {Object} BulletTooltipPosition
+ * @property {number} x - X coordinate for absolute positioning.
+ * @property {number} y - Y coordinate for absolute positioning.
+ */
+
+/**
+ * @typedef {Object} BulletTooltipProps
+ * @property {boolean} [active] - Recharts active flag.
+ * @property {Array<Object>} [payload] - Recharts tooltip payload.
+ * @property {Object} [row] - Explicit row data when not using Recharts.
+ * @property {string} nameKey - Key for the primary label.
+ * @property {string} valueKey - Key for the primary value.
+ * @property {string} [colorKey] - Key used to resolve a color category.
+ * @property {string} [percentKey] - Key used to show a percent value.
+ * @property {Map<string, {index: number}>} [colorMap] - Category to palette index map.
+ * @property {BulletTooltipPosition} [position] - Optional fixed tooltip position.
+ * @property {boolean} [visible] - Manual visibility flag when not using Recharts.
+ * @property {string} [markerLabel] - Label for the marker row.
+ * @property {function(Object): (number|null)} [getMarkerValue] - Marker value accessor.
+ * @property {function(Object): boolean} [getExceeds] - Exceeds accessor.
+ */
+
+/**
+ * Format values with a fixed suffix and placeholder for missing values.
+ *
+ * @param {number|string|null} value - Value to format.
+ * @param {string} [suffix] - Suffix to append to the formatted value.
+ * @returns {string} Formatted label.
+ */
 const formatValue = (value, suffix = '') => {
   if (value == null || Number.isNaN(value)) return '—';
   return `${value.toLocaleString(undefined, { maximumFractionDigits: 1 })}${suffix}`;
 };
 
+/**
+ * Bullet chart tooltip content.
+ *
+ * @param {BulletTooltipProps} props - Tooltip props.
+ * @param {React.Ref<HTMLDivElement>} tooltipRef - Forwarded ref.
+ * @returns {JSX.Element|null} Tooltip content.
+ */
 const BulletChartTooltip = forwardRef(function BulletChartTooltip(
   {
     active,

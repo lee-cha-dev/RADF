@@ -1,6 +1,38 @@
+/**
+ * @typedef {Object} FieldMetadata
+ * @property {string} id
+ * @property {string} name
+ * @property {string} type
+ * @property {string} role
+ * @property {number} [nulls]
+ * @property {number} [distinct]
+ * @property {string|number} [min]
+ * @property {string|number} [max]
+ * @property {string[]} [samples]
+ * @property {string} [inference]
+ */
+
+/**
+ * @typedef {Object} FieldMetadataModalProps
+ * @property {boolean} isOpen
+ * @property {FieldMetadata[]} fields
+ * @property {string} searchQuery
+ * @property {(value: string) => void} onSearchChange
+ * @property {string} selectedRole
+ * @property {(value: string) => void} onRoleChange
+ * @property {() => void} onClose
+ * @property {() => void} onSave
+ */
+
+/**
+ * Modal for reviewing and filtering field metadata details.
+ *
+ * @param {FieldMetadataModalProps} props
+ * @returns {JSX.Element|null}
+ */
 const FieldMetadataModal = ({
-                              isOpen,
-                              fields,
+  isOpen,
+  fields,
                               searchQuery,
                               onSearchChange,
                               selectedRole,

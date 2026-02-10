@@ -4,6 +4,46 @@ import {
 } from '../authoring/vizManifest.js';
 import { normalizeAuthoringModel } from '../authoring/authoringModel.js';
 
+/**
+ * @typedef {Object} TemplatePreviewBlock
+ * @property {number} x
+ * @property {number} y
+ * @property {number} w
+ * @property {number} h
+ * @property {string} type
+ */
+
+/**
+ * @typedef {Object} DashboardTemplateSummary
+ * @property {string} id
+ * @property {string} name
+ * @property {string} description
+ * @property {string[]} tags
+ * @property {boolean} supportsFilterBar
+ */
+
+/**
+ * @typedef {Object} DashboardTemplateDefinition
+ * @property {string} id
+ * @property {string} name
+ * @property {string} description
+ * @property {string[]} tags
+ * @property {boolean} supportsFilterBar
+ * @property {TemplatePreviewBlock[]} preview
+ * @property {Object} authoringModel
+ */
+
+/**
+ * @typedef {Object} DatasetColumn
+ * @property {string} id
+ * @property {string} [label]
+ * @property {string} [type]
+ * @property {string} [inferredType]
+ * @property {string} [role]
+ * @property {string} [inferredRole]
+ * @property {Object} [stats]
+ */
+
 const TEMPLATE_SCHEMA_VERSION = 1;
 
 const DEFAULT_SEMANTIC_LAYER = {
@@ -508,6 +548,11 @@ const applyBindingsToWidget = (widget, bindings) => {
   };
 };
 
+/**
+ * Lists template metadata for selection UIs.
+ *
+ * @returns {DashboardTemplateSummary[]} The template summaries.
+ */
 export const listDashboardTemplates = () =>
   TEMPLATE_DEFINITIONS.map((template) => ({
     id: template.id,
@@ -517,9 +562,22 @@ export const listDashboardTemplates = () =>
     supportsFilterBar: template.supportsFilterBar,
   }));
 
+/**
+ * Gets a template definition by id.
+ *
+ * @param {string} templateId
+ * @returns {DashboardTemplateDefinition|null} The template definition.
+ */
 export const getDashboardTemplate = (templateId) =>
   TEMPLATE_DEFINITIONS.find((template) => template.id === templateId) || null;
 
+/**
+ * Gets a layout preview for a template.
+ *
+ * @param {string} templateId
+ * @param {boolean} [includeFilterBar=false]
+ * @returns {TemplatePreviewBlock[]} The preview blocks.
+ */
 export const getTemplatePreview = (templateId, includeFilterBar = false) => {
   const template = getDashboardTemplate(templateId);
   if (!template) {
@@ -539,6 +597,13 @@ export const getTemplatePreview = (templateId, includeFilterBar = false) => {
   ];
 };
 
+/**
+ * Builds an authoring model from a template.
+ *
+ * @param {string} templateId
+ * @param {{ includeFilterBar?: boolean }} [options]
+ * @returns {Object|null} The normalized authoring model.
+ */
 export const buildTemplateAuthoringModel = (
   templateId,
   { includeFilterBar = false } = {}
@@ -557,6 +622,13 @@ export const buildTemplateAuthoringModel = (
   });
 };
 
+/**
+ * Applies auto-bindings to a template using inferred dataset columns.
+ *
+ * @param {Object} model
+ * @param {DatasetColumn[]} [datasetColumns]
+ * @returns {Object} The updated model.
+ */
 export const applyTemplateBindings = (model, datasetColumns = []) => {
   if (!model) {
     return model;

@@ -1,3 +1,50 @@
+/**
+ * @typedef {Object} DashboardAuthoringModel
+ * @property {number} schemaVersion
+ * @property {Object} meta
+ * @property {Object[]} widgets
+ * @property {Object[]} layout
+ * @property {Object|null} datasetBinding
+ * @property {{ enabled: boolean, metrics: Object[], dimensions: Object[] }} semanticLayer
+ */
+
+/**
+ * @typedef {Object} DashboardRecord
+ * @property {string} id
+ * @property {string} name
+ * @property {string} description
+ * @property {string[]} tags
+ * @property {string} createdAt
+ * @property {string} updatedAt
+ * @property {DashboardAuthoringModel} authoringModel
+ * @property {Object|null} compiledConfig
+ * @property {Object|null} datasetBinding
+ */
+
+/**
+ * @typedef {Object} DashboardTemplateInput
+ * @property {DashboardAuthoringModel} [authoringModel]
+ * @property {Object|null} [compiledConfig]
+ * @property {Object|null} [datasetBinding]
+ * @property {string[]} [tags]
+ * @property {string} [description]
+ */
+
+/**
+ * @typedef {Object} DashboardUpdates
+ * @property {string} [name]
+ * @property {string} [description]
+ * @property {string[]} [tags]
+ * @property {DashboardAuthoringModel} [authoringModel]
+ * @property {Object|null} [compiledConfig]
+ * @property {Object|null} [datasetBinding]
+ */
+
+/**
+ * LocalStorage key for the dashboard registry.
+ *
+ * @type {string}
+ */
 const STORAGE_KEY = 'lazyDashboards.registry';
 const DEFAULT_SCHEMA_VERSION = 1;
 const DEFAULT_SEMANTIC_LAYER = {
@@ -136,6 +183,11 @@ const cloneValue = (value) => {
   return JSON.parse(JSON.stringify(value));
 };
 
+/**
+ * Lists dashboards ordered by most recently updated.
+ *
+ * @returns {DashboardRecord[]} The ordered dashboards.
+ */
 export const listDashboards = () => {
   const registry = readRegistry();
   return [...registry.dashboards].sort((a, b) => {
@@ -145,6 +197,12 @@ export const listDashboards = () => {
   });
 };
 
+/**
+ * Gets a dashboard by id.
+ *
+ * @param {string} id
+ * @returns {DashboardRecord|null} The dashboard record.
+ */
 export const getDashboard = (id) => {
   if (!id) {
     return null;
@@ -153,6 +211,12 @@ export const getDashboard = (id) => {
   return registry.dashboards.find((dashboard) => dashboard.id === id) || null;
 };
 
+/**
+ * Creates a new dashboard record and persists it.
+ *
+ * @param {{ name?: string, template?: DashboardTemplateInput }} [options]
+ * @returns {DashboardRecord} The newly created record.
+ */
 export const createDashboard = ({ name, template } = {}) => {
   const registry = readRegistry();
   const resolvedName = name?.trim() || getNextUntitledName(registry.dashboards);
@@ -169,6 +233,13 @@ export const createDashboard = ({ name, template } = {}) => {
   return record;
 };
 
+/**
+ * Updates a dashboard record by id.
+ *
+ * @param {string} id
+ * @param {DashboardUpdates} [updates]
+ * @returns {DashboardRecord|null} The updated record.
+ */
 export const updateDashboard = (id, updates = {}) => {
   if (!id) {
     return null;
@@ -193,11 +264,30 @@ export const updateDashboard = (id, updates = {}) => {
   return next;
 };
 
+/**
+ * Touches a dashboard to update its timestamp.
+ *
+ * @param {string} id
+ * @returns {DashboardRecord|null} The updated record.
+ */
 export const touchDashboard = (id) => updateDashboard(id, {});
 
+/**
+ * Renames a dashboard.
+ *
+ * @param {string} id
+ * @param {string} name
+ * @returns {DashboardRecord|null} The updated record.
+ */
 export const renameDashboard = (id, name) =>
   updateDashboard(id, { name: name?.trim() || 'Untitled Dashboard' });
 
+/**
+ * Duplicates a dashboard record into a new record.
+ *
+ * @param {string} id
+ * @returns {DashboardRecord|null} The duplicated record.
+ */
 export const duplicateDashboard = (id) => {
   const registry = readRegistry();
   const source = registry.dashboards.find((dashboard) => dashboard.id === id);
@@ -219,6 +309,12 @@ export const duplicateDashboard = (id) => {
   return record;
 };
 
+/**
+ * Deletes a dashboard by id.
+ *
+ * @param {string} id
+ * @returns {boolean} True when a record was removed.
+ */
 export const deleteDashboard = (id) => {
   if (!id) {
     return false;

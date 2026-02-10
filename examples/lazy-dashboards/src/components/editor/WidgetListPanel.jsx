@@ -1,3 +1,20 @@
+/**
+ * @typedef {Object} WidgetListPanelProps
+ * @property {{ widgets: Object[] }} authoringModel
+ * @property {Object} validation
+ * @property {string|null} activeWidgetId
+ * @property {(widgetId: string) => void} onWidgetSelect
+ * @property {() => void} onOpenTemplate
+ * @property {() => void} onAddWidget
+ * @property {(widgetId: string) => void} onRequestRemoveWidget
+ */
+
+/**
+ * Displays the list of widgets with status and selection controls.
+ *
+ * @param {WidgetListPanelProps} props
+ * @returns {JSX.Element}
+ */
 const WidgetListPanel = ({
   authoringModel,
   validation,

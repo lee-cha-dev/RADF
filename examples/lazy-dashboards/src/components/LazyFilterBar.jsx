@@ -7,6 +7,33 @@ import {
   useDashboardState,
 } from 'radf';
 
+/**
+ * @typedef {Object} FilterBarOptions
+ * @property {boolean} [allowMultiSelect]
+ * @property {boolean} [showSearch]
+ * @property {boolean} [showClear]
+ * @property {'inline'|'stacked'} [layout]
+ */
+
+/**
+ * @typedef {Object} DatasetBinding
+ * @property {{ id: string, label?: string, type?: string, inferredType?: string }[]} [columns]
+ * @property {Object[]} [rows]
+ */
+
+/**
+ * @typedef {Object} SemanticLayer
+ * @property {{ id: string, label?: string, type?: string, sourceField?: string }[]} [dimensions]
+ */
+
+/**
+ * @typedef {Object} LazyFilterBarProps
+ * @property {string|string[]} fields
+ * @property {DatasetBinding} datasetBinding
+ * @property {SemanticLayer} [semanticLayer]
+ * @property {FilterBarOptions} [options]
+ */
+
 const MAX_DISTINCT_VALUES = 200;
 
 const normalizeFieldList = (fields) => {
@@ -61,6 +88,12 @@ const sortValues = (values, type) => {
   return [...values].sort((a, b) => a.localeCompare(b));
 };
 
+/**
+ * Renders a dashboard filter bar bound to dataset values.
+ *
+ * @param {LazyFilterBarProps} props
+ * @returns {JSX.Element}
+ */
 const LazyFilterBar = ({
   fields,
   datasetBinding,

@@ -1,6 +1,16 @@
 import { Component } from 'react';
 import { Link } from 'react-router-dom';
 
+/**
+ * @typedef {Object} EditorErrorBoundaryProps
+ * @property {React.ReactNode} children
+ */
+
+/**
+ * Catches render errors in the editor view and offers recovery actions.
+ *
+ * @extends {Component<EditorErrorBoundaryProps, { hasError: boolean }>}
+ */
 class EditorErrorBoundary extends Component {
   constructor(props) {
     super(props);

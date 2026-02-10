@@ -10,6 +10,14 @@ import { getCrossFilterValueFromEvent } from './crossFilter';
  * @typedef {import('../docs/jsdocTypes.js').Filter} Filter
  */
 
+/**
+ * Build a stable drilldown entry id.
+ * @param {Object} params - Drilldown identity inputs.
+ * @param {string|null|undefined} params.panelId - Source panel id.
+ * @param {string} params.dimension - Dimension name.
+ * @param {string|number|Date} params.value - Selected dimension value.
+ * @returns {string} Drilldown id.
+ */
 const buildDrilldownId = ({ panelId, dimension, value }) =>
   `${panelId || 'panel'}:${dimension}:${String(value)}`;
 

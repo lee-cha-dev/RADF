@@ -42,8 +42,21 @@ import { getDrilldownLabel } from '../interactions/drilldown';
  * @property {Array<string|number|boolean|Date>} values - Selected values.
  */
 
+/**
+ * Normalizes possibly-null filter values into an array.
+ *
+ * @param {unknown} values
+ * @returns {Array<unknown>} Value array (empty when invalid).
+ */
 const toValueArray = (values) => (Array.isArray(values) ? values : []);
 
+/**
+ * Builds a human-friendly label for a filter object.
+ *
+ * @param {Filter|null|undefined} filter
+ * @param {string} [fallback='Filter']
+ * @returns {string} Label for UI display.
+ */
 const buildFilterLabel = (filter, fallback = 'Filter') => {
   if (!filter) {
     return fallback;
@@ -53,6 +66,12 @@ const buildFilterLabel = (filter, fallback = 'Filter') => {
   return `${filter.field || fallback} ${filter.op || 'IN'} ${valueLabel}`;
 };
 
+/**
+ * Derives a filter object from a drilldown entry.
+ *
+ * @param {import('../docs/jsdocTypes').DrilldownPath|null|undefined} entry
+ * @returns {Filter|Filter[]|null} Filter or filters from the entry.
+ */
 const buildFilterFromDrillEntry = (entry) => {
   if (!entry) {
     return null;
@@ -73,6 +92,12 @@ const buildFilterFromDrillEntry = (entry) => {
   return null;
 };
 
+/**
+ * Flattens filters from selection objects.
+ *
+ * @param {import('../docs/jsdocTypes').Selection[]} [selections=[]]
+ * @returns {Filter[]} Flattened selection filters.
+ */
 const collectSelectionFilters = (selections = []) =>
   selections.flatMap((selection) => {
     if (selection.filter) {
@@ -84,6 +109,12 @@ const collectSelectionFilters = (selections = []) =>
     return [];
   });
 
+/**
+ * Flattens filters from drilldown entries.
+ *
+ * @param {import('../docs/jsdocTypes').DrilldownPath[]} [drillPath=[]]
+ * @returns {Filter[]} Flattened drilldown filters.
+ */
 const collectDrillFilters = (drillPath = []) =>
   drillPath.flatMap((entry) => toFilterArray(buildFilterFromDrillEntry(entry)));
 
@@ -273,6 +304,11 @@ export const selectSelectionFilters = (state) =>
 export const selectDrillFilters = (state) =>
   collectDrillFilters(state.drillPath);
 
+/**
+ * Namespace export for dashboard selector helpers.
+ *
+ * @type {Record<string, Function>}
+ */
 export const dashboardSelectors = {
   selectDashboardId,
   selectDatasetId,

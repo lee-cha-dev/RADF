@@ -1,8 +1,18 @@
+/**
+ * @fileoverview Vitest coverage for dataset import parsing and validation.
+ */
+
 import { describe, expect, it } from 'vitest';
 import {
   parseCsvText,
   parseRowMatrix,
 } from '../data/datasetImport.js';
+
+/**
+ * @typedef {Object} ParseOptions
+ * @property {number} maxRows - The maximum number of rows to ingest.
+ * @property {number} previewRows - The number of preview rows to keep.
+ */
 
 describe('datasetImport', () => {
   it('parses csv with quoted fields and sanitizes headers', () => {
@@ -10,7 +20,9 @@ describe('datasetImport', () => {
       'Name,,Name,Amount\n' +
       '"Alice","Smith, Jr",Alice,10\n' +
       'Bob,,Bob,20\n';
-    const table = parseCsvText(text, { maxRows: 10, previewRows: 1 });
+    /** @type {ParseOptions} */
+    const options = { maxRows: 10, previewRows: 1 };
+    const table = parseCsvText(text, options);
 
     expect(table.columns.map((column) => column.id)).toEqual([
       'name',
@@ -25,16 +37,22 @@ describe('datasetImport', () => {
   });
 
   it('flags inconsistent rows in xlsx-style matrices', () => {
+    /** @type {Array<Array<string>>} */
     const rows = [['A', 'B'], ['1'], ['2', '3', '4']];
-    const table = parseRowMatrix(rows, { maxRows: 10, previewRows: 1 });
+    /** @type {ParseOptions} */
+    const options = { maxRows: 10, previewRows: 1 };
+    const table = parseRowMatrix(rows, options);
 
     expect(table.expectedColumnCount).toBe(2);
     expect(table.inconsistentRowCount).toBe(2);
   });
 
   it('truncates large datasets when maxRows is exceeded', () => {
+    /** @type {Array<Array<string>>} */
     const rows = [['A'], ['1'], ['2'], ['3']];
-    const table = parseRowMatrix(rows, { maxRows: 2, previewRows: 1 });
+    /** @type {ParseOptions} */
+    const options = { maxRows: 2, previewRows: 1 };
+    const table = parseRowMatrix(rows, options);
 
     expect(table.truncated).toBe(true);
     expect(table.rowCount).toBe(2);

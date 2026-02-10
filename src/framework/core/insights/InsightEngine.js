@@ -25,8 +25,22 @@
  * @property {DashboardState|null} [dashboardState] - Active dashboard state.
  */
 
+/**
+ * Normalize a value into an array, excluding nullish values.
+ * @param {unknown|unknown[]|null} value - The value to normalize.
+ * @returns {unknown[]} Array-wrapped value (empty when nullish).
+ */
 const ensureArray = (value) => (Array.isArray(value) ? value : value ? [value] : []);
 
+/**
+ * Normalize a raw analyzer result into an Insight shape.
+ * @param {Object} params - Normalization inputs.
+ * @param {Object|null|undefined} params.insight - Raw analyzer insight.
+ * @param {string} params.fallbackId - Fallback id for missing insight ids.
+ * @param {string} params.analyzerId - Analyzer id for source fallback.
+ * @param {string} params.analyzerLabel - Analyzer label for title fallback.
+ * @returns {Insight|null} Normalized insight or null when invalid.
+ */
 const normalizeInsight = ({ insight, fallbackId, analyzerId, analyzerLabel }) => {
   if (!insight || typeof insight !== 'object') {
     return null;

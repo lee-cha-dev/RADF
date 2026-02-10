@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Vitest coverage for dashboard registry storage behavior.
+ */
+
 import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest';
 import {
   STORAGE_KEY,
@@ -9,6 +13,11 @@ import {
   renameDashboard,
   updateDashboard,
 } from '../data/dashboardRegistry.js';
+
+/**
+ * @typedef {Object} LegacyDashboardStorage
+ * @property {Array<Object>} dashboards - The stored dashboard entries.
+ */
 
 describe('dashboardRegistry', () => {
   beforeEach(() => {
@@ -47,6 +56,7 @@ describe('dashboardRegistry', () => {
   });
 
   it('normalizes older authoring models missing schemaVersion', () => {
+    /** @type {LegacyDashboardStorage} */
     const legacy = {
       dashboards: [
         {

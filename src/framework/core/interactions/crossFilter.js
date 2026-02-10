@@ -8,6 +8,14 @@
  * @typedef {import('../docs/jsdocTypes.js').Filter} Filter
  */
 
+/**
+ * Build a stable selection id string.
+ * @param {Object} params - Selection identity inputs.
+ * @param {string|null|undefined} params.panelId - Source panel id.
+ * @param {string} params.field - Selected field.
+ * @param {string|number} params.value - Selected value identifier.
+ * @returns {string} Selection id.
+ */
 const buildSelectionId = ({ panelId, field, value }) =>
   `${panelId || 'panel'}:${field}:${String(value)}`;
 

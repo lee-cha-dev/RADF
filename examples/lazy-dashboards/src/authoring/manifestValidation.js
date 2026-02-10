@@ -1,9 +1,21 @@
 import optionCoverageMatrix from './optionCoverageMatrix.json';
 import { listVizManifests } from './vizManifest.js';
 
+/**
+ * Normalizes option paths by removing the options prefix.
+ *
+ * @param {string} path
+ * @returns {string} The normalized path.
+ */
 const normalizeOptionPath = (path) =>
   typeof path === 'string' ? path.replace(/^options\./, '') : '';
 
+/**
+ * Builds a set of option paths supported by a manifest.
+ *
+ * @param {Object} manifest
+ * @returns {Set<string>} The normalized option paths.
+ */
 const buildManifestOptionSet = (manifest) =>
   new Set(
     Object.entries(manifest?.options || {}).map(
@@ -11,6 +23,11 @@ const buildManifestOptionSet = (manifest) =>
     )
   );
 
+/**
+ * Validates that supported options appear in the viz manifests.
+ *
+ * @returns {{ isValid: boolean, errors: string[] }} The validation result.
+ */
 export const validateManifestCoverage = () => {
   const manifestById = new Map(
     listVizManifests().map((manifest) => [manifest.id, manifest])

@@ -7,8 +7,16 @@ import { createDataProvider } from './DataProvider';
 
 /**
  * @typedef {import('../docs/jsdocTypes').DataProvider} DataProvider
+ * @typedef {import('../docs/jsdocTypes').QuerySpec} QuerySpec
  */
 
+/**
+ * Delay helper with abort support.
+ *
+ * @param {number} ms - The delay in milliseconds.
+ * @param {AbortSignal} [signal] - Abort signal for canceling the delay.
+ * @returns {Promise<void>} Resolves after the delay or rejects on abort.
+ */
 const wait = (ms, signal) =>
   new Promise((resolve, reject) => {
     if (signal?.aborted) {
@@ -28,6 +36,12 @@ const wait = (ms, signal) =>
     }
   });
 
+/**
+ * Create a deterministic PRNG from a seed.
+ *
+ * @param {number} seed - Seed integer.
+ * @returns {function(): number} Random generator that returns a float in [0, 1).
+ */
 const mulberry32 = (seed) => {
   let t = seed;
   return () => {
@@ -38,6 +52,12 @@ const mulberry32 = (seed) => {
   };
 };
 
+/**
+ * Build a stable numeric seed from a query spec.
+ *
+ * @param {QuerySpec} querySpec - Query spec to hash.
+ * @returns {number} Unsigned 32-bit seed.
+ */
 const seedFromQuery = (querySpec) => {
   const base = JSON.stringify({
     datasetId: querySpec.datasetId,
@@ -55,8 +75,20 @@ const seedFromQuery = (querySpec) => {
   return hash >>> 0;
 };
 
+/**
+ * Coerce a value to an array or return an empty array.
+ *
+ * @param {unknown} value - Candidate value.
+ * @returns {Array} Array value or empty array.
+ */
 const ensureArray = (value) => (Array.isArray(value) ? value : []);
 
+/**
+ * Normalize time range input to a {start, end} object.
+ *
+ * @param {Array<string|Date>|{start?: string|Date, end?: string|Date}|null} range
+ * @returns {{start: string|Date|null, end: string|Date|null}|null}
+ */
 const normalizeTimeRange = (range) => {
   if (!range) {
     return null;
@@ -70,6 +102,12 @@ const normalizeTimeRange = (range) => {
   return null;
 };
 
+/**
+ * Parse a date-like value into a Date object.
+ *
+ * @param {string|Date|null} value - Date-like value.
+ * @returns {Date|null} Parsed date or null when invalid.
+ */
 const parseDate = (value) => {
   if (!value) {
     return null;
@@ -81,10 +119,30 @@ const parseDate = (value) => {
   return parsed;
 };
 
+/**
+ * Format a Date as YYYY-MM-DD.
+ *
+ * @param {Date} date - Date to format.
+ * @returns {string} ISO date string without time.
+ */
 const formatDate = (date) => date.toISOString().slice(0, 10);
 
+/**
+ * Clamp a number between min and max.
+ *
+ * @param {number} value - Input value.
+ * @param {number} min - Minimum allowed.
+ * @param {number} max - Maximum allowed.
+ * @returns {number} Clamped value.
+ */
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
+/**
+ * Extract a date range from BETWEEN filters.
+ *
+ * @param {Array<Object>} filters - Filter list.
+ * @returns {{start: string|null, end: string|null}|null} Range or null.
+ */
 const resolveTimeRangeFromFilters = (filters) => {
   const list = ensureArray(filters);
   const betweenFilter = list.find(
@@ -111,6 +169,12 @@ const dimensionDefaults = {
   segment: ['Consumer', 'SMB', 'Enterprise'],
 };
 
+/**
+ * Resolve mock category values for a dimension id.
+ *
+ * @param {string} dimensionId - Dimension id.
+ * @returns {string[]} Distinct dimension values.
+ */
 const getDimensionValues = (dimensionId) => {
   if (dimensionDefaults[dimensionId]) {
     return dimensionDefaults[dimensionId];
@@ -128,6 +192,16 @@ const getDimensionValues = (dimensionId) => {
   return base.map((value, index) => `${dimensionId || 'dim'}-${value}${index + 1}`);
 };
 
+/**
+ * Generate deterministic mock rows for a query spec.
+ *
+ * @param {Object} options
+ * @param {string[]} options.measures - Measure ids to populate.
+ * @param {string[]} options.dimensions - Dimension ids to include.
+ * @param {{start: string|Date|null, end: string|Date|null}|null} options.timeRange - Optional date range.
+ * @param {function(): number} options.random - Seeded random generator.
+ * @returns {Array<Object>} Row list for mock results.
+ */
 const generateRows = ({ measures, dimensions, timeRange, random }) => {
   const dimensionList = ensureArray(dimensions);
   if (!dimensionList.length) {
@@ -179,6 +253,13 @@ const generateRows = ({ measures, dimensions, timeRange, random }) => {
   return rows;
 };
 
+/**
+ * Execute the mock provider for a query spec.
+ *
+ * @param {QuerySpec} querySpec - Query spec to resolve.
+ * @param {{signal?: AbortSignal}} [options] - Execution options.
+ * @returns {Promise<{rows: Array<Object>, meta: Record<string, unknown>}>} Mock result.
+ */
 const mockExecute = async (querySpec, { signal } = {}) => {
   const seed = seedFromQuery(querySpec);
   const random = mulberry32(seed);

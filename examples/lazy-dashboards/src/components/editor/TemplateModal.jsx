@@ -1,6 +1,48 @@
+/**
+ * @typedef {Object} TemplatePreviewBlock
+ * @property {number} x
+ * @property {number} y
+ * @property {number} w
+ * @property {number} h
+ * @property {string} [type]
+ */
+
+/**
+ * @typedef {Object} DashboardTemplate
+ * @property {string} id
+ * @property {string} name
+ * @property {string} description
+ * @property {string[]} [tags]
+ * @property {boolean} [supportsFilterBar]
+ */
+
+/**
+ * @typedef {Object} TemplateModalProps
+ * @property {boolean} isOpen
+ * @property {{ widgets: Object[] }} authoringModel
+ * @property {Object|null} datasetBinding
+ * @property {'replace'|'add'} templateMode
+ * @property {(mode: 'replace'|'add') => void} onTemplateModeChange
+ * @property {boolean} includeTemplateFilterBar
+ * @property {(value: boolean) => void} onIncludeTemplateFilterBarChange
+ * @property {string} selectedTemplateId
+ * @property {(templateId: string) => void} onSelectTemplate
+ * @property {DashboardTemplate|null} selectedTemplate
+ * @property {DashboardTemplate[]} dashboardTemplates
+ * @property {(templateId: string) => void} onApplyTemplate
+ * @property {() => void} onClose
+ * @property {(templateId: string, showFilter: boolean) => TemplatePreviewBlock[]} getTemplatePreview
+ */
+
+/**
+ * Modal for picking and applying starter dashboard templates.
+ *
+ * @param {TemplateModalProps} props
+ * @returns {JSX.Element|null}
+ */
 const TemplateModal = ({
-                         isOpen,
-                         authoringModel,
+  isOpen,
+  authoringModel,
                          datasetBinding,
                          templateMode,
                          onTemplateModeChange,

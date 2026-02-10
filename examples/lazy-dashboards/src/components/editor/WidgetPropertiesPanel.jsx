@@ -14,6 +14,26 @@ import {
 } from '../../authoring/vizManifest.js';
 import { trackTelemetryEvent } from '../../data/telemetry.js';
 
+/**
+ * @typedef {Object} WidgetPropertiesPanelProps
+ * @property {{ widgets: Object[] }} authoringModel
+ * @property {string|null} activeWidgetId
+ * @property {Object[]} vizManifests
+ * @property {Object[]} datasetColumns
+ * @property {Object|null} semanticLayer
+ * @property {Object} validation
+ * @property {Object} manifestCoverage
+ * @property {Map<string, Object>} compiledPanelMap
+ * @property {(updater: (model: Object) => Object) => void} onUpdateAuthoringModel
+ * @property {(widgetId: string) => void} onRequestRemoveWidget
+ */
+
+/**
+ * Editor panel for configuring widget encodings and options.
+ *
+ * @param {WidgetPropertiesPanelProps} props
+ * @returns {JSX.Element}
+ */
 const WidgetPropertiesPanel = ({
   authoringModel,
   activeWidgetId,

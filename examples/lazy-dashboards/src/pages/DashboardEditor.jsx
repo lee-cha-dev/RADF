@@ -51,6 +51,65 @@ import {
 } from '../data/fileSystemSync.js';
 import { trackTelemetryEvent } from '../data/telemetry.js';
 
+/**
+ * @typedef {Object} DashboardRecord
+ * @property {string} id
+ * @property {string} name
+ * @property {string} [updatedAt]
+ * @property {Object} [authoringModel]
+ * @property {Object} [datasetBinding]
+ */
+
+/**
+ * @typedef {Object} DatasetBinding
+ * @property {Object[]} [columns]
+ * @property {Object[]} [rows]
+ * @property {Object[]} [previewRows]
+ * @property {Object[]} [preview]
+ */
+
+/**
+ * @typedef {Object} SemanticLayer
+ * @property {boolean} enabled
+ * @property {Object[]} metrics
+ * @property {Object[]} dimensions
+ */
+
+/**
+ * @typedef {Object} WidgetLayout
+ * @property {number} [x]
+ * @property {number} [y]
+ * @property {number} [w]
+ * @property {number} [h]
+ */
+
+/**
+ * @typedef {Object} WidgetSummary
+ * @property {string} id
+ * @property {WidgetLayout} [layout]
+ */
+
+/**
+ * @typedef {Object} AuthoringModel
+ * @property {Object} [meta]
+ * @property {WidgetSummary[]} [widgets]
+ * @property {Object[]} [layout]
+ * @property {DatasetBinding} [datasetBinding]
+ * @property {SemanticLayer} [semanticLayer]
+ */
+
+/**
+ * @typedef {Object} SyncStatus
+ * @property {'idle'|'syncing'|'synced'|'error'} state
+ * @property {string} error
+ * @property {string|null} lastSyncedAt
+ */
+
+/**
+ * Provides the authoring workspace for editing a dashboard.
+ *
+ * @returns {JSX.Element} The dashboard editor page.
+ */
 const DashboardEditor = () => {
   const PANEL_WIDTHS_KEY = 'lazy-editor-panel-widths';
   const AUTO_SAVE_KEY = 'lazy-editor-autosave-enabled';
@@ -288,6 +347,12 @@ const DashboardEditor = () => {
     return `Auto-saved ${formattedSavedAt}`;
   }, [autoSaveEnabled, autoSaveState, formattedSavedAt, lastSavedAt]);
 
+  /**
+   * Strips large preview data before persisting to storage.
+   *
+   * @param {DatasetBinding|null} binding - The current dataset binding.
+   * @returns {DatasetBinding|null} The sanitized dataset binding.
+   */
   const buildPersistedDatasetBinding = useCallback((binding) => {
     if (!binding) {
       return null;
@@ -300,6 +365,12 @@ const DashboardEditor = () => {
     };
   }, []);
 
+  /**
+   * Produces a storage-safe authoring model.
+   *
+   * @param {AuthoringModel|null} model - The current authoring model.
+   * @returns {AuthoringModel|null} The sanitized model.
+   */
   const buildPersistedAuthoringModel = useCallback(
     (model) => {
       if (!model) {
@@ -538,12 +609,25 @@ const DashboardEditor = () => {
     setPendingRemoveWidgetId(null);
   };
 
+  /**
+   * Finds the max occupied grid row in a widget list.
+   *
+   * @param {WidgetSummary[]} widgets - The widgets to scan.
+   * @returns {number} The highest occupied row index.
+   */
   const getMaxRow = (widgets) =>
     (widgets || []).reduce((max, widget) => {
       const layout = widget.layout || { y: 1, h: 1 };
       return Math.max(max, layout.y + layout.h - 1);
     }, 0);
 
+  /**
+   * Generates a unique widget id for template merges.
+   *
+   * @param {string} base - The base id to attempt.
+   * @param {Set<string>} used - The set of already-used ids.
+   * @returns {string} The unique widget id.
+   */
   const buildUniqueWidgetId = (base, used) => {
     let nextId = base || 'widget';
     while (used.has(nextId)) {
@@ -553,6 +637,12 @@ const DashboardEditor = () => {
     return nextId;
   };
 
+  /**
+   * Applies a dashboard template to the current authoring model.
+   *
+   * @param {string} templateId - The template id to apply.
+   * @returns {void}
+   */
   const applyTemplateToModel = (templateId) => {
     const template = getDashboardTemplate(templateId);
     if (!template) {
@@ -623,6 +713,12 @@ const DashboardEditor = () => {
     setIsTemplateOpen(false);
   };
 
+  /**
+   * Updates semantic layer state with a functional updater.
+   *
+   * @param {(layer: SemanticLayer) => SemanticLayer} updater - The semantic layer updater.
+   * @returns {void}
+   */
   const updateSemanticLayer = useCallback((updater) => {
     setAuthoringModel((current) => {
       const nextLayer = updater(current.semanticLayer || {
@@ -792,6 +888,12 @@ const DashboardEditor = () => {
         (widget) => widget.id === pendingRemoveWidgetId
       )
     : null;
+  /**
+   * Builds prerequisite labels for a visualization manifest.
+   *
+   * @param {Object} manifest - The manifest definition.
+   * @returns {string[]} The prerequisite labels.
+   */
   const getVizPrereqs = (manifest) => {
     const prereqs = [];
     if (!datasetBinding) {

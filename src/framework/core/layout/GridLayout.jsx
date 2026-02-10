@@ -7,16 +7,23 @@ import React from 'react';
  */
 
 /**
+ * @typedef {Object} GridLayoutPosition
+ * @property {number} [x] - Column start position (1-based).
+ * @property {number} [y] - Row start position (1-based).
+ * @property {number} [w] - Column span in grid units.
+ * @property {number} [h] - Row span in grid units.
+ */
+
+/**
  * @typedef {Object} GridLayoutItem
  * @property {string} id - Unique id used as the React key.
- * @property {{x?: number, y?: number, w?: number, h?: number}} [layout] - Grid
- *   coordinates and spans in 12-column units.
+ * @property {GridLayoutPosition} [layout] - Grid coordinates and spans in 12-column units.
  */
 
 /**
  * @typedef {Object} GridLayoutProps
  * @property {GridLayoutItem[]} panels - Panels to render in the grid.
- * @property {(panel: GridLayoutItem) => React.ReactNode} renderPanel - Renderer for each panel.
+ * @property {function(GridLayoutItem): React.ReactNode} renderPanel - Renderer for each panel.
  * @property {string} [className] - Optional class appended to the grid container.
  */
 

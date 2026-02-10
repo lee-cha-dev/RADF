@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Vitest coverage for dashboard export planning and zip output.
+ */
+
 import { describe, expect, it } from 'vitest';
 import JSZip from 'jszip';
 import {
@@ -5,9 +9,27 @@ import {
   createDashboardZip,
 } from '../data/dashboardExport.js';
 
+/**
+ * @typedef {Object} ExportDashboardFixture
+ * @property {string} id - The dashboard id.
+ * @property {string} name - The dashboard name.
+ */
+
+/**
+ * @typedef {Object} ExportAuthoringFixture
+ * @property {number} schemaVersion - The authoring schema version.
+ * @property {{ title: string, description: string }} meta - The dashboard metadata.
+ * @property {{ id: string, source: { type: string, baseUrl: string, method: string, headers: Array<Object>, queryParams: Array<Object>, responsePath: string, refreshInterval: number|null } }} datasetBinding - The dataset binding.
+ * @property {{ enabled: boolean, metrics: Array<Object>, dimensions: Array<Object> }} semanticLayer - The semantic layer settings.
+ * @property {Array<Object>} widgets - The widget definitions.
+ * @property {Array<Object>} layout - The layout placements.
+ */
+
 describe('dashboardExport', () => {
   it('builds export files and zip with expected structure', async () => {
+    /** @type {ExportDashboardFixture} */
     const dashboard = { id: 'dash-1', name: 'Sales Ops' };
+    /** @type {ExportAuthoringFixture} */
     const authoringModel = {
       schemaVersion: 1,
       meta: { title: 'Sales Ops', description: '' },

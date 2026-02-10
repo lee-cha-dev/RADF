@@ -16,8 +16,19 @@ import { findMeasureId } from './analysisUtils.js';
  * @property {QuerySpec|null} [querySpec] - QuerySpec used to fetch the data.
  */
 
+/**
+ * Compute the mean of a numeric array.
+ * @param {number[]} values - Numeric values.
+ * @returns {number} Average value.
+ */
 const mean = (values) => values.reduce((sum, value) => sum + value, 0) / values.length;
 
+/**
+ * Compute the standard deviation for a numeric array.
+ * @param {number[]} values - Numeric values.
+ * @param {number} avg - Precomputed mean.
+ * @returns {number} Standard deviation.
+ */
 const stdDev = (values, avg) => {
   const variance = values.reduce((sum, value) => sum + (value - avg) ** 2, 0) / values.length;
   return Math.sqrt(variance);

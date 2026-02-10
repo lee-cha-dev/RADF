@@ -15,8 +15,8 @@ const DEFAULT_MESSAGE =
  * @property {React.ReactNode} children - Content wrapped by the error boundary.
  * @property {string} [title] - Title displayed in the fallback UI.
  * @property {string} [message] - Message displayed in the fallback UI.
- * @property {(error: Error, info: React.ErrorInfo) => void} [onError] - Callback when an error is caught.
- * @property {() => void} [onReset] - Callback invoked after resetting the boundary.
+ * @property {function(Error, React.ErrorInfo): void} [onError] - Callback when an error is caught.
+ * @property {function(): void} [onReset] - Callback invoked after resetting the boundary.
  */
 
 /**

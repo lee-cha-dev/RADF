@@ -1,3 +1,7 @@
+/**
+ * @file Application entrypoint that registers charts/insights and mounts routing.
+ * Assumes a #root element exists in index.html.
+ */
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
@@ -9,7 +13,12 @@ import './app.css';
 registerCharts();
 registerInsights();
 
-ReactDOM.createRoot(document.getElementById('root')).render(
+/**
+ * @type {HTMLElement|null}
+ */
+const rootElement = document.getElementById('root');
+
+ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
     <BrowserRouter>
       <App />

@@ -1,3 +1,29 @@
+/**
+ * @typedef {Object} OptionItem
+ * @property {string} id
+ * @property {string} label
+ */
+
+/**
+ * @typedef {Object} SettingsProps
+ * @property {string} themeFamily - The active theme family id.
+ * @property {'light'|'dark'|'system'} themeMode - The requested theme mode.
+ * @property {string} paletteId - The active palette id.
+ * @property {'light'|'dark'} resolvedMode - The computed light/dark mode.
+ * @property {OptionItem[]} themeFamilies - The theme families.
+ * @property {OptionItem[]} paletteOptions - The palette options.
+ * @property {(nextFamily: string) => void} setThemeFamily - The theme family setter.
+ * @property {(nextMode: 'light'|'dark'|'system') => void} setThemeMode - The mode setter.
+ * @property {(nextPaletteId: string) => void} setPaletteId - The palette setter.
+ * @property {boolean} [showHeader=true] - The flag for rendering the header.
+ */
+
+/**
+ * Renders the theme and palette settings panel.
+ *
+ * @param {SettingsProps} props - The settings props.
+ * @returns {JSX.Element} The settings page contents.
+ */
 const Settings = ({
   themeFamily,
   themeMode,

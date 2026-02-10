@@ -1,5 +1,23 @@
 import { useEffect, useRef } from 'react';
 
+/**
+ * @typedef {Object} CollapsiblePanelProps
+ * @property {'left'|'right'} [side]
+ * @property {string} title
+ * @property {() => void} onClose
+ * @property {React.ReactNode} children
+ * @property {number} [width]
+ * @property {number} [minWidth]
+ * @property {number} [maxWidth]
+ * @property {(width: number) => void} [onResize]
+ */
+
+/**
+ * Resizable side panel wrapper used in the editor shell.
+ *
+ * @param {CollapsiblePanelProps} props
+ * @returns {JSX.Element}
+ */
 const CollapsiblePanel = ({
   side = 'left',
   title,

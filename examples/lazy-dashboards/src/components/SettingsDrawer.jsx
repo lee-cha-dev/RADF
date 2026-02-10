@@ -1,6 +1,27 @@
 import { useEffect } from 'react';
 import Settings from '../pages/Settings.jsx';
 
+/**
+ * @typedef {Object} SettingsDrawerProps
+ * @property {boolean} isOpen
+ * @property {() => void} onClose
+ * @property {string} themeFamily
+ * @property {string} themeMode
+ * @property {string} paletteId
+ * @property {string} resolvedMode
+ * @property {Object[]} themeFamilies
+ * @property {Object[]} paletteOptions
+ * @property {(value: string) => void} setThemeFamily
+ * @property {(value: string) => void} setThemeMode
+ * @property {(value: string) => void} setPaletteId
+ */
+
+/**
+ * Slides in global theme settings for the dashboard editor.
+ *
+ * @param {SettingsDrawerProps} props
+ * @returns {JSX.Element|null}
+ */
 const SettingsDrawer = ({
   isOpen,
   onClose,
