@@ -49,7 +49,7 @@ const App = () => {
           <NavLink className="lazy-nav__link" to="/" end>
             Library
           </NavLink>
-          <button
+          <NavLink
             className="lazy-nav__link"
             type="button"
             onClick={openSettings}
@@ -57,7 +57,7 @@ const App = () => {
             aria-expanded={isSettingsOpen}
           >
             Settings
-          </button>
+          </NavLink>
         </nav>
         <div className="lazy-status">
           <span className="lazy-status__item">
