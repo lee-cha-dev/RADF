@@ -57,9 +57,22 @@ export const generateExternalApiProviderModule = (config = {}) => {
  */
 const apiConfig = ${serializedConfig};
 
+/**
+ * Filters key/value pairs with defined keys.
+ *
+ * @param {ApiKeyValue[]} pairs - The key/value pairs.
+ * @returns {ApiKeyValue[]} The filtered pairs.
+ */
 const normalizeKeyValuePairs = (pairs = []) =>
   (Array.isArray(pairs) ? pairs : []).filter((pair) => pair?.key);
 
+/**
+ * Builds a request URL with query parameters.
+ *
+ * @param {string} baseUrl - The base URL.
+ * @param {ApiKeyValue[]} queryParams - The query parameters.
+ * @returns {string} The resolved URL.
+ */
 const buildRequestUrl = (baseUrl, queryParams = []) => {
   if (!baseUrl) {
     return '';
@@ -73,12 +86,24 @@ const buildRequestUrl = (baseUrl, queryParams = []) => {
   return url.toString();
 };
 
+/**
+ * Converts header pairs into an object.
+ *
+ * @param {ApiKeyValue[]} pairs - The header pairs.
+ * @returns {Object} The headers object.
+ */
 const toHeaders = (pairs = []) =>
   normalizeKeyValuePairs(pairs).reduce((acc, pair) => {
     acc[pair.key] = pair.value ?? '';
     return acc;
   }, {});
 
+/**
+ * Parses a dot/bracket response path into segments.
+ *
+ * @param {string} path - The response path.
+ * @returns {Array<string|number>} The path segments.
+ */
 const parsePathSegments = (path) => {
   if (!path) {
     return [];
@@ -100,6 +125,13 @@ const parsePathSegments = (path) => {
   });
 };
 
+/**
+ * Resolves a nested value from a payload.
+ *
+ * @param {Object} payload - The JSON payload.
+ * @param {string} path - The response path.
+ * @returns {Object|Array|number|string|null} The resolved value.
+ */
 const resolveResponsePath = (payload, path) => {
   const segments = parsePathSegments(path);
   if (segments.length === 0) {
@@ -113,6 +145,13 @@ const resolveResponsePath = (payload, path) => {
   }, payload);
 };
 
+/**
+ * Extracts rows from an API payload.
+ *
+ * @param {Object} payload - The JSON payload.
+ * @param {string} responsePath - The response path.
+ * @returns {Object[]} The normalized rows.
+ */
 const extractApiRows = (payload, responsePath) => {
   const resolved = resolveResponsePath(payload, responsePath);
   const array = Array.isArray(resolved)
@@ -128,6 +167,13 @@ const extractApiRows = (payload, responsePath) => {
   });
 };
 
+/**
+ * Fetches API rows using the current config.
+ *
+ * @param {ExternalApiConfig} config - The API config.
+ * @returns {Promise<Object[]>} The API rows.
+ * @throws {Error} When the request fails.
+ */
 const fetchApiRows = async (config) => {
   const url = buildRequestUrl(config.baseUrl, config.queryParams);
   if (!url) {

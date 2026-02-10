@@ -96,6 +96,12 @@ import {
 
 const MAX_DISTINCT_VALUES = 200;
 
+/**
+ * Normalizes field ids into a list.
+ *
+ * @param {string|string[]|null|undefined} fields - The field ids input.
+ * @returns {string[]} The normalized list.
+ */
 const normalizeFieldList = (fields) => {
   if (Array.isArray(fields)) {
     return fields.map((field) => String(field).trim()).filter(Boolean);
@@ -106,12 +112,35 @@ const normalizeFieldList = (fields) => {
   return [];
 };
 
+/**
+ * Resolves the field type for display and sorting.
+ *
+ * @param {Object|null|undefined} column - The column metadata.
+ * @param {Object|null|undefined} dimension - The semantic dimension.
+ * @returns {string} The resolved field type.
+ */
 const getFieldType = (column, dimension) =>
   dimension?.type || column?.type || column?.inferredType || "string";
 
+/**
+ * Resolves the label for a field.
+ *
+ * @param {Object|null|undefined} column - The column metadata.
+ * @param {Object|null|undefined} dimension - The semantic dimension.
+ * @param {string} fieldId - The field id.
+ * @returns {string} The display label.
+ */
 const getFieldLabel = (column, dimension, fieldId) =>
   dimension?.label || column?.label || fieldId;
 
+/**
+ * Extracts distinct values from a dataset column.
+ *
+ * @param {Object[]} rows - The dataset rows.
+ * @param {string} fieldId - The column id.
+ * @param {number} limit - The maximum values to return.
+ * @returns {string[]} The distinct values.
+ */
 const getDistinctValues = (rows, fieldId, limit) => {
   const seen = new Set();
   const values = [];
@@ -133,6 +162,13 @@ const getDistinctValues = (rows, fieldId, limit) => {
   return values;
 };
 
+/**
+ * Sorts values based on a field type.
+ *
+ * @param {string[]} values - The values to sort.
+ * @param {string} type - The field type.
+ * @returns {string[]} The sorted values.
+ */
 const sortValues = (values, type) => {
   if (type === "number") {
     return [...values].sort((a, b) => Number(a) - Number(b));
@@ -224,6 +260,13 @@ const LazyFilterBar = ({ fields, datasetBinding, semanticLayer, options }) => {
     return map;
   }, [globalFilters]);
 
+  /**
+   * Updates global filters for a field.
+   *
+   * @param {string} fieldId - The field id.
+   * @param {string[]} nextValues - The selected values.
+   * @returns {void}
+   */
   const handleSelectionChange = (fieldId, nextValues) => {
     const trimmed = nextValues.filter(Boolean);
     const nextFilter =
@@ -352,6 +395,12 @@ const buildLocalDataProviderSource = () => `import { createDataProvider } from "
  * @typedef {function(Object): Promise<{ rows: Object[], meta: Object }>} DataProvider
  */
 
+/**
+ * Normalizes raw values into trimmed strings.
+ *
+ * @param {unknown} value - The raw value.
+ * @returns {string} The normalized string.
+ */
 const normalizeValue = (value) => {
   if (value === null || value === undefined) {
     return "";
@@ -359,6 +408,12 @@ const normalizeValue = (value) => {
   return String(value).trim();
 };
 
+/**
+ * Parses a number from user-friendly input.
+ *
+ * @param {unknown} raw - The raw value.
+ * @returns {number|null} The parsed number.
+ */
 const parseNumericValue = (raw) => {
   const value = normalizeValue(raw);
   if (!value) {
@@ -394,6 +449,12 @@ const parseNumericValue = (raw) => {
   return parsed;
 };
 
+/**
+ * Parses a boolean value from text.
+ *
+ * @param {unknown} raw - The raw value.
+ * @returns {boolean|null} The parsed boolean.
+ */
 const parseBooleanValue = (raw) => {
   const value = normalizeValue(raw).toLowerCase();
   if (!value) {
@@ -408,6 +469,12 @@ const parseBooleanValue = (raw) => {
   return null;
 };
 
+/**
+ * Parses a date value from text.
+ *
+ * @param {unknown} raw - The raw value.
+ * @returns {Date|null} The parsed date.
+ */
 const parseDateValue = (raw) => {
   const value = normalizeValue(raw);
   if (!value) {
@@ -420,6 +487,13 @@ const parseDateValue = (raw) => {
   return parsed;
 };
 
+/**
+ * Coerces a value into a query-comparable type.
+ *
+ * @param {unknown} raw - The raw value.
+ * @param {string} type - The expected type.
+ * @returns {string|number|boolean|Date|null} The coerced value.
+ */
 const coerceValue = (raw, type) => {
   if (type === "number") {
     return parseNumericValue(raw);
@@ -433,6 +507,13 @@ const coerceValue = (raw, type) => {
   return normalizeValue(raw);
 };
 
+/**
+ * Normalizes filter values for comparison.
+ *
+ * @param {Object} filter - The filter definition.
+ * @param {string} type - The field type.
+ * @returns {Array<string|number|boolean|Date|null>} The normalized values.
+ */
 const resolveFilterValues = (filter, type) => {
   if (Array.isArray(filter?.values)) {
     return filter.values.map((value) => coerceValue(value, type));
@@ -443,6 +524,13 @@ const resolveFilterValues = (filter, type) => {
   return [];
 };
 
+/**
+ * Compares two values with type-aware behavior.
+ *
+ * @param {unknown} left - The left value.
+ * @param {unknown} right - The right value.
+ * @returns {number} The comparison result.
+ */
 const compareValues = (left, right) => {
   if (left instanceof Date && right instanceof Date) {
     return left.getTime() - right.getTime();
@@ -453,6 +541,15 @@ const compareValues = (left, right) => {
   return String(left).localeCompare(String(right));
 };
 
+/**
+ * Filters dataset rows based on query filters.
+ *
+ * @param {Object[]} rows - The dataset rows.
+ * @param {Object[]} filters - The query filters.
+ * @param {function(string): string} resolveFieldType - The field type resolver.
+ * @param {function(string): string} resolveField - The field id resolver.
+ * @returns {Object[]} The filtered rows.
+ */
 const filterRows = (rows, filters, resolveFieldType, resolveField) => {
   if (!Array.isArray(filters) || filters.length === 0) {
     return rows;
@@ -508,6 +605,12 @@ const filterRows = (rows, filters, resolveFieldType, resolveField) => {
   );
 };
 
+/**
+ * Initializes aggregate state for measures.
+ *
+ * @param {Object[]} measures - The measures to aggregate.
+ * @returns {Object} The aggregate state.
+ */
 const buildAggregateState = (measures) =>
   measures.reduce((acc, measure) => {
     acc[measure.id] = {
@@ -521,6 +624,13 @@ const buildAggregateState = (measures) =>
     return acc;
   }, {});
 
+/**
+ * Finalizes aggregate values into a row payload.
+ *
+ * @param {Object} aggregateState - The aggregate state.
+ * @param {Object[]} measures - The measures to resolve.
+ * @returns {Object} The aggregate row.
+ */
 const finalizeAggregates = (aggregateState, measures) => {
   const row = {};
   measures.forEach((measure) => {
@@ -550,6 +660,15 @@ const finalizeAggregates = (aggregateState, measures) => {
   return row;
 };
 
+/**
+ * Aggregates rows by dimension and measure definitions.
+ *
+ * @param {Object[]} rows - The dataset rows.
+ * @param {Object[]} measures - The measure definitions.
+ * @param {string[]} dimensions - The dimension ids.
+ * @param {function(string): string} resolveDimensionField - The dimension field resolver.
+ * @returns {Object[]} The aggregated rows.
+ */
 const aggregateRows = (rows, measures, dimensions, resolveDimensionField) => {
   if (!dimensions.length) {
     if (!measures.length) {
@@ -651,14 +770,32 @@ export const createLocalDataProvider = ({
     (semanticLayer?.metrics || []).map((metric) => [metric.id, metric])
   );
 
+  /**
+   * Resolves the data type for a column.
+   *
+   * @param {string} fieldId - The field id.
+   * @returns {string} The field type.
+   */
   const resolveFieldType = (fieldId) =>
     columnMap.get(fieldId)?.type ||
     columnMap.get(fieldId)?.inferredType ||
     "string";
 
+  /**
+   * Resolves the source field id for a dimension.
+   *
+   * @param {string} dimensionId - The dimension id.
+   * @returns {string} The source field id.
+   */
   const resolveDimensionField = (dimensionId) =>
     dimensionMap.get(dimensionId)?.sourceField || dimensionId;
 
+  /**
+   * Resolves a measure definition for aggregation.
+   *
+   * @param {string} measureId - The measure id.
+   * @returns {{ id: string, field: string, op: string }} The measure definition.
+   */
   const resolveMeasure = (measureId) => {
     const metric = metricMap.get(measureId);
     if (metric?.query?.field) {
@@ -675,7 +812,13 @@ export const createLocalDataProvider = ({
     };
   };
 
-  return createDataProvider(async (querySpec) => {
+  /**
+   * Executes a query against local dataset bindings.
+   *
+   * @param {Object} querySpec - The query spec.
+   * @returns {Promise<{ rows: Object[], meta: Object }>} The query result.
+   */
+  const runQuery = async (querySpec) => {
     const measures = Array.isArray(querySpec?.measures)
       ? querySpec.measures.map(resolveMeasure)
       : [];
@@ -713,7 +856,9 @@ export const createLocalDataProvider = ({
         filteredRows: filteredRows.length,
       },
     };
-  });
+  };
+
+  return createDataProvider(runQuery);
 };
 `;
 
@@ -767,6 +912,12 @@ import dashboardConfig from "./deps/${fileBase}.dashboard.js";${hasDataProvider 
  */
 const ApiDataProvider = ${hasDataProvider ? "createExternalApiProvider()" : "null"};
 
+/**
+ * Renders a single dashboard panel.
+ *
+ * @param {{ panel: Object, dataProvider: DataProvider, datasetBinding: Object, semanticLayer: Object|null }} props - The panel props.
+ * @returns {JSX.Element} The panel markup.
+ */
 const VizPanel = ({ panel, dataProvider, datasetBinding, semanticLayer }) => {
   const dashboardState = useDashboardState();
   const isFilterBar = panel?.panelType === "viz" && panel?.vizType === "filterBar";
@@ -808,6 +959,12 @@ ${filterBarBlock}
   );
 };
 
+/**
+ * Renders the dashboard content layout.
+ *
+ * @param {{ dataProvider: DataProvider, datasetBinding: Object, semanticLayer: Object|null }} props - The content props.
+ * @returns {JSX.Element} The content markup.
+ */
 const DashboardContent = ({ dataProvider, datasetBinding, semanticLayer }) => (
   <section className="radf-dashboard">
     <header className="radf-dashboard__header">
