@@ -718,6 +718,11 @@ const VIZ_CAPABILITIES = {
           options: ['horizontal', 'vertical'],
           default: 'horizontal',
         },
+        tooltip: {
+          type: 'boolean',
+          label: 'Show tooltip',
+          default: true,
+        },
         colorBy: {
           type: 'string',
           label: 'Color by field',
@@ -799,7 +804,7 @@ const VIZ_CAPABILITIES = {
         outlierRuleValueKey: {
           type: 'string',
           label: 'Outlier value field',
-          default: 'dept_threshold',
+          default: '',
           advanced: true,
           path: 'outlierRule.valueKey',
           suggestFrom: 'fields',

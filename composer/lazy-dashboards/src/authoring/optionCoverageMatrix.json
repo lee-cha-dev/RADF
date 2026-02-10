@@ -331,6 +331,18 @@
     },
     {
       "vizType": "bulletChart",
+      "optionPath": "options.tooltip",
+      "type": "boolean",
+      "default": true,
+      "required": false,
+      "enum": [],
+      "control": "toggle",
+      "status": "supported",
+      "notes": "Enable/disable row tooltip interactions.",
+      "source": "src/framework/core/viz/charts/BulletChart.jsx"
+    },
+    {
+      "vizType": "bulletChart",
       "optionPath": "options.colorBy",
       "type": "string",
       "default": "",
@@ -454,14 +466,62 @@
     },
     {
       "vizType": "bulletChart",
-      "optionPath": "options.outlierRule.valueKey",
+      "optionPath": "options.markerLines.enabled",
+      "type": "boolean",
+      "default": true,
+      "required": false,
+      "enum": [],
+      "control": "toggle",
+      "status": "supported",
+      "notes": "Legacy alias: enable marker line overlay.",
+      "source": "src/framework/core/viz/charts/BulletChart.jsx"
+    },
+    {
+      "vizType": "bulletChart",
+      "optionPath": "options.markerLines.valueKey",
       "type": "string",
-      "default": "dept_threshold",
+      "default": "",
       "required": false,
       "enum": [],
       "control": "text",
       "status": "supported",
-      "notes": "Field for outlier threshold values.",
+      "notes": "Legacy alias for marker value field.",
+      "source": "src/framework/core/viz/charts/BulletChart.jsx"
+    },
+    {
+      "vizType": "bulletChart",
+      "optionPath": "options.markerLines.label",
+      "type": "string",
+      "default": "Reference",
+      "required": false,
+      "enum": [],
+      "control": "text",
+      "status": "supported",
+      "notes": "Legacy alias for marker legend label.",
+      "source": "src/framework/core/viz/charts/BulletChart.jsx"
+    },
+    {
+      "vizType": "bulletChart",
+      "optionPath": "options.markerLines.color",
+      "type": "color",
+      "default": "var(--radf-accent-warning)",
+      "required": false,
+      "enum": [],
+      "control": "color",
+      "status": "supported",
+      "notes": "Legacy alias for marker line color.",
+      "source": "src/framework/core/viz/charts/BulletChart.jsx"
+    },
+    {
+      "vizType": "bulletChart",
+      "optionPath": "options.outlierRule.valueKey",
+      "type": "string",
+      "default": "",
+      "required": false,
+      "enum": [],
+      "control": "text",
+      "status": "supported",
+      "notes": "Optional field for explicit outlier bounds.",
       "source": "src/framework/core/viz/charts/BulletChart.jsx"
     },
     {
@@ -498,42 +558,6 @@
       "control": "text",
       "status": "supported",
       "notes": "Fallback average key for marker lines.",
-      "source": "src/framework/core/viz/charts/BulletChart.jsx"
-    },
-    {
-      "vizType": "bulletChart",
-      "optionPath": "options.headerTitles.xTitle",
-      "type": "string",
-      "default": "",
-      "required": false,
-      "enum": [],
-      "control": "text",
-      "status": "supported",
-      "notes": "Header label for value column.",
-      "source": "src/framework/core/viz/charts/BulletChart.jsx"
-    },
-    {
-      "vizType": "bulletChart",
-      "optionPath": "options.headerTitles.yTitle",
-      "type": "string",
-      "default": "",
-      "required": false,
-      "enum": [],
-      "control": "text",
-      "status": "supported",
-      "notes": "Header label for category column.",
-      "source": "src/framework/core/viz/charts/BulletChart.jsx"
-    },
-    {
-      "vizType": "bulletChart",
-      "optionPath": "options.headerTitles.percentTitle",
-      "type": "string",
-      "default": "",
-      "required": false,
-      "enum": [],
-      "control": "text",
-      "status": "supported",
-      "notes": "Header label for percent column.",
       "source": "src/framework/core/viz/charts/BulletChart.jsx"
     },
     {

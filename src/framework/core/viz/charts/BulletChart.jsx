@@ -388,6 +388,7 @@ function BulletChart({ data = [], encodings = {}, options = {}, handlers = {}, h
   const leftAnnotationKey = leftAnnotations.colorBy || colorKey;
   const showAnnotations = leftAnnotations.enabled !== false && leftAnnotations.type !== 'none';
   const showPercent = options.showPercentColumn !== false;
+  const showTooltip = options.tooltip !== false;
   const percentKey = options.percentKey;
 
   const xKey = isHorizontal ? encodings.x : encodings.y;
@@ -443,7 +444,7 @@ function BulletChart({ data = [], encodings = {}, options = {}, handlers = {}, h
     options.iqrValueKey ||
     options.outlierValueKey ||
     options.thresholdMarkers?.valueKey ||
-    'dept_threshold';
+    null;
 
   const markerValueKey =
     options.markerLines?.valueKey ||
@@ -451,7 +452,7 @@ function BulletChart({ data = [], encodings = {}, options = {}, handlers = {}, h
       ? markerConfig.valueKey
       : null) ||
     options.averageKey ||
-    'dept_average';
+    null;
 
   const hasOutlierKey = useMemo(
     () => filteredData.some((row) => Number.isFinite(row?.[outlierValueKey])),
@@ -690,9 +691,9 @@ function BulletChart({ data = [], encodings = {}, options = {}, handlers = {}, h
               percentKey={percentKey}
               showPercent={showPercent}
               onClick={handlers.onClick}
-              onMouseEnter={handleMouseEnter}
-              onMouseMove={handleMouseMove}
-              onMouseLeave={handleMouseLeave}
+              onMouseEnter={showTooltip ? handleMouseEnter : undefined}
+              onMouseMove={showTooltip ? handleMouseMove : undefined}
+              onMouseLeave={showTooltip ? handleMouseLeave : undefined}
             />
           ))}
         </div>
@@ -775,20 +776,22 @@ function BulletChart({ data = [], encodings = {}, options = {}, handlers = {}, h
         )}
 
         {/* Custom Tooltip */}
-        <BulletChartTooltip
-          row={tooltip.row}
-          nameKey={yKey}
-          valueKey={xKey}
-          colorKey={colorKey}
-          percentKey={percentKey}
-          markerLabel={markerLabel}
-          colorMap={barColorMap}
-          position={tooltip.position}
-          visible={tooltip.visible}
-          getMarkerValue={getMarkerValue}
-          getExceeds={getExceeds}
-          ref={tooltipRef}
-        />
+        {showTooltip ? (
+          <BulletChartTooltip
+            row={tooltip.row}
+            nameKey={yKey}
+            valueKey={xKey}
+            colorKey={colorKey}
+            percentKey={percentKey}
+            markerLabel={markerLabel}
+            colorMap={barColorMap}
+            position={tooltip.position}
+            visible={tooltip.visible}
+            getMarkerValue={getMarkerValue}
+            getExceeds={getExceeds}
+            ref={tooltipRef}
+          />
+        ) : null}
       </div>
     </ChartContainer>
   );
