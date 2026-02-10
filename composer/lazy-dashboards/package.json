@@ -7,8 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "eslint . --max-warnings=0",
-    "lint:fix": "eslint . --fix",
+    "lint": "eslint  --max-warnings=0",
+    "lint:fix": "eslint  --fix",
     "test:vite": "vitest run --environment=happy-dom"
   },
   "dependencies": {
