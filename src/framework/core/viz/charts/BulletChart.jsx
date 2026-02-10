@@ -630,7 +630,7 @@ function BulletChart({ data = [], encodings = {}, options = {}, handlers = {}, h
     setTooltip((prev) => ({ ...prev, visible: false }));
   }, []);
 
-  const markerLabel = markerConfig.label || 'Reference';
+  const markerLabel = markerConfig.label || 'Dept average';
   const markerColor = markerConfig.color || 'var(--radf-accent-warning, var(--radf-viz-marker))';
   const headerTitles = options.headerTitles || {};
   const xTitle = headerTitles.xTitle || '';
