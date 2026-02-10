@@ -136,7 +136,7 @@
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--radf-shadow-low);
 }
 
 .radf-bullet__name {
@@ -189,7 +189,7 @@
     font-size: 0.75rem;
     font-weight: var(--radf-font-weight-bold);
     color: var(--radf-text-inverse, #fff);
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    text-shadow: 0 1px 1px color-mix(in srgb, var(--radf-surface-base, #000) 45%, transparent);
     white-space: nowrap;
 }
 
@@ -202,7 +202,7 @@
     width: 4px;
     border-radius: 2px;
     transform: translateX(-50%);
-    box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--radf-shadow-low);
     background: var(--radf-viz-marker);
     z-index: 2;
     opacity: 1;

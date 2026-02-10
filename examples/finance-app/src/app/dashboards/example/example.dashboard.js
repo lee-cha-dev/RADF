@@ -161,8 +161,10 @@ const exampleDashboard = {
           yTitle: 'Total Revenue',
           percentTitle: '% of Total',
         },
-        markerLines: {
+        thresholdMarkers: {
+          valueKey: 'avg_revenue',
           label: 'Avg revenue',
+          color: 'var(--radf-accent-warning)',
         },
       },
     },

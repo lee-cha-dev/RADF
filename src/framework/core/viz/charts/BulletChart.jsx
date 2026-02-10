@@ -242,18 +242,6 @@ const computeGroupAverages = (data, groupKey, valueKey) => {
 };
 
 /**
- * Sanitize legacy marker labels that contain threshold/sigma language.
- * @param {string|undefined} raw - Raw label from config.
- * @returns {string} Sanitized label.
- */
-const sanitizeMarkerLabel = (raw) => {
-  if (!raw || /threshold/i.test(raw) || /[μσ]/.test(raw) || /std\s*dev/i.test(raw)) {
-    return 'Dept average';
-  }
-  return raw;
-};
-
-/**
  * Single bullet row component with tooltip support.
  */
 function BulletRow({
@@ -400,6 +388,7 @@ function BulletChart({ data = [], encodings = {}, options = {}, handlers = {}, h
   const leftAnnotationKey = leftAnnotations.colorBy || colorKey;
   const showAnnotations = leftAnnotations.enabled !== false && leftAnnotations.type !== 'none';
   const showPercent = options.showPercentColumn !== false;
+  const showTooltip = options.tooltip !== false;
   const percentKey = options.percentKey;
 
   const xKey = isHorizontal ? encodings.x : encodings.y;
@@ -455,7 +444,7 @@ function BulletChart({ data = [], encodings = {}, options = {}, handlers = {}, h
     options.iqrValueKey ||
     options.outlierValueKey ||
     options.thresholdMarkers?.valueKey ||
-    'dept_threshold';
+    null;
 
   const markerValueKey =
     options.markerLines?.valueKey ||
@@ -463,7 +452,7 @@ function BulletChart({ data = [], encodings = {}, options = {}, handlers = {}, h
       ? markerConfig.valueKey
       : null) ||
     options.averageKey ||
-    'dept_average';
+    null;
 
   const hasOutlierKey = useMemo(
     () => filteredData.some((row) => Number.isFinite(row?.[outlierValueKey])),
@@ -641,13 +630,12 @@ function BulletChart({ data = [], encodings = {}, options = {}, handlers = {}, h
     setTooltip((prev) => ({ ...prev, visible: false }));
   }, []);
 
-  /* Sanitize legacy label — strip threshold / sigma language */
-  const markerLabel = sanitizeMarkerLabel(markerConfig.label);
-  /* Use explicit markerLines color, otherwise neutral token */
-  const markerColor = options.markerLines?.color || '#E0E000';
-  const xTitle = options.headerTitles.xTitle || '';
-  const yTitle = options.headerTitles.yTitle || '';
-  const percentTitle = options.headerTitles.percentTitle || '';
+  const markerLabel = markerConfig.label || 'Reference';
+  const markerColor = markerConfig.color || 'var(--radf-accent-warning, var(--radf-viz-marker))';
+  const headerTitles = options.headerTitles || {};
+  const xTitle = headerTitles.xTitle || '';
+  const yTitle = headerTitles.yTitle || '';
+  const percentTitle = headerTitles.percentTitle || '';
 
   return (
     <ChartContainer>
@@ -703,9 +691,9 @@ function BulletChart({ data = [], encodings = {}, options = {}, handlers = {}, h
               percentKey={percentKey}
               showPercent={showPercent}
               onClick={handlers.onClick}
-              onMouseEnter={handleMouseEnter}
-              onMouseMove={handleMouseMove}
-              onMouseLeave={handleMouseLeave}
+              onMouseEnter={showTooltip ? handleMouseEnter : undefined}
+              onMouseMove={showTooltip ? handleMouseMove : undefined}
+              onMouseLeave={showTooltip ? handleMouseLeave : undefined}
             />
           ))}
         </div>
@@ -788,20 +776,22 @@ function BulletChart({ data = [], encodings = {}, options = {}, handlers = {}, h
         )}
 
         {/* Custom Tooltip */}
-        <BulletChartTooltip
-          row={tooltip.row}
-          nameKey={yKey}
-          valueKey={xKey}
-          colorKey={colorKey}
-          percentKey={percentKey}
-          markerLabel={markerLabel}
-          colorMap={barColorMap}
-          position={tooltip.position}
-          visible={tooltip.visible}
-          getMarkerValue={getMarkerValue}
-          getExceeds={getExceeds}
-          ref={tooltipRef}
-        />
+        {showTooltip ? (
+          <BulletChartTooltip
+            row={tooltip.row}
+            nameKey={yKey}
+            valueKey={xKey}
+            colorKey={colorKey}
+            percentKey={percentKey}
+            markerLabel={markerLabel}
+            colorMap={barColorMap}
+            position={tooltip.position}
+            visible={tooltip.visible}
+            getMarkerValue={getMarkerValue}
+            getExceeds={getExceeds}
+            ref={tooltipRef}
+          />
+        ) : null}
       </div>
     </ChartContainer>
   );
