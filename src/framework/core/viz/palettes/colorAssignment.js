@@ -7,6 +7,13 @@ import { getDivergingVar, getSequentialVar, getSeriesVar } from './paletteRegist
 const TEXT_VIZ_TYPES = new Set(['kpi', 'text', 'metric', 'number', 'markdown']);
 const LINE_VIZ_TYPES = new Set(['line', 'area', 'composed', 'time-series', 'timeseries']);
 const BAR_VIZ_TYPES = new Set(['bar', 'column', 'histogram']);
+const PIE_VIZ_TYPES = new Set(['pie', 'donut']);
+const SCATTER_VIZ_TYPES = new Set(['scatter']);
+const RADAR_VIZ_TYPES = new Set(['radar']);
+const TREEMAP_VIZ_TYPES = new Set(['treemap']);
+const FUNNEL_VIZ_TYPES = new Set(['funnel']);
+const SANKEY_VIZ_TYPES = new Set(['sankey']);
+const RADIAL_BAR_VIZ_TYPES = new Set(['radialBar']);
 const SEQUENTIAL_VIZ_TYPES = new Set(['heatmap', 'choropleth', 'density']);
 
 /**
@@ -41,6 +48,66 @@ const normalizeKeys = (keys) => {
     ordered.push(normalized);
   });
   return ordered;
+};
+
+/**
+ * Build a category assignment from an ordered key list.
+ * @param {Array<*>} keys - Raw key list.
+ * @returns {Object|null} Category assignment or null.
+ */
+const buildCategoryAssignmentFromKeys = (keys) => {
+  const seriesKeys = normalizeKeys(keys);
+  if (!seriesKeys.length) {
+    return null;
+  }
+  return {
+    mode: 'category',
+    ...buildSeriesAssignment({ seriesKeys, seriesDefinitions: [] }),
+  };
+};
+
+/**
+ * Collect top-level treemap keys from hierarchical data.
+ * @param {Array<Object>|Object} data - Treemap data.
+ * @returns {Array<*>} Key list.
+ */
+const collectTreemapKeys = (data, nameKey = 'name') => {
+  if (Array.isArray(data)) {
+    const hasChildren = data.some((item) => Array.isArray(item?.children));
+    if (hasChildren) {
+      return data.map((item) => item?.name ?? item?.[nameKey]);
+    }
+    return data.map((item) => item?.[nameKey] ?? item?.name);
+  }
+  if (Array.isArray(data?.children)) {
+    return data.children.map((item) => item?.name);
+  }
+  return [];
+};
+
+/**
+ * Collect funnel stage keys from data.
+ * @param {Array<Object>} data - Funnel data rows.
+ * @param {string} nameKey - Field for stage names.
+ * @returns {Array<*>} Key list.
+ */
+const collectFunnelKeys = (data, nameKey) => {
+  if (!Array.isArray(data)) {
+    return [];
+  }
+  return data.map((row) => row?.[nameKey] ?? row?.name);
+};
+
+/**
+ * Collect sankey node keys from data.
+ * @param {Object} data - Sankey data.
+ * @returns {Array<*>} Key list.
+ */
+const collectSankeyKeys = (data) => {
+  if (!data?.nodes) {
+    return [];
+  }
+  return data.nodes.map((node) => node?.name ?? node?.id);
 };
 
 /**
@@ -369,6 +436,74 @@ export const buildColorAssignment = ({
       seriesDefinitions,
     });
     return { mode: 'single', ...single };
+  }
+
+  if (PIE_VIZ_TYPES.has(vizType)) {
+    return {
+      mode: 'category',
+      ...buildCategoryAssignment({ data, xKey: encodings?.category ?? encodings?.x }),
+    };
+  }
+
+  if (SCATTER_VIZ_TYPES.has(vizType)) {
+    if (encodings?.group) {
+      return {
+        mode: 'category',
+        ...buildCategoryAssignment({ data, xKey: encodings.group }),
+      };
+    }
+    const fallbackKey = encodings?.y ?? 'value';
+    return {
+      mode: 'single',
+      ...buildSeriesAssignment({
+        seriesKeys: [fallbackKey],
+        seriesDefinitions,
+      }),
+    };
+  }
+
+  if (RADAR_VIZ_TYPES.has(vizType)) {
+    if (seriesKeys.length > 1) {
+      return {
+        mode: 'series',
+        ...buildSeriesAssignment({ seriesKeys, seriesDefinitions }),
+      };
+    }
+    const single = buildSeriesAssignment({
+      seriesKeys: seriesKeys.slice(0, 1),
+      seriesDefinitions,
+    });
+    return { mode: 'single', ...single };
+  }
+
+  if (TREEMAP_VIZ_TYPES.has(vizType)) {
+    const nameKey = encodings?.category || encodings?.x || 'name';
+    return buildCategoryAssignmentFromKeys(collectTreemapKeys(data, nameKey));
+  }
+
+  if (FUNNEL_VIZ_TYPES.has(vizType)) {
+    const nameKey = encodings?.category || encodings?.x || 'name';
+    return buildCategoryAssignmentFromKeys(collectFunnelKeys(data, nameKey));
+  }
+
+  if (SANKEY_VIZ_TYPES.has(vizType)) {
+    return buildCategoryAssignmentFromKeys(collectSankeyKeys(data));
+  }
+
+  if (RADIAL_BAR_VIZ_TYPES.has(vizType)) {
+    if (isMultiSeries) {
+      return {
+        mode: 'series',
+        ...buildSeriesAssignment({ seriesKeys, seriesDefinitions }),
+      };
+    }
+    return {
+      mode: 'category',
+      ...buildCategoryAssignment({
+        data,
+        xKey: encodings?.category || encodings?.x,
+      }),
+    };
   }
 
   if (seriesKeys.length > 1) {

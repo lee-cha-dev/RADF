@@ -523,6 +523,43 @@ const applyBindingsToWidget = (widget, bindings) => {
       nextEncodings.y = bindings.metric || nextEncodings.y;
       nextEncodings.group = bindings.group || nextEncodings.group;
       break;
+    case 'area':
+      nextEncodings.x = bindings.date || bindings.category || nextEncodings.x;
+      nextEncodings.y = bindings.metric || nextEncodings.y;
+      nextEncodings.group = bindings.group || nextEncodings.group;
+      break;
+    case 'pie':
+      nextEncodings.category = bindings.category || nextEncodings.category;
+      nextEncodings.value = bindings.metric || nextEncodings.value;
+      break;
+    case 'scatter':
+      nextEncodings.x = bindings.date || bindings.category || nextEncodings.x;
+      nextEncodings.y = bindings.metric || nextEncodings.y;
+      nextEncodings.group = bindings.group || nextEncodings.group;
+      break;
+    case 'composed':
+      nextEncodings.x = bindings.date || bindings.category || nextEncodings.x;
+      nextEncodings.y = bindings.metric || nextEncodings.y;
+      nextEncodings.group = bindings.group || nextEncodings.group;
+      break;
+    case 'radar':
+      nextEncodings.x = bindings.category || nextEncodings.x;
+      nextEncodings.y = bindings.metric || nextEncodings.y;
+      nextEncodings.group = bindings.group || nextEncodings.group;
+      break;
+    case 'treemap':
+      nextEncodings.category = bindings.category || nextEncodings.category;
+      nextEncodings.value = bindings.metric || nextEncodings.value;
+      break;
+    case 'funnel':
+      nextEncodings.category = bindings.category || nextEncodings.category;
+      nextEncodings.value = bindings.metric || nextEncodings.value;
+      break;
+    case 'radialBar':
+      nextEncodings.category = bindings.category || nextEncodings.category;
+      nextEncodings.value = bindings.metric || nextEncodings.value;
+      nextEncodings.group = bindings.group || nextEncodings.group;
+      break;
     case 'table':
       nextEncodings.columns =
         bindings.tableColumns.length > 0

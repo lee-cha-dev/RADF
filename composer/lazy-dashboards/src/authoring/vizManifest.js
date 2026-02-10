@@ -252,6 +252,359 @@ const VIZ_CAPABILITIES = {
         ...LEGEND_OPTIONS,
       },
     },
+    area: {
+      id: 'area',
+      label: 'Area',
+      panelType: 'viz',
+      supportLevel: 'supported',
+      description: 'Filled trend lines for time series comparisons.',
+      encodings: {
+        required: [
+          { id: 'x', label: 'X Axis', role: 'dimension' },
+          { id: 'y', label: 'Y Axis', role: 'metric' },
+        ],
+        optional: [
+          {
+            id: 'group',
+            label: 'Series',
+            role: 'dimension',
+            help: 'Split into multiple areas.',
+          },
+          {
+            id: 'category',
+            label: 'Color',
+            role: 'dimension',
+          },
+        ],
+      },
+      options: {
+        tooltip: {
+          type: 'boolean',
+          label: 'Show tooltip',
+          default: true,
+        },
+        brushEnabled: {
+          type: 'boolean',
+          label: 'Enable brush',
+          default: false,
+          advanced: true,
+          path: 'brush.enabled',
+        },
+        brushStartIndex: {
+          type: 'number',
+          label: 'Brush start index',
+          min: 0,
+          path: 'brush.startIndex',
+          advanced: true,
+          visibleWhen: { option: 'brush.enabled', equals: true },
+        },
+        brushEndIndex: {
+          type: 'number',
+          label: 'Brush end index',
+          min: 0,
+          path: 'brush.endIndex',
+          advanced: true,
+          visibleWhen: { option: 'brush.enabled', equals: true },
+        },
+        ...SERIES_OPTIONS,
+        ...LEGEND_OPTIONS,
+      },
+    },
+    pie: {
+      id: 'pie',
+      label: 'Pie',
+      panelType: 'viz',
+      supportLevel: 'supported',
+      description: 'Categorical proportions as slices (donut optional).',
+      encodings: {
+        required: [
+          { id: 'category', label: 'Category', role: 'dimension' },
+          { id: 'value', label: 'Value', role: 'metric' },
+        ],
+        optional: [],
+      },
+      options: {
+        tooltip: {
+          type: 'boolean',
+          label: 'Show tooltip',
+          default: true,
+        },
+        donut: {
+          type: 'boolean',
+          label: 'Donut mode',
+          default: false,
+        },
+        labels: {
+          type: 'boolean',
+          label: 'Show labels',
+          default: false,
+          advanced: true,
+        },
+        ...LEGEND_OPTIONS,
+      },
+    },
+    scatter: {
+      id: 'scatter',
+      label: 'Scatter',
+      panelType: 'viz',
+      supportLevel: 'supported',
+      description: 'Scatter plot for correlation and outliers.',
+      encodings: {
+        required: [
+          { id: 'x', label: 'X Axis', role: 'dimension' },
+          { id: 'y', label: 'Y Axis', role: 'metric' },
+        ],
+        optional: [
+          {
+            id: 'group',
+            label: 'Series',
+            role: 'dimension',
+            help: 'Split points into series by category.',
+          },
+        ],
+      },
+      options: {
+        tooltip: {
+          type: 'boolean',
+          label: 'Show tooltip',
+          default: true,
+        },
+        pointSize: {
+          type: 'number',
+          label: 'Point size',
+          min: 2,
+          max: 16,
+          default: 6,
+        },
+        ...LEGEND_OPTIONS,
+      },
+    },
+    composed: {
+      id: 'composed',
+      label: 'Composed',
+      panelType: 'viz',
+      supportLevel: 'supported',
+      description: 'Combined bar + line chart for comparisons.',
+      encodings: {
+        required: [
+          { id: 'x', label: 'X Axis', role: 'dimension' },
+          { id: 'y', label: 'Y Axis', role: 'metric' },
+        ],
+        optional: [
+          {
+            id: 'group',
+            label: 'Series',
+            role: 'dimension',
+            help: 'Split into multiple series if supported.',
+          },
+        ],
+      },
+      options: {
+        tooltip: {
+          type: 'boolean',
+          label: 'Show tooltip',
+          default: true,
+        },
+        barKeys: {
+          type: 'stringList',
+          label: 'Bar series keys',
+          help: 'Comma-separated list of measure keys rendered as bars.',
+          default: [],
+          advanced: true,
+        },
+        lineKeys: {
+          type: 'stringList',
+          label: 'Line series keys',
+          help: 'Comma-separated list of measure keys rendered as lines.',
+          default: [],
+          advanced: true,
+        },
+        ...SERIES_OPTIONS,
+        ...LEGEND_OPTIONS,
+      },
+    },
+    radar: {
+      id: 'radar',
+      label: 'Radar',
+      panelType: 'viz',
+      supportLevel: 'supported',
+      description: 'Multi-metric comparison across categories.',
+      encodings: {
+        required: [
+          { id: 'x', label: 'Category', role: 'dimension' },
+          { id: 'y', label: 'Value', role: 'metric' },
+        ],
+        optional: [
+          {
+            id: 'group',
+            label: 'Series',
+            role: 'dimension',
+            help: 'Split into multiple radar series.',
+          },
+        ],
+      },
+      options: {
+        tooltip: {
+          type: 'boolean',
+          label: 'Show tooltip',
+          default: true,
+        },
+        fillOpacity: {
+          type: 'number',
+          label: 'Fill opacity',
+          min: 0,
+          max: 1,
+          default: 0.2,
+          advanced: true,
+        },
+        ...SERIES_OPTIONS,
+        ...LEGEND_OPTIONS,
+      },
+    },
+    treemap: {
+      id: 'treemap',
+      label: 'Treemap',
+      panelType: 'viz',
+      supportLevel: 'supported',
+      description: 'Hierarchical proportions shown as nested rectangles.',
+      encodings: {
+        required: [
+          { id: 'category', label: 'Category', role: 'dimension' },
+          { id: 'value', label: 'Value', role: 'metric' },
+        ],
+        optional: [],
+      },
+      options: {
+        tooltip: {
+          type: 'boolean',
+          label: 'Show tooltip',
+          default: true,
+        },
+        colorBy: {
+          type: 'enum',
+          label: 'Color by',
+          options: ['category', 'depth'],
+          default: 'category',
+        },
+        labels: {
+          type: 'boolean',
+          label: 'Show labels',
+          default: false,
+          advanced: true,
+        },
+        ...LEGEND_OPTIONS,
+      },
+    },
+    funnel: {
+      id: 'funnel',
+      label: 'Funnel',
+      panelType: 'viz',
+      supportLevel: 'supported',
+      description: 'Stage drop-off visualization with ordered steps.',
+      encodings: {
+        required: [
+          { id: 'category', label: 'Stage', role: 'dimension' },
+          { id: 'value', label: 'Value', role: 'metric' },
+        ],
+        optional: [],
+      },
+      options: {
+        tooltip: {
+          type: 'boolean',
+          label: 'Show tooltip',
+          default: true,
+        },
+        labelMode: {
+          type: 'enum',
+          label: 'Label mode',
+          options: ['name', 'value', 'percent', 'none'],
+          default: 'name',
+        },
+        sort: {
+          type: 'enum',
+          label: 'Sort order',
+          options: ['input', 'desc', 'asc'],
+          default: 'input',
+          advanced: true,
+        },
+        ...LEGEND_OPTIONS,
+      },
+    },
+    sankey: {
+      id: 'sankey',
+      label: 'Sankey',
+      panelType: 'viz',
+      supportLevel: 'supported',
+      description: 'Flow diagram based on provided nodes and links.',
+      encodings: {
+        required: [],
+        optional: [],
+      },
+      options: {
+        tooltip: {
+          type: 'boolean',
+          label: 'Show tooltip',
+          default: true,
+        },
+        colorBy: {
+          type: 'enum',
+          label: 'Color by',
+          options: ['node', 'source', 'target'],
+          default: 'node',
+        },
+        ...LEGEND_OPTIONS,
+      },
+    },
+    radialBar: {
+      id: 'radialBar',
+      label: 'Radial Bar',
+      panelType: 'viz',
+      supportLevel: 'supported',
+      description: 'Radial bars for ranked category comparisons.',
+      encodings: {
+        required: [
+          { id: 'category', label: 'Category', role: 'dimension' },
+          { id: 'value', label: 'Value', role: 'metric' },
+        ],
+        optional: [
+          {
+            id: 'group',
+            label: 'Series',
+            role: 'dimension',
+            help: 'Split into multiple radial bar series.',
+          },
+        ],
+      },
+      options: {
+        tooltip: {
+          type: 'boolean',
+          label: 'Show tooltip',
+          default: true,
+        },
+        innerRadius: {
+          type: 'number',
+          label: 'Inner radius',
+          min: 0,
+          default: 20,
+          advanced: true,
+        },
+        outerRadius: {
+          type: 'number',
+          label: 'Outer radius',
+          min: 0,
+          default: 80,
+          advanced: true,
+        },
+        labels: {
+          type: 'boolean',
+          label: 'Show labels',
+          default: false,
+          advanced: true,
+        },
+        ...SERIES_OPTIONS,
+        ...LEGEND_OPTIONS,
+      },
+    },
     barWithConditionalColoring: {
       id: 'barWithConditionalColoring',
       label: 'Conditional Bar',
