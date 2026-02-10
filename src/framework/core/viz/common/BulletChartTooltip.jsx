@@ -76,7 +76,8 @@ const BulletChartTooltip = forwardRef(function BulletChartTooltip(
   const value = resolvedRow[valueKey] ?? 0;
 
   const category = colorKey ? resolvedRow[colorKey] : null;
-  const percent = percentKey ? resolvedRow[percentKey] : null;
+  const rawPercent = percentKey ? resolvedRow[percentKey] : null;
+  const percent = Number.isFinite(Number(rawPercent)) ? Number(rawPercent) : null;
 
   const markerValue = getMarkerValue ? getMarkerValue(resolvedRow) : null;
   const exceeds = getExceeds ? getExceeds(resolvedRow) : false;

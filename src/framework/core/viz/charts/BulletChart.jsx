@@ -265,7 +265,8 @@ function BulletRow({
   onMouseMove,
   onMouseLeave,
 }) {
-  const value = row[xKey] || 0;
+  const rawValue = Number(row?.[xKey]);
+  const value = Number.isFinite(rawValue) ? rawValue : 0;
   const label = row[yKey] || '';
   const category = normalizeKey(row[colorKey]);
   const dotCategory = normalizeKey(row[dotColorKey]);
@@ -276,7 +277,8 @@ function BulletRow({
     : 'radf-chart-color-0';
   const dotColorClass = dotColorEntry ? `radf-chart-color-${dotColorEntry.index}` : barColorClass;
 
-  const percent = showPercent && percentKey ? row[percentKey] : null;
+  const rawPercent = showPercent && percentKey ? row[percentKey] : null;
+  const percent = Number.isFinite(Number(rawPercent)) ? Number(rawPercent) : null;
 
   const barWidthPercent = maxValue > 0 ? (value / maxValue) * 100 : 0;
   const markerPercent =
@@ -379,7 +381,7 @@ function BulletChart({ data = [], encodings = {}, options = {}, handlers = {}, h
     position: null,
   });
 
-  const isHorizontal = options.orientation === 'horizontal';
+  const isHorizontal = options.orientation !== 'vertical';
   const markerConfig = options.markerLines || options.thresholdMarkers || {};
   const markerEnabled = markerConfig?.enabled !== false;
   const outlierConfig = options.outlierRule || {};
@@ -389,19 +391,45 @@ function BulletChart({ data = [], encodings = {}, options = {}, handlers = {}, h
   const showAnnotations = leftAnnotations.enabled !== false && leftAnnotations.type !== 'none';
   const showPercent = options.showPercentColumn !== false;
   const showTooltip = options.tooltip !== false;
-  const percentKey = options.percentKey;
+  const percentKey = options.percentKey || null;
 
   const xKey = isHorizontal ? encodings.x : encodings.y;
   const yKey = isHorizontal ? encodings.y : encodings.x;
 
   const seriesIndices = useMemo(() => resolveNonRedSeriesIndices(), []);
 
-  const filteredData = useMemo(() => {
-    if (!hiddenKeys?.size || !colorKey) {
+  const totalValue = useMemo(() => {
+    if (!data?.length || !xKey) {
+      return 0;
+    }
+    return data.reduce((acc, row) => {
+      const value = Number(row?.[xKey]);
+      return Number.isFinite(value) ? acc + value : acc;
+    }, 0);
+  }, [data, xKey]);
+
+  const resolvedPercentKey = percentKey || (showPercent ? '__radfPercent' : null);
+
+  const normalizedData = useMemo(() => {
+    if (!data?.length || percentKey || !resolvedPercentKey) {
       return data;
     }
-    return data.filter((row) => !hiddenKeys.has(row[colorKey]));
-  }, [data, hiddenKeys, colorKey]);
+    if (totalValue <= 0) {
+      return data.map((row) => ({ ...row, [resolvedPercentKey]: null }));
+    }
+    return data.map((row) => {
+      const value = Number(row?.[xKey]);
+      const percent = Number.isFinite(value) ? (value / totalValue) * 100 : null;
+      return { ...row, [resolvedPercentKey]: percent };
+    });
+  }, [data, percentKey, resolvedPercentKey, totalValue, xKey]);
+
+  const filteredData = useMemo(() => {
+    if (!hiddenKeys?.size || !colorKey) {
+      return normalizedData;
+    }
+    return normalizedData.filter((row) => !hiddenKeys.has(row[colorKey]));
+  }, [normalizedData, hiddenKeys, colorKey]);
 
   const barColorMap = useMemo(
     () => buildCategoryColorMap(filteredData, colorKey, seriesIndices),
@@ -516,16 +544,24 @@ function BulletChart({ data = [], encodings = {}, options = {}, handlers = {}, h
     if (!filteredData.length) return 100;
     let max = 0;
     filteredData.forEach((row) => {
-      const val = row[xKey] || 0;
-      const markerValue = getMarkerValue(row) || 0;
+      const rawValue = Number(row?.[xKey]);
+      const val = Number.isFinite(rawValue) ? rawValue : 0;
+      const rawMarker = Number(getMarkerValue(row));
+      const markerValue = Number.isFinite(rawMarker) ? rawMarker : 0;
       max = Math.max(max, val, markerValue);
     });
-    return max * 1.1;
+    return max > 0 ? max * 1.1 : 0;
   }, [filteredData, xKey, getMarkerValue]);
+
+  const axisMaxValue = maxValue > 0 ? maxValue : 1;
 
   // X-axis tick values
   const xTicks = useMemo(() => {
-    const step = Math.ceil(maxValue / 4 / 50) * 50;
+    if (!Number.isFinite(maxValue) || maxValue <= 0) {
+      return [0];
+    }
+    const baseStep = Math.ceil(maxValue / 4 / 50) * 50;
+    const step = baseStep > 0 ? baseStep : Math.max(1, Math.ceil(maxValue / 4));
     const ticks = [];
     for (let i = 0; i <= maxValue; i += step) {
       ticks.push(i);
@@ -664,7 +700,7 @@ function BulletChart({ data = [], encodings = {}, options = {}, handlers = {}, h
                   <div
                     key={tick}
                     className="radf-bullet__grid-line"
-                    style={{ left: `${(tick / maxValue) * 100}%` }}
+                    style={{ left: `${(tick / axisMaxValue) * 100}%` }}
                   />
                 ))}
               </div>
@@ -688,7 +724,7 @@ function BulletChart({ data = [], encodings = {}, options = {}, handlers = {}, h
               markerColor={markerColor}
               markerEnabled={markerEnabled}
               outlierBound={getOutlierBound(row)}
-              percentKey={percentKey}
+              percentKey={resolvedPercentKey}
               showPercent={showPercent}
               onClick={handlers.onClick}
               onMouseEnter={showTooltip ? handleMouseEnter : undefined}
@@ -707,7 +743,7 @@ function BulletChart({ data = [], encodings = {}, options = {}, handlers = {}, h
                 <span
                   key={tick}
                   className="radf-bullet__tick"
-                  style={{ left: `${(tick / maxValue) * 100}%` }}
+                  style={{ left: `${(tick / axisMaxValue) * 100}%` }}
                 >
                   {tick.toLocaleString()}
                 </span>
@@ -782,7 +818,7 @@ function BulletChart({ data = [], encodings = {}, options = {}, handlers = {}, h
             nameKey={yKey}
             valueKey={xKey}
             colorKey={colorKey}
-            percentKey={percentKey}
+            percentKey={resolvedPercentKey}
             markerLabel={markerLabel}
             colorMap={barColorMap}
             position={tooltip.position}
