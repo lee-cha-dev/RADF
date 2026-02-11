@@ -377,21 +377,16 @@ const DashboardEditor = ({ themeFamily, themeMode, paletteId }) => {
   }, [autoSaveEnabled, autoSaveState, formattedSavedAt, lastSavedAt]);
 
   /**
-   * Strips large preview data before persisting to storage.
+   * Persists the dataset binding as-is so previews use full datasets.
    *
    * @param {DatasetBinding|null} binding - The current dataset binding.
-   * @returns {DatasetBinding|null} The sanitized dataset binding.
+   * @returns {DatasetBinding|null} The persisted dataset binding.
    */
   const buildPersistedDatasetBinding = useCallback((binding) => {
     if (!binding) {
       return null;
     }
-    const { ...rest } = binding;
-    return {
-      ...rest,
-      rows: [],
-      preview: [],
-    };
+    return { ...binding };
   }, []);
 
   /**
