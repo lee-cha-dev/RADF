@@ -120,6 +120,11 @@ textarea {
   pointer-events: none;
 }
 
+.ladf-dashboard__header {
+  position: relative;
+  margin-bottom: 20px;
+}
+
 .ladf-dashboard__title {
   margin: 0 0 var(--ladf-space-2);
   font-size: 1.75rem;
@@ -130,6 +135,12 @@ textarea {
 .ladf-dashboard__subtitle {
   margin: 0;
   color: var(--ladf-text-muted, var(--ladf-color-muted));
+}
+
+.ladf-dashboard__toggle {
+  position: absolute;
+  top: 0;
+  right: 0;
 }
 
 .ladf-error-boundary {

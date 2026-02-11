@@ -1179,7 +1179,7 @@ const DashboardContent = ({
       </div>
       <button
         type="button"
-        className="ladf-dashboard__theme-toggle"
+        className="ladf-button ladf-dashboard__toggle"
         onClick={onToggleTheme}
         aria-pressed={themeMode === "dark"}
       >
