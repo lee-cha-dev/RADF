@@ -78,6 +78,44 @@ const buildQueryFromEncodings = (encodings = {}, options = {}, vizType) => {
   };
 };
 
+const normalizeQueryArray = (value) =>
+  Array.isArray(value) ? value.filter(Boolean) : [];
+
+/**
+ * Merge an explicit widget query with encodings-driven fields.
+ *
+ * @param {Object|null|undefined} query
+ * @param {Object} encodings
+ * @param {Object} options
+ * @param {string} vizType
+ * @returns {Object} The merged query definition.
+ */
+const mergeQueryWithEncodings = (
+  query,
+  encodings = {},
+  options = {},
+  vizType
+) => {
+  const derived = buildQueryFromEncodings(encodings, options, vizType);
+  if (!query) {
+    return derived;
+  }
+  const mergedMeasures = uniq([
+    ...normalizeQueryArray(query.measures),
+    ...derived.measures,
+  ]);
+  const mergedDimensions = uniq([
+    ...normalizeQueryArray(query.dimensions),
+    ...derived.dimensions,
+  ]);
+  return {
+    ...derived,
+    ...query,
+    measures: mergedMeasures,
+    dimensions: mergedDimensions,
+  };
+};
+
 /**
  * Compiles a single widget into a dashboard panel config.
  *
@@ -89,8 +127,12 @@ const compileWidget = (widget, datasetId) => {
   const layout = widget.layout || { x: 1, y: 1, w: 4, h: 2 };
   const panelType = widget.panelType || 'viz';
   const vizType = widget.vizType || widget.type || 'kpi';
-  const query =
-    widget.query || buildQueryFromEncodings(widget.encodings, widget.options, vizType);
+  const query = mergeQueryWithEncodings(
+    widget.query,
+    widget.encodings,
+    widget.options,
+    vizType
+  );
   const resolvedDatasourceId = widget.datasourceId || widget.datasetId || datasetId;
   const panel = {
     id: widget.id,
@@ -282,4 +324,4 @@ export const compileAuthoringModel = ({ dashboard, authoringModel }) => {
   return { config, modules };
 };
 
-export { buildQueryFromEncodings };
+export { buildQueryFromEncodings, mergeQueryWithEncodings };

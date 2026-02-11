@@ -6,7 +6,7 @@ import {
   useDashboardState,
   useQuery,
 } from 'ladf';
-import { buildQueryFromEncodings } from '../authoring/compiler.js';
+import { mergeQueryWithEncodings } from '../authoring/compiler.js';
 import LazyFilterBar from './LazyFilterBar.jsx';
 
 /**
@@ -43,10 +43,12 @@ const LivePreviewPanel = ({
     if (!panel) {
       return null;
     }
-    if (panel.query) {
-      return panel.query;
-    }
-    return buildQueryFromEncodings(panel.encodings, panel.options, panel.vizType);
+    return mergeQueryWithEncodings(
+      panel.query,
+      panel.encodings,
+      panel.options,
+      panel.vizType
+    );
   }, [panel]);
   const panelConfig = useMemo(() => {
     if (!panel) {
