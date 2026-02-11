@@ -1370,8 +1370,8 @@ const ${componentName} = ({
             onToggleTheme={handleToggleTheme}
           />
         </DashboardProvider>
-        </ErrorBoundary>
-      </main>
+      </ErrorBoundary>
+    </main>
   );
 };
 
