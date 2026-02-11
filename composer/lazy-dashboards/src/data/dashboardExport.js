@@ -906,6 +906,7 @@ import {
   registerInsights,
   useDashboardState,
   useQuery,
+  ErrorBoundary
 } from "ladf";
 import dashboardConfig from "./deps/${fileBase}.dashboard.js";${apiImport}${hasFilterBar ? `\nimport LazyFilterBar from "./utils/LazyFilterBar.jsx";` : ""}`;
   const providerImports = `\nimport { createLocalDataProvider } from "./utils/localDataProvider.js";`;
