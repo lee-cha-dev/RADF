@@ -97,6 +97,7 @@ describe('dashboardExport', () => {
     expect(componentSource).toContain('DEFAULT_THEME_MODE = "light"');
     expect(componentSource).toContain('EXPORTED_THEME_FAMILY = "nord"');
     expect(componentSource).toContain('EXPORTED_THEME_MODE = "dark"');
+    expect(componentSource).toContain('panelConfig={panel}');
 
     const zipBlob = await createDashboardZip(exportPlan);
     const zip = await JSZip.loadAsync(zipBlob);

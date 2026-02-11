@@ -37,6 +37,7 @@ const VizPanel = ({ panel }) => {
       emptyMessage="No data returned for this panel."
     >
       <VizRenderer
+        panelConfig={panel}
         vizType={panel.vizType}
         data={data || []}
         encodings={panel.encodings}
