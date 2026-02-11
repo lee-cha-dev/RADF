@@ -92,7 +92,7 @@ describe('dashboardExport', () => {
     expect(exportPlan.files).toHaveProperty(`${exportPlan.componentName}.jsx`);
 
     const componentSource = exportPlan.files[`${exportPlan.componentName}.jsx`];
-    expect(componentSource).toContain('ladf-dashboard__theme-toggle');
+    expect(componentSource).toContain('ladf-dashboard__toggle');
     expect(componentSource).toContain('DEFAULT_THEME_FAMILY = "default"');
     expect(componentSource).toContain('DEFAULT_THEME_MODE = "light"');
     expect(componentSource).toContain('EXPORTED_THEME_FAMILY = "nord"');
