@@ -63,12 +63,16 @@ function LineChartPanel({
   colorAssignment,
   hiddenKeys,
 }) {
-  const assignedKeys =
-    colorAssignment?.mode === 'series' ||
-    colorAssignment?.mode === 'single' ||
-    colorAssignment?.mode === 'category'
-      ? colorAssignment.items.map((item) => item.key)
-      : [];
+  const assignedKeys = useMemo(() => {
+    if (
+      colorAssignment?.mode === 'series' ||
+      colorAssignment?.mode === 'single' ||
+      colorAssignment?.mode === 'category'
+    ) {
+      return colorAssignment.items.map((item) => item.key);
+    }
+    return [];
+  }, [colorAssignment]);
   const { chartData, seriesKeys } = useMemo(() => {
     const groupKey = encodings.group;
     const xKey = encodings.x;
