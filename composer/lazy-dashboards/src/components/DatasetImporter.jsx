@@ -159,7 +159,7 @@ const DatasetImporter = ({ datasetBinding, onUpdate }) => {
   const [pendingWorkbook, setPendingWorkbook] = useState(null);
   const reportImportError = useCallback((message, details = {}) => {
     trackTelemetryEvent('dataset_import_error', { message, ...details });
-  }, [trackTelemetryEvent]);
+  }, []);
 
   const datasetSummary = useMemo(() => {
     if (!datasetBinding) {
@@ -180,7 +180,10 @@ const DatasetImporter = ({ datasetBinding, onUpdate }) => {
       endpoint: isApi ? datasetBinding.source?.baseUrl : null,
     };
   }, [datasetBinding]);
-  const datasetColumns = datasetBinding?.columns || [];
+  const datasetColumns = useMemo(
+    () => datasetBinding?.columns || [],
+    [datasetBinding?.columns]
+  );
   const previewRows = datasetBinding?.previewRows || [];
   const fieldRoleCounts = useMemo(() => {
     const counts = { metric: 0, dimension: 0, unknown: 0 };
@@ -530,7 +533,7 @@ const DatasetImporter = ({ datasetBinding, onUpdate }) => {
         sheetNames: pendingWorkbook.sheetNames,
       });
     },
-    [applyTableAsDataset, parseWorkbook, pendingWorkbook]
+    [applyTableAsDataset, parseWorkbook, pendingWorkbook, reportImportError]
   );
 
   const updateApiConfigField = useCallback((field, value) => {

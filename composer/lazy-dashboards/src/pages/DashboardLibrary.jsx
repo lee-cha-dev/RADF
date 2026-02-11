@@ -56,9 +56,10 @@ const formatTimestamp = (value) => {
 /**
  * Displays the dashboard library and entry points for new dashboards.
  *
+ * @param {{ themeFamily: string, themeMode: 'light'|'dark', paletteId: string }} props
  * @returns {JSX.Element} The dashboard library page.
  */
-const DashboardLibrary = () => {
+const DashboardLibrary = ({ themeFamily, themeMode, paletteId }) => {
   const navigate = useNavigate();
   const {
     dashboards,
@@ -146,6 +147,9 @@ const DashboardLibrary = () => {
     const exportPlan = buildDashboardExport({
       dashboard,
       authoringModel: dashboard.authoringModel,
+      themeFamily,
+      themeMode,
+      paletteId,
     });
     if (!exportPlan) {
       window.alert('Export failed to build.');

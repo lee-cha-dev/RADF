@@ -72,12 +72,19 @@ const WidgetPropertiesPanel = ({
     (datasources || []).find(
       (datasource) => datasource.id === resolvedDatasourceId
     ) || datasources?.[0] || null;
-  const datasetColumns = activeDatasource?.datasetBinding?.columns || [];
-  const normalizedSemanticLayer = activeDatasource?.semanticLayer || {
-    enabled: false,
-    metrics: [],
-    dimensions: [],
-  };
+  const datasetColumns = useMemo(
+    () => activeDatasource?.datasetBinding?.columns || [],
+    [activeDatasource?.datasetBinding?.columns]
+  );
+  const normalizedSemanticLayer = useMemo(
+    () =>
+      activeDatasource?.semanticLayer || {
+        enabled: false,
+        metrics: [],
+        dimensions: [],
+      },
+    [activeDatasource?.semanticLayer]
+  );
 
   useEffect(() => {
     if (!activeWidget || showExpertOptions) {
@@ -282,7 +289,7 @@ const WidgetPropertiesPanel = ({
         optionPath: path,
       });
     });
-  }, [activeWidget, unsupportedOptionPaths, trackTelemetryEvent]);
+  }, [activeWidget, unsupportedOptionPaths]);
 
   const compiledActivePanel = activeWidget
     ? compiledPanelMap.get(activeWidget.id)

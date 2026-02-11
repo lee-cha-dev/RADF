@@ -111,9 +111,10 @@ import { trackTelemetryEvent } from '../data/telemetry.js';
 /**
  * Provides the authoring workspace for editing a dashboard.
  *
+ * @param {{ themeFamily: string, themeMode: 'light'|'dark', paletteId: string }} props
  * @returns {JSX.Element} The dashboard editor page.
  */
-const DashboardEditor = () => {
+const DashboardEditor = ({ themeFamily, themeMode, paletteId }) => {
   const PANEL_WIDTHS_KEY = 'lazy-editor-panel-widths';
   const AUTO_SAVE_KEY = 'lazy-editor-autosave-enabled';
   const { dashboardId } = useParams();
@@ -136,7 +137,7 @@ const DashboardEditor = () => {
         return true;
       }
       return stored === 'true';
-    } catch (error) {
+    } catch {
       return true;
     }
   });
@@ -176,7 +177,7 @@ const DashboardEditor = () => {
       const stored = window.localStorage.getItem(PANEL_WIDTHS_KEY);
       const parsed = stored ? JSON.parse(stored) : null;
       return parsed?.left || 320;
-    } catch (error) {
+    } catch {
       return 320;
     }
   });
@@ -188,7 +189,7 @@ const DashboardEditor = () => {
       const stored = window.localStorage.getItem(PANEL_WIDTHS_KEY);
       const parsed = stored ? JSON.parse(stored) : null;
       return parsed?.right || 360;
-    } catch (error) {
+    } catch {
       return 360;
     }
   });
@@ -385,7 +386,7 @@ const DashboardEditor = () => {
     if (!binding) {
       return null;
     }
-    const { rows, preview, ...rest } = binding;
+    const { ...rest } = binding;
     return {
       ...rest,
       rows: [],
@@ -452,13 +453,15 @@ const DashboardEditor = () => {
     leftTools.find((tool) => tool.id === leftActiveTool)?.label || 'Tools';
   const rightPanelTitle =
     rightTools.find((tool) => tool.id === rightActiveTool)?.label || 'Tools';
-  const slugifyDatasourceId = (value) =>
+  const slugifyDatasourceId = useCallback((value) =>
     String(value || '')
       .toLowerCase()
       .trim()
       .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)+/g, '');
-  const resolveUniqueDatasourceId = (value, currentId, existingIds) => {
+      .replace(/(^-|-$)+/g, ''),
+    []
+  );
+  const resolveUniqueDatasourceId = useCallback((value, currentId, existingIds) => {
     const usedIds = new Set(existingIds);
     if (currentId) {
       usedIds.delete(currentId);
@@ -471,7 +474,7 @@ const DashboardEditor = () => {
       counter += 1;
     }
     return nextId;
-  };
+  }, [slugifyDatasourceId]);
 
   const validation = useMemo(
     () => validateAuthoringModel(authoringModel),
@@ -498,7 +501,9 @@ const DashboardEditor = () => {
     [selectedTemplateId]
   );
   const manifestCoverage = useMemo(() => validateManifestCoverage(), []);
-  const datasources = authoringModel.datasources || [];
+  const datasources = useMemo(() => authoringModel.datasources || [], [
+    authoringModel.datasources,
+  ]);
   const activeDatasourceId =
     authoringModel.activeDatasourceId || datasources[0]?.id || null;
   const activeDatasource =
@@ -506,7 +511,9 @@ const DashboardEditor = () => {
     datasources[0] ||
     null;
   const datasetBinding = activeDatasource?.datasetBinding || null;
-  const datasetColumns = datasetBinding?.columns || [];
+  const datasetColumns = useMemo(() => datasetBinding?.columns || [], [
+    datasetBinding,
+  ]);
   const semanticLayer = activeDatasource?.semanticLayer || {
     enabled: false,
     metrics: [],
@@ -603,6 +610,9 @@ const DashboardEditor = () => {
         dashboard,
         authoringModel,
         compiled: compiledImmediate,
+        themeFamily,
+        themeMode,
+        paletteId,
       });
       if (!exportPlan) {
         trackTelemetryEvent('export_failure', {
@@ -1230,6 +1240,9 @@ const DashboardEditor = () => {
       dashboard,
       authoringModel,
       compiled: compiledImmediate,
+      themeFamily,
+      themeMode,
+      paletteId,
     });
     if (!exportPlan) {
       return undefined;
@@ -1273,6 +1286,9 @@ const DashboardEditor = () => {
     dashboard,
     syncEnabled,
     syncHandle,
+    themeFamily,
+    themeMode,
+    paletteId,
   ]);
 
   if (!dashboard) {

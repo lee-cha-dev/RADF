@@ -68,12 +68,25 @@ const App = () => {
       </header>
       <main className={`lazy-shell${isEditorRoute ? ' lazy-shell--editor' : ''}`}>
         <Routes>
-          <Route path="/" element={<DashboardLibrary />} />
+          <Route
+            path="/"
+            element={
+              <DashboardLibrary
+                themeFamily={themeFamily}
+                themeMode={resolvedMode}
+                paletteId={paletteId}
+              />
+            }
+          />
           <Route
             path="/editor/:dashboardId"
             element={
               <EditorErrorBoundary>
-                <DashboardEditor />
+                <DashboardEditor
+                  themeFamily={themeFamily}
+                  themeMode={resolvedMode}
+                  paletteId={paletteId}
+                />
               </EditorErrorBoundary>
             }
           />

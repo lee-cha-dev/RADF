@@ -65,7 +65,12 @@ describe('dashboardExport', () => {
       layout: [{ id: 'filter-1', x: 1, y: 1, w: 12, h: 1 }],
     };
 
-    const exportPlan = buildDashboardExport({ dashboard, authoringModel });
+    const exportPlan = buildDashboardExport({
+      dashboard,
+      authoringModel,
+      themeFamily: 'nord',
+      themeMode: 'dark',
+    });
     expect(exportPlan).not.toBeNull();
     expect(exportPlan.files).toHaveProperty(
       `deps/${exportPlan.fileBase}.dashboard.js`
@@ -84,6 +89,13 @@ describe('dashboardExport', () => {
     );
     expect(exportPlan.files).toHaveProperty('utils/LazyFilterBar.jsx');
     expect(exportPlan.files).toHaveProperty(`${exportPlan.componentName}.jsx`);
+
+    const componentSource = exportPlan.files[`${exportPlan.componentName}.jsx`];
+    expect(componentSource).toContain('radf-dashboard__theme-toggle');
+    expect(componentSource).toContain('DEFAULT_THEME_FAMILY = "default"');
+    expect(componentSource).toContain('DEFAULT_THEME_MODE = "light"');
+    expect(componentSource).toContain('EXPORTED_THEME_FAMILY = "nord"');
+    expect(componentSource).toContain('EXPORTED_THEME_MODE = "dark"');
 
     const zipBlob = await createDashboardZip(exportPlan);
     const zip = await JSZip.loadAsync(zipBlob);
@@ -144,7 +156,12 @@ describe('dashboardExport', () => {
       layout: [],
     };
 
-    const exportPlan = buildDashboardExport({ dashboard, authoringModel });
+    const exportPlan = buildDashboardExport({
+      dashboard,
+      authoringModel,
+      themeFamily: 'nord',
+      themeMode: 'dark',
+    });
     expect(exportPlan.files).toHaveProperty(
       `deps/${exportPlan.fileBase}.dataset.sales.js`
     );

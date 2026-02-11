@@ -109,8 +109,10 @@ const LazyFilterBar = ({
   const showClear = options?.showClear !== false;
   const layout = options?.layout === 'stacked' ? 'stacked' : 'inline';
 
-  const columns = datasetBinding?.columns || [];
-  const rows = datasetBinding?.rows || [];
+  const columns = useMemo(() => datasetBinding?.columns || [], [
+    datasetBinding?.columns,
+  ]);
+  const rows = useMemo(() => datasetBinding?.rows || [], [datasetBinding?.rows]);
   const dimensionMap = useMemo(
     () =>
       new Map(

@@ -148,7 +148,7 @@ export const loadCustomDashboardsDirectory = async () => {
     }
     const permitted = await verifyPermission(handle);
     return permitted ? handle : null;
-  } catch (error) {
+  } catch {
     return null;
   }
 };
@@ -219,7 +219,7 @@ export const removeDashboardExportFromDirectory = async (
     const customRoot = await ensureDirectory(baseHandle, 'CustomDashboards');
     await customRoot.removeEntry(folderName, { recursive: true });
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 };

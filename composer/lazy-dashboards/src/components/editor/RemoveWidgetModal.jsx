@@ -27,7 +27,7 @@ const RemoveWidgetModal = ({ pendingRemoveWidget, onCancel, onConfirm }) => {
         </div>
         <div className="lazy-modal__body">
           <p className="lazy-panel__body">
-            Remove "{pendingRemoveWidget.title}" from the dashboard?
+            Remove &quot;{pendingRemoveWidget.title}&quot; from the dashboard?
           </p>
         </div>
         <div className="lazy-modal__footer">

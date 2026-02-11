@@ -78,7 +78,7 @@ const readRegistry = () => {
       writeRegistry(normalized.registry);
     }
     return normalized.registry;
-  } catch (error) {
+  } catch {
     return getEmptyRegistry();
   }
 };

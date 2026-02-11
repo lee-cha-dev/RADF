@@ -89,7 +89,7 @@ const GridCanvas = ({
     a.y < b.y + b.h &&
     a.y + a.h > b.y;
 
-  const resolveCollision = (widgetId, nextLayout, allWidgets) => {
+  const resolveCollision = useCallback((widgetId, nextLayout, allWidgets) => {
     let candidate = { ...nextLayout };
     let guard = 0;
     while (
@@ -111,9 +111,9 @@ const GridCanvas = ({
       }
     }
     return candidate;
-  };
+  }, []);
 
-  const getGridMetrics = () => {
+  const getGridMetrics = useCallback(() => {
     const grid = gridRef.current;
     if (!grid) {
       return null;
@@ -131,9 +131,9 @@ const GridCanvas = ({
       colWidth,
       rowStep: GRID_ROW_HEIGHT + GRID_GAP,
     };
-  };
+  }, []);
 
-  const getDeltaFromPointer = (origin, event) => {
+  const getDeltaFromPointer = useCallback((origin, event) => {
     const metrics = getGridMetrics();
     if (!metrics) {
       return { dx: 0, dy: 0 };
@@ -144,7 +144,7 @@ const GridCanvas = ({
       dx: Math.round((event.clientX - origin.x) / colStep),
       dy: Math.round((event.clientY - origin.y) / rowStep),
     };
-  };
+  }, [getGridMetrics]);
 
   const updateLayoutForInteraction = useCallback(
     (event) => {
@@ -198,7 +198,7 @@ const GridCanvas = ({
         });
       });
     },
-    [onUpdateAuthoringModel]
+    [getDeltaFromPointer, onUpdateAuthoringModel, resolveCollision]
   );
 
   const handlePointerMove = useCallback(

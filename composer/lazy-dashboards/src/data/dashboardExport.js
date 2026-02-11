@@ -1,5 +1,10 @@
 import JSZip from 'jszip';
 import { compileAuthoringModel } from '../authoring/compiler.js';
+import {
+  PALETTE_OPTIONS,
+  THEME_CLASS_MAP,
+  THEME_SETTINGS_STORAGE_KEY,
+} from '../theme/themeConfig.js';
 
 /**
  * @typedef {Object} DashboardExportNames
@@ -25,6 +30,9 @@ import { compileAuthoringModel } from '../authoring/compiler.js';
  * @property {{ id?: string, name?: string, meta?: { title?: string, description?: string } }} dashboard
  * @property {Object} [authoringModel]
  * @property {Object} [compiled]
+ * @property {string} [themeFamily]
+ * @property {'light'|'dark'} [themeMode]
+ * @property {string} [paletteId]
  */
 
 const toWords = (value = '') =>
@@ -869,6 +877,9 @@ const buildDashboardComponentSource = ({
   hasDataProvider,
   hasMultiApiProviders,
   apiDatasourceId,
+  themeFamily,
+  themeMode,
+  paletteId,
 }) => {
   const apiImport = hasDataProvider
     ? hasMultiApiProviders
@@ -883,7 +894,7 @@ const buildDashboardComponentSource = ({
       ? ''
       : `\nconst ApiDataProviders = { [${apiDatasourceKey}]: createExternalApiProvider() };`
     : '\nconst ApiDataProviders = {};';
-  const imports = `import { useEffect, useMemo } from "react";
+  const imports = `import { useEffect, useMemo, useState } from "react";
 import {
   DashboardProvider,
   GridLayout,
@@ -909,7 +920,38 @@ import dashboardConfig from "./deps/${fileBase}.dashboard.js";${apiImport}${hasF
           Filter Bar widget found but no filter bar component is included.
         </div>`;
 
+  const normalizedThemeFamily = JSON.stringify(themeFamily || 'default');
+  const normalizedThemeMode = JSON.stringify(
+    themeMode === 'dark' ? 'dark' : 'light'
+  );
+  const normalizedPaletteId = JSON.stringify(paletteId || 'analytics');
+  const serializedThemeClassMap = JSON.stringify(THEME_CLASS_MAP, null, 2);
+  const serializedPaletteIds = JSON.stringify(
+    PALETTE_OPTIONS.map((palette) => palette.id),
+    null,
+    2
+  );
+
   return `${imports}${providerImports}${apiProvidersInit}
+
+const THEME_CLASS_MAP = ${serializedThemeClassMap};
+
+const PALETTE_IDS = ${serializedPaletteIds};
+
+const ALL_THEME_CLASSES = Object.values(THEME_CLASS_MAP).flatMap((modes) =>
+  Object.values(modes)
+);
+const ALL_PALETTE_CLASSES = PALETTE_IDS.map((id) => "radf-palette-" + id);
+
+const THEME_SETTINGS_STORAGE_KEY = ${JSON.stringify(THEME_SETTINGS_STORAGE_KEY)};
+
+const DEFAULT_THEME_FAMILY = "default";
+const DEFAULT_THEME_MODE = "light";
+const DEFAULT_PALETTE_ID = "analytics";
+
+const EXPORTED_THEME_FAMILY = ${normalizedThemeFamily};
+const EXPORTED_THEME_MODE = ${normalizedThemeMode};
+const EXPORTED_PALETTE_ID = ${normalizedPaletteId};
 
 /**
  * @typedef {function(Object): Promise<{ rows: Object[], meta: Object }>} DataProvider
@@ -923,6 +965,9 @@ import dashboardConfig from "./deps/${fileBase}.dashboard.js";${apiImport}${hasF
  *   - Datasource definitions for local previews.
  * @property {{ rows?: Object[], columns?: Object[], previewRows?: Object[] }} [datasetBinding] - Legacy dataset binding.
  * @property {{ enabled?: boolean, dimensions?: Object[], metrics?: Object[] }} [semanticLayer] - Legacy semantic layer config.
+ * @property {string} [themeFamily] - Theme family id (for example: default, nord).
+ * @property {'light'|'dark'} [themeMode] - Active theme mode.
+ * @property {string} [paletteId] - Active palette id.
  */
 
 /**
@@ -935,6 +980,47 @@ const ApiDataProvider = ${
       ? "createExternalApiMultiProvider()"
       : "createMultiDataProvider(ApiDataProviders)"
     : "null"
+};
+
+const resolveThemeFamily = (value) =>
+  value && THEME_CLASS_MAP[value] ? value : DEFAULT_THEME_FAMILY;
+
+const resolveThemeMode = (value) =>
+  value === "dark" || value === "light" ? value : DEFAULT_THEME_MODE;
+
+const resolvePaletteId = (value) =>
+  PALETTE_IDS.includes(value) ? value : DEFAULT_PALETTE_ID;
+
+const readStoredThemeSettings = () => {
+  if (typeof window === "undefined") {
+    return {};
+  }
+  try {
+    const raw = window.localStorage.getItem(THEME_SETTINGS_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+};
+
+const persistThemeSettings = ({ themeFamily, themeMode, paletteId }) => {
+  if (typeof window === "undefined") {
+    return;
+  }
+  try {
+    const stored = readStoredThemeSettings();
+    window.localStorage.setItem(
+      THEME_SETTINGS_STORAGE_KEY,
+      JSON.stringify({
+        ...stored,
+        themeFamily,
+        themeMode,
+        paletteId,
+      })
+    );
+  } catch {
+    // no-op
+  }
 };
 
 /**
@@ -1017,13 +1103,27 @@ ${filterBarBlock}
  * @param {{ dataProvider: DataProvider, datasourcesById: Map<string, Object>, defaultDatasource: Object }} props - The content props.
  * @returns {JSX.Element} The content markup.
  */
-const DashboardContent = ({ dataProvider, datasourcesById, defaultDatasource }) => (
+const DashboardContent = ({
+  dataProvider,
+  datasourcesById,
+  defaultDatasource,
+  themeMode,
+  onToggleTheme,
+}) => (
   <section className="radf-dashboard">
     <header className="radf-dashboard__header">
       <div>
         <h1 className="radf-dashboard__title">{dashboardConfig.title}</h1>
         <p className="radf-dashboard__subtitle">{dashboardConfig.subtitle}</p>
       </div>
+      <button
+        type="button"
+        className="radf-dashboard__theme-toggle"
+        onClick={onToggleTheme}
+        aria-pressed={themeMode === "dark"}
+      >
+        {themeMode === "dark" ? "Switch to Light" : "Switch to Dark"}
+      </button>
     </header>
     <GridLayout
       panels={dashboardConfig.panels}
@@ -1056,11 +1156,48 @@ const ${componentName} = ({
   datasources,
   datasetBinding,
   semanticLayer,
+  themeFamily,
+  themeMode,
+  paletteId,
 }) => {
   useEffect(() => {
     registerCharts();
     registerInsights();
   }, []);
+
+  const [resolvedThemeFamily, setResolvedThemeFamily] = useState(
+    DEFAULT_THEME_FAMILY
+  );
+  const [resolvedThemeMode, setResolvedThemeMode] = useState(DEFAULT_THEME_MODE);
+  const [resolvedPaletteId, setResolvedPaletteId] = useState(DEFAULT_PALETTE_ID);
+
+  useEffect(() => {
+    const stored = readStoredThemeSettings();
+    const nextThemeFamily = resolveThemeFamily(
+      themeFamily || stored.themeFamily || EXPORTED_THEME_FAMILY
+    );
+    const nextThemeMode = resolveThemeMode(
+      themeMode || stored.themeMode || EXPORTED_THEME_MODE
+    );
+    const nextPaletteId = resolvePaletteId(
+      paletteId || stored.paletteId || EXPORTED_PALETTE_ID
+    );
+
+    setResolvedThemeFamily(nextThemeFamily);
+    setResolvedThemeMode(nextThemeMode);
+    setResolvedPaletteId(nextPaletteId);
+  }, [themeFamily, themeMode, paletteId]);
+
+  useEffect(() => {
+    if (typeof document === "undefined") {
+      return;
+    }
+    const root = document.documentElement;
+    const themeClass = THEME_CLASS_MAP[resolvedThemeFamily][resolvedThemeMode];
+
+    root.classList.remove(...ALL_THEME_CLASSES, ...ALL_PALETTE_CLASSES);
+    root.classList.add(themeClass, "radf-palette-" + resolvedPaletteId);
+  }, [resolvedThemeFamily, resolvedThemeMode, resolvedPaletteId]);
 
   const normalizedDatasources = useMemo(
     () => normalizeDatasources(datasources, datasetBinding, semanticLayer),
@@ -1123,6 +1260,18 @@ const ${componentName} = ({
     window.location.reload();
   };
 
+  const handleToggleTheme = () => {
+    setResolvedThemeMode((current) => {
+      const nextMode = current === "dark" ? "light" : "dark";
+      persistThemeSettings({
+        themeFamily: resolvedThemeFamily,
+        themeMode: nextMode,
+        paletteId: resolvedPaletteId,
+      });
+      return nextMode;
+    });
+  };
+
   return (
     <main className="radf-app__content">
       <ErrorBoundary
@@ -1140,6 +1289,8 @@ const ${componentName} = ({
             dataProvider={resolvedProvider}
             datasourcesById={datasourcesById}
             defaultDatasource={defaultDatasource}
+            themeMode={resolvedThemeMode}
+            onToggleTheme={handleToggleTheme}
           />
         </DashboardProvider>
         </ErrorBoundary>
@@ -1162,6 +1313,9 @@ export const buildDashboardExport = ({
   dashboard,
   authoringModel,
   compiled,
+  themeFamily,
+  themeMode,
+  paletteId,
 } = {}) => {
   if (!dashboard) {
     return null;
@@ -1328,6 +1482,9 @@ export const buildDashboardExport = ({
     hasDataProvider: Boolean(modules.dataProvider),
     hasMultiApiProviders: apiDatasourceCount > 1,
     apiDatasourceId: apiDatasourceIds[0] || null,
+    themeFamily,
+    themeMode,
+    paletteId,
   });
   return {
     ...exportNames,
