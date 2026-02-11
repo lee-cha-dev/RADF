@@ -401,6 +401,12 @@ export const buildColorAssignment = ({
   }
 
   if (LINE_VIZ_TYPES.has(vizType)) {
+    if (encodings?.group && !Array.isArray(encodings?.y)) {
+      return {
+        mode: 'category',
+        ...buildCategoryAssignment({ data, xKey: encodings.group }),
+      };
+    }
     if (isMultiSeries) {
       return {
         mode: 'series',

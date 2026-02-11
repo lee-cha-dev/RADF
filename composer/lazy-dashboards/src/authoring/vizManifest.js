@@ -199,7 +199,7 @@ const VIZ_CAPABILITIES = {
       label: 'Line',
       panelType: 'viz',
       supportLevel: 'supported',
-      description: 'Time series or trend lines.',
+      description: 'Time series or trend lines (supports grouped series from long-form rows).',
       encodings: {
         required: [
           { id: 'x', label: 'X Axis', role: 'dimension' },
@@ -210,7 +210,7 @@ const VIZ_CAPABILITIES = {
             id: 'group',
             label: 'Series',
             role: 'dimension',
-            help: 'Split into multiple lines.',
+            help: 'Split into multiple lines; long-form rows are auto-pivoted by group.',
           },
           {
             id: 'category',
@@ -249,6 +249,14 @@ const VIZ_CAPABILITIES = {
           visibleWhen: { option: 'brush.enabled', equals: true },
         },
         ...SERIES_OPTIONS,
+        seriesKeys: {
+          type: 'stringList',
+          label: 'Series keys',
+          help:
+            'Comma-separated list of series keys to render (multi-measure or wide-form data).',
+          default: [],
+          advanced: true,
+        },
         ...LEGEND_OPTIONS,
       },
     },

@@ -215,7 +215,7 @@
       "enum": [],
       "control": "list",
       "status": "supported",
-      "notes": "Explicit series list for palette/legend.",
+      "notes": "Explicit series list for palette/legend in multi-measure or wide-form data; grouped lines derive keys from group values.",
       "source": "src/framework/core/viz/palettes/colorAssignment.js"
     },
     {
@@ -239,7 +239,7 @@
       "enum": ["auto", "series", "category"],
       "control": "select",
       "status": "supported",
-      "notes": "Legend visibility logic.",
+      "notes": "Legend visibility logic; grouped lines list group values.",
       "source": "src/framework/core/viz/VizRenderer.jsx"
     },
     {
