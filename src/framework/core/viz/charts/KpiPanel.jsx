@@ -4,20 +4,9 @@
  */
 import React, { useMemo } from 'react';
 
-const VALID_VARIANTS = new Set(['clean', 'accent', 'halo', 'icon', 'compact']);
-const VALID_SUBTYPES = new Set(['standalone', 'embedded']);
+const VALID_VARIANTS = new Set(['clean', 'accent', 'gradient', 'icon', 'compact']);
 const VALID_BADGE_TONES = new Set(['neutral', 'success', 'warning', 'danger']);
 const KPI_VARIANT_REGISTRY = new Map();
-
-const normalizeToggle = (value) => {
-  if (value === true || value === 'true') {
-    return true;
-  }
-  if (value === false || value === 'false') {
-    return false;
-  }
-  return 'auto';
-};
 
 const clampDecimals = (value, fallback = 0) =>
   Number.isFinite(value) && value >= 0 ? value : fallback;
@@ -113,26 +102,71 @@ const normalizeVariant = (variant) => {
   return VALID_VARIANTS.has(key) ? key : 'clean';
 };
 
-const normalizeSubtype = (subtype, panelHasHeader) => {
-  const key = typeof subtype === 'string' ? subtype.toLowerCase() : subtype;
-  if (VALID_SUBTYPES.has(key)) {
-    return key;
-  }
-  return panelHasHeader ? 'embedded' : 'standalone';
-};
-
 const normalizeBadgeTone = (tone) => {
   const key = typeof tone === 'string' ? tone.toLowerCase() : tone;
   return VALID_BADGE_TONES.has(key) ? key : 'neutral';
+};
+
+const subtypePresets = {
+  clean: {
+    standard: {},
+    currency: { format: 'currency' },
+    'large value': { format: 'compact', decimals: 1 },
+    integer: { format: 'number', decimals: 0 },
+    count: { format: 'number', decimals: 0 },
+  },
+  accent: {
+    standard: { valueTone: 'success' },
+    percentage: { format: 'percent', decimals: 1, valueTone: 'success' },
+    decimal: { format: 'number', decimals: 2, valueTone: 'success' },
+    ratio: { format: 'number', decimals: 0, valueTone: 'success' },
+    amount: { format: 'currency', decimals: 0, valueTone: 'success' },
+  },
+  gradient: {
+    standard: {},
+    time: { format: 'number', decimals: 1 },
+    negative: { valueTone: 'danger' },
+    duration: { format: 'duration', decimals: 0 },
+    index: { format: 'number', decimals: 0 },
+  },
+  icon: {
+    standard: { icon: 'users' },
+    rating: { icon: 'star', format: 'number', decimals: 1 },
+    alert: { icon: 'alert', valueTone: 'danger' },
+    capacity: { icon: 'box', valueTone: 'warning' },
+    velocity: { icon: 'spark', valueTone: 'success' },
+  },
+  compact: {
+    standard: { badgeText: '+12% vs last month', badgeTone: 'success' },
+    growth: { badgeText: '+28% growth', badgeTone: 'success' },
+    minimal: { badgeText: 'All systems operational', badgeTone: 'success' },
+    score: { badgeText: 'No change', badgeTone: 'warning' },
+    efficiency: { badgeText: '-8% reduction', badgeTone: 'success' },
+  },
+};
+
+const normalizeSubtype = (subtype) => String(subtype || 'Standard').trim();
+
+const applySubtypePreset = (variant, subtype, viewModel) => {
+  const lowerVariant = (variant || '').toLowerCase();
+  const lowerSubtype = (subtype || '').toLowerCase();
+  const presets = subtypePresets[lowerVariant] || {};
+  const preset = presets[lowerSubtype] || presets.standard || {};
+  const next = { ...viewModel };
+  if (!viewModel.format && preset.format) next.format = preset.format;
+  if (!viewModel.icon && preset.icon) next.icon = preset.icon;
+  if (!viewModel.badgeText && preset.badgeText) next.badgeText = preset.badgeText;
+  if (viewModel.badgeTone === 'neutral' && preset.badgeTone) next.badgeTone = preset.badgeTone;
+  if (viewModel.valueTone === undefined && preset.valueTone) next.valueTone = preset.valueTone;
+  if (viewModel.decimals === 0 && typeof preset.decimals === 'number') next.decimals = preset.decimals;
+  return next;
 };
 
 const normalizeOptions = (options, panelConfig) => {
   const panelHasHeader = Boolean(panelConfig?.title || panelConfig?.subtitle);
   return {
     variant: normalizeVariant(options?.variant),
-    subtype: normalizeSubtype(options?.subtype, panelHasHeader),
-    showLabel: normalizeToggle(options?.showLabel),
-    showCaption: normalizeToggle(options?.showCaption),
+    subtype: normalizeSubtype(options?.subtype),
     format: options?.format || 'number',
     currency: options?.currency || 'USD',
     decimals: clampDecimals(options?.decimals, 0),
@@ -145,34 +179,30 @@ const normalizeOptions = (options, panelConfig) => {
   };
 };
 
-const shouldDisplayLabel = (showLabel, panelHasHeader, label) => {
-  if (!label) {
-    return false;
-  }
-  if (showLabel === true) {
-    return true;
-  }
-  if (showLabel === false) {
-    return false;
-  }
-  return !panelHasHeader;
-};
-
-const shouldDisplayCaption = (showCaption, caption) => {
-  if (!caption) {
-    return false;
-  }
-  if (showCaption === true) {
-    return true;
-  }
-  if (showCaption === false) {
-    return false;
-  }
-  return Boolean(caption);
-};
-
 const resolveIconNode = (iconKey) => {
   const icons = {
+    star: (
+      <svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+      </svg>
+    ),
+    alert: (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="2" />
+        <line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" strokeWidth="2" />
+        <line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" strokeWidth="2" />
+      </svg>
+    ),
+    box: (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path
+          d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        />
+      </svg>
+    ),
     trend: (
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <polyline
@@ -270,7 +300,10 @@ class BaseKpiVariant {
     const classes = [
       'ladf-kpi',
       `ladf-kpi--${this.viewModel.variant}`,
-      `ladf-kpi--${this.viewModel.subtype}`,
+      this.viewModel.subtype
+        ? `ladf-kpi--subtype-${String(this.viewModel.subtype).toLowerCase().replace(/[^a-z0-9]+/g, '-')}`
+        : null,
+      this.viewModel.panelHasHeader ? 'ladf-kpi--embedded' : null,
     ];
     return classes.filter(Boolean).join(' ');
   }
@@ -282,9 +315,10 @@ class BaseKpiVariant {
     return <div className="ladf-kpi__label">{this.viewModel.label}</div>;
   }
 
-  renderValue() {
-    return <div className="ladf-kpi__value">{this.viewModel.formattedValue}</div>;
-  }
+    renderValue() {
+      const toneClass = this.viewModel.valueTone ? `ladf-kpi__value--${this.viewModel.valueTone}` : '';
+      return <div className={`ladf-kpi__value ${toneClass}`.trim()}>{this.viewModel.formattedValue}</div>;
+    }
 
   renderCaption() {
     if (!this.viewModel.caption) {
@@ -312,7 +346,7 @@ class CleanKpiVariant extends BaseKpiVariant {}
 
 class AccentKpiVariant extends BaseKpiVariant {}
 
-class HaloKpiVariant extends BaseKpiVariant {}
+class GradientKpiVariant extends BaseKpiVariant {}
 
 class IconKpiVariant extends BaseKpiVariant {
   renderIcon() {
@@ -380,7 +414,7 @@ const registerVariant = (variantId, VariantClass) =>
 
 registerVariant('clean', CleanKpiVariant);
 registerVariant('accent', AccentKpiVariant);
-registerVariant('halo', HaloKpiVariant);
+registerVariant('gradient', GradientKpiVariant);
 registerVariant('icon', IconKpiVariant);
 registerVariant('compact', CompactKpiVariant);
 
@@ -401,22 +435,22 @@ function KpiPanel({ data = [], encodings = {}, options = {}, panelConfig = null 
     const normalized = normalizeOptions(options, panelConfig);
     const valueKey = resolveValueKey(encodings, data);
     const rawValue = valueKey ? data?.[0]?.[valueKey] : null;
-    const labelSource = options?.label || encodings?.label || encodings?.value || '';
-    const captionSource = options?.caption || '';
-    const label = shouldDisplayLabel(normalized.showLabel, normalized.panelHasHeader, labelSource)
-      ? labelSource
-      : '';
-    const caption = shouldDisplayCaption(normalized.showCaption, captionSource)
-      ? captionSource
-      : '';
+    const label = options?.label || encodings?.label || encodings?.value || '';
+    const caption = options?.caption || '';
 
-    return {
+    const hydrated = applySubtypePreset(normalized.variant, normalized.subtype, {
       ...normalized,
       valueKey,
       rawValue,
       formattedValue: formatKpiValue(rawValue, normalized),
       label,
       caption,
+      valueTone: normalized.valueTone,
+    });
+
+    return {
+      ...hydrated,
+      formattedValue: formatKpiValue(rawValue, hydrated),
     };
   }, [data, encodings, options, panelConfig]);
 

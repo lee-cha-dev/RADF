@@ -232,14 +232,14 @@
   background: var(--ladf-panel-gradient, var(--ladf-color-surface));
   border: 1px solid var(--ladf-border-subtle, var(--ladf-color-border));
   box-shadow: var(--ladf-shadow-low);
-  min-height: 120px;
+  min-height: 140px;
 }
 
 .ladf-kpi--embedded {
   background: transparent;
   border-color: transparent;
   box-shadow: none;
-  padding: var(--ladf-space-3) var(--ladf-space-1);
+  padding: 0;
   min-height: unset;
 }
 
@@ -256,6 +256,15 @@
   font-weight: var(--ladf-font-weight-bold);
   color: var(--ladf-text-primary, var(--ladf-color-text));
   line-height: 1.1;
+}
+.ladf-kpi__value--success {
+  color: var(--ladf-accent-success);
+}
+.ladf-kpi__value--warning {
+  color: var(--ladf-accent-warning);
+}
+.ladf-kpi__value--danger {
+  color: var(--ladf-accent-danger);
 }
 
 .ladf-kpi__caption {
@@ -274,20 +283,11 @@
   padding-left: calc(var(--ladf-space-4) - 2px);
   background: var(--ladf-color-surface);
 }
-
-.ladf-kpi--accent.ladf-kpi--embedded {
-  padding-left: var(--ladf-space-3);
-  border-left-width: 3px;
-  background: transparent;
-}
-
-.ladf-kpi--halo,
 .ladf-kpi--gradient {
   position: relative;
   overflow: hidden;
 }
-
-.ladf-kpi--halo::before,
+.ladf-kpi--gradient::before,
 .ladf-kpi--gradient::before {
   content: '';
   position: absolute;
@@ -300,7 +300,7 @@
   pointer-events: none;
 }
 
-.ladf-kpi--halo::after,
+.ladf-kpi--gradient::after,
 .ladf-kpi--gradient::after {
   content: '';
   position: absolute;
@@ -317,7 +317,7 @@
   pointer-events: none;
 }
 
-.ladf-kpi--halo > *,
+.ladf-kpi--gradient > *,
 .ladf-kpi--gradient > * {
   position: relative;
   z-index: 1;
