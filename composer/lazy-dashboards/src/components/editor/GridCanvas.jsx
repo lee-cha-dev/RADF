@@ -255,7 +255,8 @@ const GridCanvas = ({
     });
     const isEmpty = !loading && !error && (!data || data.length === 0);
     const status = loading ? 'loading' : error ? 'error' : 'ready';
-    const isKpiPanel = panelConfig.vizType === 'kpi';
+    const isKpiPanel =
+      panelConfig.vizType === 'kpi' || panelConfig.vizType === 'kpiVariant';
 
     return (
       <Panel

@@ -508,6 +508,9 @@ const applyBindingsToWidget = (widget, bindings) => {
   }
   const nextEncodings = { ...(widget.encodings || {}) };
   switch (widget.vizType) {
+    case 'kpiVariant':
+      nextEncodings.value = bindings.metric || nextEncodings.value;
+      break;
     case 'kpi':
       nextEncodings.value = bindings.metric || nextEncodings.value;
       nextEncodings.trend = bindings.metricAlt || nextEncodings.trend;
