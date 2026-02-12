@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KPI Panel Redesign - 5 Variations</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* Base CSS Variables */
+    :root {
+      --ladf-space-2: 0.5rem;
+      --ladf-space-3: 0.75rem;
+      --ladf-space-4: 1rem;
+      --ladf-radius-sm: 0.375rem;
+      --ladf-radius-md: 0.5rem;
+      --ladf-radius-lg: 0.75rem;
+      --ladf-font-weight-medium: 500;
+      --ladf-font-weight-semibold: 600;
+      --ladf-font-weight-bold: 700;
+    }
+
+    /* Light Theme */
+    :root.fecc-theme-light {
+      --ladf-surface-bg: #f8f9fa;
+      --ladf-surface-1: #e9ecef;
+      --ladf-surface-2: #ffffff;
+      --ladf-surface-3: #f3f4f6;
+      --ladf-surface-well: #f8f9fa;
+      --ladf-surface-overlay: #ffffff;
+      --ladf-surface-muted: #e9ecef;
+
+      --ladf-border-subtle: #d1d5db;
+      --ladf-border-strong: #b9c0ca;
+      --ladf-border-divider: #d1d5db;
+      --ladf-border-focus: #186329;
+
+      --ladf-text-primary: #111827;
+      --ladf-text-secondary: #0f172a;
+      --ladf-text-muted: #64748b;
+      --ladf-text-inverse: #f8fafc;
+
+      --ladf-accent-primary: #186329;
+      --ladf-accent-secondary: #1c7330;
+      --ladf-accent-success: #16a34a;
+      --ladf-accent-warning: #f97316;
+      --ladf-accent-danger: #dc2626;
+      --ladf-accent-primary-soft: rgba(24, 99, 41, 0.12);
+      --ladf-accent-secondary-soft: rgba(28, 115, 48, 0.12);
+
+      --ladf-shadow-low: 0 1px 2px rgba(17, 24, 39, 0.08), 0 1px 1px rgba(17, 24, 39, 0.04);
+      --ladf-shadow-med: 0 10px 24px rgba(17, 24, 39, 0.12), 0 4px 10px rgba(17, 24, 39, 0.08);
+      --ladf-shadow-high: 0 20px 45px rgba(17, 24, 39, 0.16), 0 8px 20px rgba(17, 24, 39, 0.1);
+      --ladf-shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.7), inset 0 -1px 0 rgba(17, 24, 39, 0.03);
+
+      --ladf-app-gradient: radial-gradient(circle at top, rgba(24, 99, 41, 0.08), transparent 55%),
+      linear-gradient(180deg, #f8f9fa 0%, #f3f4f6 100%);
+      --ladf-panel-gradient: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+      --ladf-panel-header-gradient: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
+
+      --ladf-chart-grid: rgba(100, 116, 139, 0.3);
+      --ladf-viz-bar-muted: #E0E0E0;
+      --ladf-viz-marker: #FFE347;
+
+      --ladf-color-bg: var(--ladf-surface-bg);
+      --ladf-color-surface: var(--ladf-surface-2);
+      --ladf-color-surface-alt: var(--ladf-surface-1);
+      --ladf-color-text: var(--ladf-text-primary);
+      --ladf-color-muted: var(--ladf-text-muted);
+      --ladf-color-border: var(--ladf-border-subtle);
+      --ladf-color-accent: var(--ladf-accent-primary);
+      --ladf-color-accent-weak: var(--ladf-accent-primary-soft);
+    }
+
+    /* Dark Theme */
+    :root.fecc-theme-dark {
+      --ladf-surface-bg: #292c34;
+      --ladf-surface-1: #2C2F3A;
+      --ladf-surface-2: #1f2128;
+      --ladf-surface-3: #353846;
+      --ladf-surface-well: #1f2128;
+      --ladf-surface-overlay: #1f2128;
+      --ladf-surface-muted: #2C2F3A;
+
+      --ladf-border-subtle: #4b5563;
+      --ladf-border-strong: #6b7280;
+      --ladf-border-divider: #4b5563;
+      --ladf-border-focus: #186329;
+
+      --ladf-text-primary: #f8fafc;
+      --ladf-text-secondary: #ffffff;
+      --ladf-text-muted: #94a3b8;
+      --ladf-text-inverse: #0f172a;
+
+      --ladf-accent-primary: #186329;
+      --ladf-accent-secondary: #1c7330;
+      --ladf-accent-success: #22c55e;
+      --ladf-accent-warning: #fbbf24;
+      --ladf-accent-danger: #ef4444;
+      --ladf-accent-primary-soft: rgba(24, 99, 41, 0.2);
+      --ladf-accent-secondary-soft: rgba(28, 115, 48, 0.2);
+
+      --ladf-shadow-low: 0 1px 2px rgba(0, 0, 0, 0.5), 0 1px 1px rgba(0, 0, 0, 0.4);
+      --ladf-shadow-med: 0 16px 32px rgba(0, 0, 0, 0.55), 0 6px 14px rgba(0, 0, 0, 0.4);
+      --ladf-shadow-high: 0 24px 50px rgba(0, 0, 0, 0.6), 0 10px 24px rgba(0, 0, 0, 0.45);
+      --ladf-shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.04), inset 0 -1px 0 rgba(0, 0, 0, 0.4);
+
+      --ladf-app-gradient: radial-gradient(circle at top, rgba(24, 99, 41, 0.1), transparent 55%),
+      linear-gradient(180deg, #292c34 0%, #1f2128 100%);
+      --ladf-panel-gradient: linear-gradient(180deg, #1f2128 0%, #1a1d25 100%);
+      --ladf-panel-header-gradient: linear-gradient(180deg, #292c34 0%, #1f2128 100%);
+
+      --ladf-chart-grid: rgba(148, 163, 184, 0.2);
+      --ladf-viz-bar-muted: #B8B8B8;
+      --ladf-viz-marker: #C4B400;
+
+      --ladf-color-bg: var(--ladf-surface-bg);
+      --ladf-color-surface: var(--ladf-surface-2);
+      --ladf-color-surface-alt: var(--ladf-surface-1);
+      --ladf-color-text: var(--ladf-text-primary);
+      --ladf-color-muted: var(--ladf-text-muted);
+      --ladf-color-border: var(--ladf-border-subtle);
+      --ladf-color-accent: var(--ladf-accent-primary);
+      --ladf-color-accent-weak: var(--ladf-accent-primary-soft);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: var(--ladf-color-bg);
+      padding: 2rem;
+      min-height: 100vh;
+      transition: background-color 0.3s ease;
+    }
+
+    .header {
+      max-width: 1400px;
+      margin: 0 auto 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header h1 {
+      color: var(--ladf-color-text);
+      font-size: 1.75rem;
+      font-weight: var(--ladf-font-weight-bold);
+    }
+
+    .theme-toggle {
+      background: var(--ladf-color-surface);
+      border: 1px solid var(--ladf-color-border);
+      color: var(--ladf-color-text);
+      padding: 0.5rem 1rem;
+      border-radius: var(--ladf-radius-md);
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: var(--ladf-font-weight-medium);
+      transition: all 0.2s ease;
+    }
+
+    .theme-toggle:hover {
+      background: var(--ladf-color-surface-alt);
+      box-shadow: var(--ladf-shadow-low);
+    }
+
+    .grid {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .demo-section {
+      margin-bottom: 1rem;
+    }
+
+    .demo-label {
+      color: var(--ladf-color-muted);
+      font-size: 0.75rem;
+      font-weight: var(--ladf-font-weight-semibold);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+      padding-left: 0.25rem;
+    }
+
+    /* Base KPI Styles - Minimal/Clean (Variation 1) */
+    .ladf-kpi {
+      display: flex;
+      flex-direction: column;
+      gap: var(--ladf-space-2);
+      padding: var(--ladf-space-4);
+      border-radius: var(--ladf-radius-lg);
+      background: var(--ladf-panel-gradient, var(--ladf-color-surface));
+      border: 1px solid var(--ladf-border-subtle, var(--ladf-color-border));
+      box-shadow: var(--ladf-shadow-low);
+      min-height: 140px;
+      justify-content: center;
+    }
+
+    .ladf-kpi__label {
+      font-size: 0.65rem;
+      color: var(--ladf-text-muted, var(--ladf-color-muted));
+      font-weight: var(--ladf-font-weight-semibold);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      opacity: 0.7;
+    }
+
+    .ladf-kpi__value {
+      font-size: 2.5rem;
+      font-weight: var(--ladf-font-weight-bold);
+      color: var(--ladf-text-primary, var(--ladf-color-text));
+      line-height: 1.1;
+      margin: var(--ladf-space-2) 0;
+    }
+
+    .ladf-kpi__caption {
+      font-size: 0.8rem;
+      color: var(--ladf-text-muted, var(--ladf-color-muted));
+      line-height: 1.4;
+    }
+
+    /* Variation 2: Accent Border Left */
+    .ladf-kpi--accent {
+      border-left: 4px solid var(--ladf-accent-primary);
+      padding-left: calc(var(--ladf-space-4) - 4px);
+      background: var(--ladf-color-surface);
+    }
+
+    .ladf-kpi--accent .ladf-kpi__value {
+      color: var(--ladf-accent-primary);
+    }
+
+    /* Variation 3: Gradient Backdrop */
+    .ladf-kpi--gradient {
+      background: var(--ladf-panel-gradient);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ladf-kpi--gradient::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 100px;
+      height: 100px;
+      background: radial-gradient(circle, var(--ladf-accent-primary-soft) 0%, transparent 70%);
+      border-radius: 50%;
+      transform: translate(30%, -30%);
+      pointer-events: none;
+    }
+
+    .ladf-kpi--gradient .ladf-kpi__label {
+      position: relative;
+      z-index: 1;
+    }
+
+    .ladf-kpi--gradient .ladf-kpi__value {
+      position: relative;
+      z-index: 1;
+    }
+
+    .ladf-kpi--gradient .ladf-kpi__caption {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Variation 4: Icon Enhanced */
+    .ladf-kpi--icon {
+      padding: var(--ladf-space-4);
+      background: var(--ladf-color-surface);
+    }
+
+    .ladf-kpi--icon .ladf-kpi__header {
+      display: flex;
+      align-items: center;
+      gap: var(--ladf-space-2);
+      margin-bottom: var(--ladf-space-2);
+    }
+
+    .ladf-kpi--icon .ladf-kpi__icon {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--ladf-accent-primary-soft);
+      border-radius: var(--ladf-radius-md);
+      color: var(--ladf-accent-primary);
+      flex-shrink: 0;
+    }
+
+    .ladf-kpi--icon .ladf-kpi__label {
+      margin: 0;
+    }
+
+    .ladf-kpi--icon .ladf-kpi__value {
+      margin-left: 44px;
+    }
+
+    /* Variation 5: Compact Card */
+    .ladf-kpi--compact {
+      min-height: auto;
+      padding: var(--ladf-space-3) var(--ladf-space-4);
+      gap: var(--ladf-space-2);
+      background: var(--ladf-color-surface);
+      border: 1px solid var(--ladf-color-border);
+    }
+
+    .ladf-kpi--compact .ladf-kpi__label {
+      font-size: 0.7rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .ladf-kpi--compact .ladf-kpi__value {
+      font-size: 2rem;
+      margin: 0;
+    }
+
+    .ladf-kpi--compact .ladf-kpi__caption {
+      font-size: 0.75rem;
+      margin-top: 0.25rem;
+    }
+
+    .ladf-kpi--compact .ladf-kpi__footer {
+      display: flex;
+      align-items: center;
+      gap: var(--ladf-space-2);
+      margin-top: var(--ladf-space-2);
+      padding-top: var(--ladf-space-2);
+      border-top: 1px solid var(--ladf-border-subtle);
+    }
+
+    .ladf-kpi--compact .ladf-kpi__badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.125rem 0.5rem;
+      background: var(--ladf-accent-primary-soft);
+      color: var(--ladf-accent-success);
+      border-radius: var(--ladf-radius-sm);
+      font-size: 0.7rem;
+      font-weight: var(--ladf-font-weight-semibold);
+    }
+
+    /* Icons */
+    .icon {
+      width: 1em;
+      height: 1em;
+      display: inline-block;
+    }
+
+    @media (max-width: 768px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body class="fecc-theme-dark">
+  <div class="header">
+    <h1>KPI Panel Redesign - 5 Variations</h1>
+    <button class="theme-toggle" onclick="toggleTheme()">Switch to Light</button>
+  </div>
+
+  <!--
+  KPI Panel Overhaul Spec (LADF + Lazy Dashboards)
+
+  Goal
+  Replace the legacy KPI panel with a new KPI system that supports KPI Variants + Subtypes (as demonstrated in this file), while preserving the existing LADF rendering pattern:
+  - The Panel remains the parent container.
+  - The KPI render stays inside the ladf-kpi content container so it can be driven by DSL options.
+  - Implement KPI variants as extendable OOP components/classes (or a clean strategy/registry pattern).
+  - Update Lazy Dashboards (composer) so users can configure the new KPI options and the generated configs pass the correct options.
+  - Remove legacy KPI options and any old KPI-specific UI/logic cleanly (no backwards compatibility for removed KPI panel).
+
+  1) LADF: KPI System Architecture
+  1.1 Replace legacy KPI panel implementation
+  - Remove the existing KPI panel renderer/component completely.
+  - New KPI must render using the new design language shown in the samples:
+    - clean visual hierarchy
+    - less repeated labels/headings
+    - fewer nested containers / less double-chrome
+
+  1.2 KPI renderer contract
+  The KPI visualization is still vizType: "kpi". It must accept:
+  - Panel-level metadata: panel.title, panel.subtitle
+  - Encodings: encodings.value, plus optional encodings.trend, encodings.comparison
+  - Options: new KPI options (defined below)
+  The KPI renderer is responsible only for rendering; it should not own layout grid decisions.
+
+  1.3 OOP extensibility requirement
+  Implement KPI variants as separate, extendable units and route selection through the parent KPI panel.
+  Required pattern
+  - A base KPI renderer (e.g., BaseKpiVariant) defines shared formatting, value extraction, and shared DOM structure.
+  - Each variant extends the base and overrides only what’s needed (markup regions/classes/badges/icons/etc).
+  - The KPI panel chooses which variant to instantiate based on options.variant and options.subtype.
+  Must support a registry
+  - Variants are registered in a single registry map (variantId -> class/renderer)
+  - Adding a new variant should not require changing the KPI panel logic beyond registration.
+
+  2) KPI Variants + Subtypes (Required Support)
+  2.1 Variants (these map to sample designs)
+  Implement these variants:
+  1. clean (Minimal/Clean)
+  2. accent (Accent rail / left border)
+  3. halo (Gradient/halo backdrop)
+  4. icon (Icon enhanced header)
+  5. compact (Compact card + optional badge/footer)
+
+  2.2 Subtypes
+  Subtypes control how the KPI behaves inside the parent Panel container.
+  - standalone: Used when KPI is not wrapped by a panel header; full card chrome is allowed.
+  - embedded: Used when KPI is inside a Panel that already renders title/subtitle. Embedded mode must remove duplicate visual chrome and reduce label repetition.
+  Default rule:
+  - If panel has title or subtitle, default subtype to embedded unless explicitly overridden.
+
+  3) Label / Subtitle / Caption Rules (Anti-Clutter Rules)
+  3.1 Panel owns header text
+  - The parent panel header renders: panel.title and panel.subtitle
+  3.2 KPI label should be optional
+  - KPI label (options.label) must not be blindly shown when panel title exists.
+  - Use options.showLabel with these semantics:
+    - showLabel: "auto" (default): hide KPI label when panel.title exists; show KPI label when panel.title is empty (standalone usage)
+    - showLabel: true|false: forced on/off
+  3.3 Caption behavior
+  - Caption (options.caption) is independent and may show even when panel title exists.
+  - Controlled by options.showCaption with same auto|true|false semantics.
+
+  4) New KPI Options Schema (LADF Contract)
+  4.1 Replace legacy KPI options
+  - Legacy KPI options must be removed from: LADF runtime option parsing; Lazy Dashboards authoring UI; option matrices / validation schemas; generated code/config. No “keep for compatibility.” This is a clean break.
+  4.2 New options (required)
+  {
+    "variant": "clean | accent | halo | icon | compact",
+    "subtype": "standalone | embedded",
+    "showLabel": "auto | true | false",
+    "showCaption": "auto | true | false",
+    "format": "number | currency | percent | compact | duration | custom",
+    "currency": "USD | ...",
+    "decimals": 0,
+    "label": "string",
+    "caption": "string",
+    "badgeText": "string",
+    "badgeTone": "neutral | success | warning | danger",
+    "icon": "string"
+  }
+  Notes:
+  - format drives number formatting only; it does not change layout.
+  - badgeText, badgeTone, and icon are used only by variants that support them (compact uses badge; icon uses icon).
+  - icon is a semantic key (not raw SVG). Implementation can map keys to icons (e.g., lucide/react-icons/internal set). Provide a safe fallback.
+  4.3 Validation
+  - Add validation rules so invalid combinations don’t break render:
+    - Unknown variant falls back to clean
+    - Unknown badgeTone falls back to neutral
+    - Unsupported option for a variant is ignored gracefully (e.g., badgeText on clean variant does nothing)
+
+  5) Rendering Requirements (Visual + DOM)
+  5.1 Must reuse .ladf-kpi container
+  - All variants must render inside .ladf-kpi (base class). Variants may add modifier classes like:
+    - .ladf-kpi--clean
+    - .ladf-kpi--accent
+    - .ladf-kpi--halo
+    - .ladf-kpi--icon
+    - .ladf-kpi--compact
+    - .ladf-kpi--embedded
+  5.2 Embedded mode removes double chrome
+  - When subtype is embedded:
+    - remove extra borders/shadows that double-frame inside the parent panel
+    - reduce padding if needed
+    - do not repeat header text that is already shown by parent panel
+  5.3 Keep theme token usage
+  - No hard-coded colors. Must rely on existing tokens: surfaces, borders, text, accent, shadows, gradients.
+
+  6) Lazy Dashboards (Composer) Updates
+  6.1 Update authoring model for KPI
+  - KPI widget editor must expose the new options:
+    - variant dropdown
+    - subtype dropdown (or hidden auto behavior if desired)
+    - showLabel/showCaption toggles (with auto option)
+    - formatting options (format, currency, decimals)
+    - badge settings (only when variant supports it)
+    - icon selection (only when variant supports it)
+  6.2 Remove legacy KPI UI and config generation
+  - Delete legacy KPI option fields from the composer UI.
+  - Delete any transformation code that maps old KPI options to runtime props.
+  - Ensure newly generated widget configs contain ONLY the new KPI options.
+  6.3 Option coverage matrix + schema sync
+  - Update /composer/lazy-dashboards/authoring/optionCoverageMatrix.json
+  - Update any validation schemas so KPI options are recognized and legacy keys are rejected.
+  6.4 Preview must render correctly
+  - Composer preview must render KPI variants exactly as LADF runtime does: same defaults, same auto behaviors, same formatting.
+
+  7) Backwards Compatibility Policy (Explicit)
+  - This is a controlled breaking change.
+  - Existing dashboards using the old KPI panel are not supported.
+  - Any old KPI options/keys should fail validation or be ignored, but must not be preserved in the new composer.
+  - If a migration script is later desired, it must be a separate feature—not part of this overhaul.
+
+  8) Deliverables
+  LADF
+  - New KPI renderer + variant registry
+  - Variant implementations: clean/accent/halo/icon/compact
+  - Subtype support: standalone/embedded
+  - Updated styles (modifier classes)
+  - Updated docs (if applicable)
+  Lazy Dashboards
+  - Updated KPI widget authoring UI
+  - Updated config generation
+  - Updated option coverage matrix + validation
+  - Removal of legacy KPI config + UI
+
+  9) Acceptance Criteria (Definition of Done)
+  Rendering
+  - KPI widgets render in both light/dark themes with no hard-coded colors.
+  - No duplicated label/title in default embedded KPI inside panels.
+  - Each variant visually matches the samples in KPI_VARIATIONS.HTML.
+  Options
+  - variant switch changes layout/visual treatment correctly.
+  - subtype switch changes chrome/label rules correctly.
+  - showLabel/showCaption behave as specified.
+  - Badge and icon options only affect the variants that support them.
+  Composer ↔ Runtime Sync
+  - Composer preview matches LADF runtime output.
+  - Generated configs contain only the new KPI option keys.
+  - Legacy KPI keys are absent (and not silently reintroduced).
+  Code Quality
+  - Variant registry exists and new variants can be added without changing KPI panel core logic.
+  - Unit tests cover: option defaulting; variant selection; embedded label suppression rules; formatting output.
+
+  ENSURE THE KPI REDESIGN RESPECTS THE GRID SYSTEM! VERY IMPORTANT.
+  -->
+
+  <div class="grid">
+    <!-- Variation 1: Minimal/Clean -->
+    <div class="demo-section">
+      <div class="demo-label">1. Minimal/Clean</div>
+      <div class="ladf-kpi">
+        <div class="ladf-kpi__label">Employees with OT</div>
+        <div class="ladf-kpi__value">214</div>
+        <div class="ladf-kpi__caption">Employees who logged overtime</div>
+      </div>
+    </div>
+
+    <!-- Variation 2: Accent Border Left -->
+    <div class="demo-section">
+      <div class="demo-label">2. Accent Border</div>
+      <div class="ladf-kpi ladf-kpi--accent">
+        <div class="ladf-kpi__label">Total OT Hours</div>
+        <div class="ladf-kpi__value">36,512.54</div>
+        <div class="ladf-kpi__caption">Sum of all overtime hours</div>
+      </div>
+    </div>
+
+    <!-- Variation 3: Gradient Backdrop -->
+    <div class="demo-section">
+      <div class="demo-label">3. Gradient Backdrop</div>
+      <div class="ladf-kpi ladf-kpi--gradient">
+        <div class="ladf-kpi__label">Avg OT per Employee</div>
+        <div class="ladf-kpi__value">170.62</div>
+        <div class="ladf-kpi__caption">Average overtime hours per employee</div>
+      </div>
+    </div>
+
+    <!-- Variation 4: Icon Enhanced -->
+    <div class="demo-section">
+      <div class="demo-label">4. Icon Enhanced</div>
+      <div class="ladf-kpi ladf-kpi--icon">
+        <div class="ladf-kpi__header">
+          <div class="ladf-kpi__icon">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          </div>
+          <div class="ladf-kpi__label">Revenue per Customer</div>
+        </div>
+        <div class="ladf-kpi__value">$2,847</div>
+        <div class="ladf-kpi__caption">Average revenue per active customer</div>
+      </div>
+    </div>
+
+    <!-- Variation 5: Compact Card -->
+    <div class="demo-section">
+      <div class="demo-label">5. Compact Card</div>
+      <div class="ladf-kpi ladf-kpi--compact">
+        <div class="ladf-kpi__label">Active Projects</div>
+        <div class="ladf-kpi__value">42</div>
+        <div class="ladf-kpi__caption">Currently in progress</div>
+        <div class="ladf-kpi__footer">
+          <div class="ladf-kpi__badge">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            +12% vs last month
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Second Row: More Examples -->
+  <div class="grid" style="margin-top: 1.5rem;">
+    <!-- Example 6: Minimal with different data -->
+    <div class="demo-section">
+      <div class="demo-label">Clean - Currency</div>
+      <div class="ladf-kpi">
+        <div class="ladf-kpi__label">Total Revenue</div>
+        <div class="ladf-kpi__value">$1.2M</div>
+        <div class="ladf-kpi__caption">This quarter</div>
+      </div>
+    </div>
+
+    <!-- Example 7: Accent with percentage -->
+    <div class="demo-section">
+      <div class="demo-label">Accent - Percentage</div>
+      <div class="ladf-kpi ladf-kpi--accent">
+        <div class="ladf-kpi__label">Completion Rate</div>
+        <div class="ladf-kpi__value">94.2%</div>
+        <div class="ladf-kpi__caption">Tasks completed on time</div>
+      </div>
+    </div>
+
+    <!-- Example 8: Gradient with time metric -->
+    <div class="demo-section">
+      <div class="demo-label">Gradient - Time</div>
+      <div class="ladf-kpi ladf-kpi--gradient">
+        <div class="ladf-kpi__label">Avg Response Time</div>
+        <div class="ladf-kpi__value">2.4h</div>
+        <div class="ladf-kpi__caption">Average ticket response time</div>
+      </div>
+    </div>
+
+    <!-- Example 9: Icon with rating -->
+    <div class="demo-section">
+      <div class="demo-label">Icon - Rating</div>
+      <div class="ladf-kpi ladf-kpi--icon">
+        <div class="ladf-kpi__header">
+          <div class="ladf-kpi__icon">
+            <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+          </div>
+          <div class="ladf-kpi__label">Customer Rating</div>
+        </div>
+        <div class="ladf-kpi__value">4.8</div>
+        <div class="ladf-kpi__caption">Based on 1,247 reviews</div>
+      </div>
+    </div>
+
+    <!-- Example 10: Compact with growth -->
+    <div class="demo-section">
+      <div class="demo-label">Compact - Growth</div>
+      <div class="ladf-kpi ladf-kpi--compact">
+        <div class="ladf-kpi__label">New Users</div>
+        <div class="ladf-kpi__value">3,847</div>
+        <div class="ladf-kpi__caption">This month</div>
+        <div class="ladf-kpi__footer">
+          <div class="ladf-kpi__badge">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+              <polyline points="17 6 23 6 23 12"/>
+            </svg>
+            +28% growth
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Third Row: Edge Cases -->
+  <div class="grid" style="margin-top: 1.5rem;">
+    <!-- Example 11: Large number -->
+    <div class="demo-section">
+      <div class="demo-label">Clean - Large Value</div>
+      <div class="ladf-kpi">
+        <div class="ladf-kpi__label">Impressions</div>
+        <div class="ladf-kpi__value">8.4M</div>
+        <div class="ladf-kpi__caption">Total ad impressions served</div>
+      </div>
+    </div>
+
+    <!-- Example 12: Decimal precision -->
+    <div class="demo-section">
+      <div class="demo-label">Accent - Decimal</div>
+      <div class="ladf-kpi ladf-kpi--accent">
+        <div class="ladf-kpi__label">Conversion Rate</div>
+        <div class="ladf-kpi__value">3.47%</div>
+        <div class="ladf-kpi__caption">Visitors to customers</div>
+      </div>
+    </div>
+
+    <!-- Example 13: Negative trend -->
+    <div class="demo-section">
+      <div class="demo-label">Gradient - Negative</div>
+      <div class="ladf-kpi ladf-kpi--gradient">
+        <div class="ladf-kpi__label">Support Tickets</div>
+        <div class="ladf-kpi__value">127</div>
+        <div class="ladf-kpi__caption">Open support requests</div>
+      </div>
+    </div>
+
+    <!-- Example 14: Icon with alert -->
+    <div class="demo-section">
+      <div class="demo-label">Icon - Alert</div>
+      <div class="ladf-kpi ladf-kpi--icon">
+        <div class="ladf-kpi__header">
+          <div class="ladf-kpi__icon" style="background: rgba(239, 68, 68, 0.15); color: var(--ladf-accent-danger);">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+          </div>
+          <div class="ladf-kpi__label">Failed Deployments</div>
+        </div>
+        <div class="ladf-kpi__value" style="color: var(--ladf-accent-danger);">7</div>
+        <div class="ladf-kpi__caption">Requires immediate attention</div>
+      </div>
+    </div>
+
+    <!-- Example 15: Compact minimal text -->
+    <div class="demo-section">
+      <div class="demo-label">Compact - Minimal</div>
+      <div class="ladf-kpi ladf-kpi--compact">
+        <div class="ladf-kpi__label">Uptime</div>
+        <div class="ladf-kpi__value">99.9%</div>
+        <div class="ladf-kpi__footer">
+          <div class="ladf-kpi__badge">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            All systems operational
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fourth Row: Additional Variations -->
+  <div class="grid" style="margin-top: 1.5rem;">
+    <!-- Example 16 -->
+    <div class="demo-section">
+      <div class="demo-label">Clean - Integer</div>
+      <div class="ladf-kpi">
+        <div class="ladf-kpi__label">API Calls</div>
+        <div class="ladf-kpi__value">2,849,301</div>
+        <div class="ladf-kpi__caption">Total requests processed</div>
+      </div>
+    </div>
+
+    <!-- Example 17 -->
+    <div class="demo-section">
+      <div class="demo-label">Accent - Ratio</div>
+      <div class="ladf-kpi ladf-kpi--accent">
+        <div class="ladf-kpi__label">Win Rate</div>
+        <div class="ladf-kpi__value">7:3</div>
+        <div class="ladf-kpi__caption">Opportunities won vs lost</div>
+      </div>
+    </div>
+
+    <!-- Example 18 -->
+    <div class="demo-section">
+      <div class="demo-label">Gradient - Duration</div>
+      <div class="ladf-kpi ladf-kpi--gradient">
+        <div class="ladf-kpi__label">Avg Session</div>
+        <div class="ladf-kpi__value">8m 42s</div>
+        <div class="ladf-kpi__caption">Average user session length</div>
+      </div>
+    </div>
+
+    <!-- Example 19 -->
+    <div class="demo-section">
+      <div class="demo-label">Icon - Capacity</div>
+      <div class="ladf-kpi ladf-kpi--icon">
+        <div class="ladf-kpi__header">
+          <div class="ladf-kpi__icon" style="background: rgba(249, 115, 22, 0.15); color: var(--ladf-accent-warning);">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+            </svg>
+          </div>
+          <div class="ladf-kpi__label">Storage Used</div>
+        </div>
+        <div class="ladf-kpi__value">847GB</div>
+        <div class="ladf-kpi__caption">78% of allocated capacity</div>
+      </div>
+    </div>
+
+    <!-- Example 20 -->
+    <div class="demo-section">
+      <div class="demo-label">Compact - Score</div>
+      <div class="ladf-kpi ladf-kpi--compact">
+        <div class="ladf-kpi__label">NPS Score</div>
+        <div class="ladf-kpi__value">67</div>
+        <div class="ladf-kpi__caption">Net Promoter Score</div>
+        <div class="ladf-kpi__footer">
+          <div class="ladf-kpi__badge" style="background: rgba(249, 115, 22, 0.15); color: var(--ladf-accent-warning);">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 12h18"/>
+            </svg>
+            No change
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fifth Row: Final Variations -->
+  <div class="grid" style="margin-top: 1.5rem;">
+    <!-- Example 21 -->
+    <div class="demo-section">
+      <div class="demo-label">Clean - Count</div>
+      <div class="ladf-kpi">
+        <div class="ladf-kpi__label">Departments</div>
+        <div class="ladf-kpi__value">12</div>
+        <div class="ladf-kpi__caption">Active organizational units</div>
+      </div>
+    </div>
+
+    <!-- Example 22 -->
+    <div class="demo-section">
+      <div class="demo-label">Accent - Amount</div>
+      <div class="ladf-kpi ladf-kpi--accent">
+        <div class="ladf-kpi__label">Outstanding Balance</div>
+        <div class="ladf-kpi__value">$184,920</div>
+        <div class="ladf-kpi__caption">Accounts receivable</div>
+      </div>
+    </div>
+
+    <!-- Example 23 -->
+    <div class="demo-section">
+      <div class="demo-label">Gradient - Index</div>
+      <div class="ladf-kpi ladf-kpi--gradient">
+        <div class="ladf-kpi__label">Performance Index</div>
+        <div class="ladf-kpi__value">112</div>
+        <div class="ladf-kpi__caption">12% above baseline</div>
+      </div>
+    </div>
+
+    <!-- Example 24 -->
+    <div class="demo-section">
+      <div class="demo-label">Icon - Velocity</div>
+      <div class="ladf-kpi ladf-kpi--icon">
+        <div class="ladf-kpi__header">
+          <div class="ladf-kpi__icon">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="5" y1="12" x2="19" y2="12"/>
+              <polyline points="12 5 19 12 12 19"/>
+            </svg>
+          </div>
+          <div class="ladf-kpi__label">Sprint Velocity</div>
+        </div>
+        <div class="ladf-kpi__value">48</div>
+        <div class="ladf-kpi__caption">Story points per sprint</div>
+      </div>
+    </div>
+
+    <!-- Example 25 -->
+    <div class="demo-section">
+      <div class="demo-label">Compact - Efficiency</div>
+      <div class="ladf-kpi ladf-kpi--compact">
+        <div class="ladf-kpi__label">Cost per Unit</div>
+        <div class="ladf-kpi__value">$0.42</div>
+        <div class="ladf-kpi__caption">Manufacturing cost</div>
+        <div class="ladf-kpi__footer">
+          <div class="ladf-kpi__badge">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/>
+              <polyline points="17 18 23 18 23 12"/>
+            </svg>
+            -8% reduction
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const button = document.querySelector('.theme-toggle');
+      
+      if (html.classList.contains('fecc-theme-dark')) {
+        html.classList.remove('fecc-theme-dark');
+        html.classList.add('fecc-theme-light');
+        button.textContent = 'Switch to Dark';
+      } else {
+        html.classList.remove('fecc-theme-light');
+        html.classList.add('fecc-theme-dark');
+        button.textContent = 'Switch to Light';
+      }
+    }
+  </script>
+</body>
+</html>

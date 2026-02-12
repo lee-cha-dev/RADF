@@ -114,6 +114,7 @@ function VizRenderer({
       encodings={encodings}
       options={options}
       handlers={handlers}
+      panelConfig={panelConfig}
       colorAssignment={colorAssignment}
       hiddenKeys={hiddenKeys}
     />

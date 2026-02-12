@@ -108,10 +108,18 @@ describe('compileAuthoringModel', () => {
               "y": 1,
             },
             "options": {
+              "badgeText": "",
+              "badgeTone": "neutral",
               "caption": "",
               "currency": "USD",
+              "decimals": 0,
               "format": "number",
+              "icon": "",
               "label": "",
+              "showCaption": "auto",
+              "showLabel": "auto",
+              "subtype": "auto",
+              "variant": "clean",
             },
             "panelType": "viz",
             "query": {

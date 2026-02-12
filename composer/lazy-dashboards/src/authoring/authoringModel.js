@@ -246,13 +246,6 @@ export const normalizeAuthoringModel = (model = {}, { title, description } = {})
     const encodingDefaults = getVizEncodingDefaults(vizType);
     const optionDefaults = getVizOptionDefaults(vizType);
     const normalizedOptions = mergeDeep(optionDefaults, widget.options || {});
-    if (
-      vizType === 'kpi' &&
-      widget.options?.numberFormat &&
-      normalizedOptions.format == null
-    ) {
-      normalizedOptions.format = widget.options.numberFormat;
-    }
     return {
       ...widget,
       id: widget.id || createWidgetId(),

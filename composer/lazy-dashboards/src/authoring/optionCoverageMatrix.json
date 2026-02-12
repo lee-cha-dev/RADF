@@ -4,11 +4,59 @@
   "options": [
     {
       "vizType": "kpi",
+      "optionPath": "options.variant",
+      "type": "enum",
+      "default": "clean",
+      "required": false,
+      "enum": ["clean", "accent", "halo", "icon", "compact"],
+      "control": "select",
+      "status": "supported",
+      "notes": "Selects KPI layout variant via the registry.",
+      "source": "src/framework/core/viz/charts/KpiPanel.jsx"
+    },
+    {
+      "vizType": "kpi",
+      "optionPath": "options.subtype",
+      "type": "enum",
+      "default": "auto",
+      "required": false,
+      "enum": ["auto", "standalone", "embedded"],
+      "control": "select",
+      "status": "supported",
+      "notes": "Auto embeds when panel title/subtitle exists.",
+      "source": "src/framework/core/viz/charts/KpiPanel.jsx"
+    },
+    {
+      "vizType": "kpi",
+      "optionPath": "options.showLabel",
+      "type": "enum",
+      "default": "auto",
+      "required": false,
+      "enum": ["auto", "true", "false"],
+      "control": "select",
+      "status": "supported",
+      "notes": "Auto hides label when panel header is present.",
+      "source": "src/framework/core/viz/charts/KpiPanel.jsx"
+    },
+    {
+      "vizType": "kpi",
+      "optionPath": "options.showCaption",
+      "type": "enum",
+      "default": "auto",
+      "required": false,
+      "enum": ["auto", "true", "false"],
+      "control": "select",
+      "status": "supported",
+      "notes": "Auto shows caption when provided.",
+      "source": "src/framework/core/viz/charts/KpiPanel.jsx"
+    },
+    {
+      "vizType": "kpi",
       "optionPath": "options.format",
       "type": "enum",
       "default": "number",
       "required": false,
-      "enum": ["number", "currency", "percent", "integer"],
+      "enum": ["number", "currency", "percent", "compact", "duration", "custom"],
       "control": "select",
       "status": "supported",
       "notes": "Formats KPI value output.",
@@ -28,6 +76,18 @@
     },
     {
       "vizType": "kpi",
+      "optionPath": "options.decimals",
+      "type": "number",
+      "default": 0,
+      "required": false,
+      "enum": [],
+      "control": "number",
+      "status": "supported",
+      "notes": "Decimal precision for number formatting.",
+      "source": "src/framework/core/viz/charts/KpiPanel.jsx"
+    },
+    {
+      "vizType": "kpi",
       "optionPath": "options.label",
       "type": "string",
       "default": "",
@@ -35,7 +95,7 @@
       "enum": [],
       "control": "text",
       "status": "supported",
-      "notes": "Overrides label displayed above KPI.",
+      "notes": "Optional KPI label; auto hides when panel title exists.",
       "source": "src/framework/core/viz/charts/KpiPanel.jsx"
     },
     {
@@ -48,6 +108,42 @@
       "control": "text",
       "status": "supported",
       "notes": "Optional caption under KPI value.",
+      "source": "src/framework/core/viz/charts/KpiPanel.jsx"
+    },
+    {
+      "vizType": "kpi",
+      "optionPath": "options.badgeText",
+      "type": "string",
+      "default": "",
+      "required": false,
+      "enum": [],
+      "control": "text",
+      "status": "supported",
+      "notes": "Optional badge text (compact variant).",
+      "source": "src/framework/core/viz/charts/KpiPanel.jsx"
+    },
+    {
+      "vizType": "kpi",
+      "optionPath": "options.badgeTone",
+      "type": "enum",
+      "default": "neutral",
+      "required": false,
+      "enum": ["neutral", "success", "warning", "danger"],
+      "control": "select",
+      "status": "supported",
+      "notes": "Badge tone mapping for compact variant.",
+      "source": "src/framework/core/viz/charts/KpiPanel.jsx"
+    },
+    {
+      "vizType": "kpi",
+      "optionPath": "options.icon",
+      "type": "string",
+      "default": "",
+      "required": false,
+      "enum": [],
+      "control": "text",
+      "status": "supported",
+      "notes": "Semantic icon key for the icon variant.",
       "source": "src/framework/core/viz/charts/KpiPanel.jsx"
     },
     {

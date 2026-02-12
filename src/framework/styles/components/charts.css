@@ -223,6 +223,7 @@
 }
 
 .ladf-kpi {
+  width: 100%;
   display: flex;
   flex-direction: column;
   gap: var(--ladf-space-2);
@@ -231,25 +232,189 @@
   background: var(--ladf-panel-gradient, var(--ladf-color-surface));
   border: 1px solid var(--ladf-border-subtle, var(--ladf-color-border));
   box-shadow: var(--ladf-shadow-low);
+  min-height: 120px;
+}
+
+.ladf-kpi--embedded {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  padding: var(--ladf-space-3) var(--ladf-space-1);
+  min-height: unset;
 }
 
 .ladf-kpi__label {
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   color: var(--ladf-text-muted, var(--ladf-color-muted));
   font-weight: var(--ladf-font-weight-semibold);
 }
 
 .ladf-kpi__value {
-  font-size: 2rem;
+  font-size: 2.35rem;
   font-weight: var(--ladf-font-weight-bold);
   color: var(--ladf-text-primary, var(--ladf-color-text));
+  line-height: 1.1;
 }
 
 .ladf-kpi__caption {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   color: var(--ladf-text-muted, var(--ladf-color-muted));
+  line-height: 1.4;
+}
+
+.ladf-kpi__caption--compact {
+  font-size: 0.82rem;
+  margin-top: 2px;
+}
+
+.ladf-kpi--accent {
+  border-left: 4px solid var(--ladf-accent-primary);
+  padding-left: calc(var(--ladf-space-4) - 2px);
+  background: var(--ladf-color-surface);
+}
+
+.ladf-kpi--accent.ladf-kpi--embedded {
+  padding-left: var(--ladf-space-3);
+  border-left-width: 3px;
+  background: transparent;
+}
+
+.ladf-kpi--halo,
+.ladf-kpi--gradient {
+  position: relative;
+  overflow: hidden;
+}
+
+.ladf-kpi--halo::before,
+.ladf-kpi--gradient::before {
+  content: '';
+  position: absolute;
+  top: -30%;
+  right: -20%;
+  width: 180px;
+  height: 180px;
+  background: radial-gradient(circle, var(--ladf-accent-primary-soft) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.ladf-kpi--halo::after,
+.ladf-kpi--gradient::after {
+  content: '';
+  position: absolute;
+  bottom: -40%;
+  left: -10%;
+  width: 220px;
+  height: 220px;
+  background: radial-gradient(
+    circle,
+    var(--ladf-accent-secondary-soft, var(--ladf-accent-primary-soft)) 0%,
+    transparent 70%
+  );
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.ladf-kpi--halo > *,
+.ladf-kpi--gradient > * {
+  position: relative;
+  z-index: 1;
+}
+
+.ladf-kpi--icon .ladf-kpi__header {
+  display: flex;
+  align-items: center;
+  gap: var(--ladf-space-2);
+  margin-bottom: var(--ladf-space-2);
+}
+
+.ladf-kpi__icon {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--ladf-radius-md);
+  background: var(--ladf-accent-primary-soft);
+  color: var(--ladf-accent-primary);
+}
+
+.ladf-kpi__icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.ladf-kpi--icon .ladf-kpi__value {
+  margin-top: 0;
+}
+
+.ladf-kpi--compact {
+  min-height: auto;
+  padding: var(--ladf-space-3) var(--ladf-space-4);
+  gap: var(--ladf-space-2);
+  background: var(--ladf-color-surface);
+  border: 1px solid var(--ladf-border-subtle);
+  box-shadow: none;
+}
+
+.ladf-kpi--compact .ladf-kpi__label {
+  font-size: 0.72rem;
+}
+
+.ladf-kpi--compact .ladf-kpi__value {
+  font-size: 1.9rem;
+  margin: 0;
+}
+
+.ladf-kpi__value-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ladf-space-3);
+}
+
+.ladf-kpi__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ladf-space-1);
+  padding: 4px 10px;
+  border-radius: var(--ladf-radius-sm);
+  font-size: 0.8rem;
+  font-weight: var(--ladf-font-weight-semibold);
+  border: 1px solid transparent;
+}
+
+.ladf-kpi__badge--neutral {
+  color: var(--ladf-color-muted);
+  background: var(--ladf-surface-muted, var(--ladf-color-surface-alt));
+  border-color: var(--ladf-border-subtle, var(--ladf-color-border));
+  background: color-mix(in srgb, var(--ladf-color-muted) 16%, transparent);
+  border-color: color-mix(in srgb, var(--ladf-color-muted) 22%, transparent);
+}
+
+.ladf-kpi__badge--success {
+  color: var(--ladf-accent-success);
+  background: var(--ladf-surface-muted, var(--ladf-color-surface-alt));
+  border-color: var(--ladf-border-subtle, var(--ladf-color-border));
+  background: color-mix(in srgb, var(--ladf-accent-success) 16%, transparent);
+  border-color: color-mix(in srgb, var(--ladf-accent-success) 22%, transparent);
+}
+
+.ladf-kpi__badge--warning {
+  color: var(--ladf-accent-warning);
+  background: var(--ladf-surface-muted, var(--ladf-color-surface-alt));
+  border-color: var(--ladf-border-subtle, var(--ladf-color-border));
+  background: color-mix(in srgb, var(--ladf-accent-warning) 16%, transparent);
+  border-color: color-mix(in srgb, var(--ladf-accent-warning) 22%, transparent);
+}
+
+.ladf-kpi__badge--danger {
+  color: var(--ladf-accent-danger);
+  background: var(--ladf-surface-muted, var(--ladf-color-surface-alt));
+  border-color: var(--ladf-border-subtle, var(--ladf-color-border));
+  background: color-mix(in srgb, var(--ladf-accent-danger) 16%, transparent);
+  border-color: color-mix(in srgb, var(--ladf-accent-danger) 22%, transparent);
 }
 
 .ladf-chart-color-0 {
