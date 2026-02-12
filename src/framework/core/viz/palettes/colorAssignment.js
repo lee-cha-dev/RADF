@@ -4,7 +4,7 @@
  */
 import { getDivergingVar, getSequentialVar, getSeriesVar } from './paletteRegistry';
 
-const TEXT_VIZ_TYPES = new Set(['kpi', 'text', 'metric', 'number', 'markdown']);
+const TEXT_VIZ_TYPES = new Set(['kpi', 'kpiVariant', 'text', 'metric', 'number', 'markdown']);
 const LINE_VIZ_TYPES = new Set(['line', 'area', 'composed', 'time-series', 'timeseries']);
 const GROUPABLE_LINE_VIZ_TYPES = new Set(['line', 'area', 'time-series', 'timeseries']);
 const BAR_VIZ_TYPES = new Set(['bar', 'column', 'histogram']);

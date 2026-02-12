@@ -5,6 +5,7 @@ import {
   flattenOptionPaths,
   getNestedValue,
   isPlainObject,
+  mergeDeep,
   setNestedValue,
 } from '../../authoring/optionUtils.js';
 import {
@@ -13,6 +14,44 @@ import {
   getVizOptionDefaults,
 } from '../../authoring/vizManifest.js';
 import { trackTelemetryEvent } from '../../data/telemetry.js';
+
+const getOptionPath = (schema, optionKey) => schema?.path || optionKey;
+
+const getOptionValue = (schema, optionKey, options) =>
+  getNestedValue(options, getOptionPath(schema, optionKey));
+
+const buildOptionPatch = (schema, optionKey, value) =>
+  setNestedValue({}, getOptionPath(schema, optionKey), value);
+
+const resolveSelectOptions = (schema, options) => {
+  if (!schema?.optionsByOption) {
+    return schema?.options || [];
+  }
+  const { option, map, fallback } = schema.optionsByOption;
+  if (!option || !map) {
+    return schema?.options || [];
+  }
+  const selected = getNestedValue(options, option);
+  const mapped = map?.[selected];
+  if (Array.isArray(mapped) && mapped.length > 0) {
+    return mapped;
+  }
+  if (Array.isArray(fallback) && fallback.length > 0) {
+    return fallback;
+  }
+  return schema?.options || [];
+};
+
+const resolveSelectValue = (schema, optionValue, options) => {
+  const selectOptions = resolveSelectOptions(schema, options);
+  if (selectOptions.includes(optionValue)) {
+    return optionValue;
+  }
+  if (selectOptions.includes(schema?.default)) {
+    return schema.default;
+  }
+  return selectOptions[0] ?? '';
+};
 
 /**
  * @typedef {Object} WidgetPropertiesPanelProps
@@ -116,14 +155,6 @@ const WidgetPropertiesPanel = ({
     }
     return rawValue;
   };
-
-  const getOptionPath = (schema, optionKey) => schema?.path || optionKey;
-
-  const getOptionValue = (schema, optionKey, options) =>
-    getNestedValue(options, getOptionPath(schema, optionKey));
-
-  const buildOptionPatch = (schema, optionKey, value) =>
-    setNestedValue({}, getOptionPath(schema, optionKey), value);
 
   const parseStringList = (rawValue) =>
     rawValue
@@ -306,6 +337,47 @@ const WidgetPropertiesPanel = ({
     [compiledActivePanel]
   );
 
+  useEffect(() => {
+    if (!activeWidget) {
+      return;
+    }
+    const nextOptions = optionEntries.reduce((acc, [optionKey, schema]) => {
+      if (!schema?.optionsByOption) {
+        return acc;
+      }
+      const selectOptions = resolveSelectOptions(schema, activeWidget.options);
+      if (!selectOptions.length) {
+        return acc;
+      }
+      const currentValue = getOptionValue(
+        schema,
+        optionKey,
+        activeWidget.options
+      );
+      const nextValue = resolveSelectValue(
+        schema,
+        currentValue,
+        activeWidget.options
+      );
+      if (nextValue === currentValue) {
+        return acc;
+      }
+      return mergeDeep(
+        acc,
+        buildOptionPatch(schema, optionKey, nextValue)
+      );
+    }, {});
+    if (Object.keys(nextOptions).length === 0) {
+      return;
+    }
+    updateAuthoringModel((current) =>
+      updateWidgetInModel(current, activeWidget.id, {
+        options: nextOptions,
+        draft: false,
+      })
+    );
+  }, [activeWidget, optionEntries, updateAuthoringModel]);
+
   const renderOptionField = (optionKey, schema) => {
     if (!activeWidget) {
       return null;
@@ -348,13 +420,19 @@ const WidgetPropertiesPanel = ({
     }
 
     if (control === 'select') {
+      const selectOptions = resolveSelectOptions(schema, activeWidget.options);
+      const resolvedValue = resolveSelectValue(
+        schema,
+        optionValue,
+        activeWidget.options
+      );
       return (
         <label key={optionKey} className="lazy-form__field">
           <span className="lazy-input__label">{label}</span>
           <select
             id={fieldId}
             className="lazy-input__field"
-            value={optionValue ?? schema.default ?? ''}
+            value={resolvedValue}
             onChange={(event) =>
               handleOptionChange(
                 activeWidget.id,
@@ -364,7 +442,7 @@ const WidgetPropertiesPanel = ({
               )
             }
           >
-            {(schema.options || []).map((option) => (
+            {selectOptions.map((option) => (
               <option key={option} value={option}>
                 {option}
               </option>

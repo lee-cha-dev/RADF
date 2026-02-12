@@ -4,7 +4,7 @@
  */
 import { getPaletteClass } from './paletteRegistry';
 
-const TEXT_VIZ_TYPES = new Set(['kpi', 'text', 'metric', 'number', 'markdown']);
+const TEXT_VIZ_TYPES = new Set(['kpi', 'kpiVariant', 'text', 'metric', 'number', 'markdown']);
 const SEQUENTIAL_VIZ_TYPES = new Set(['heatmap', 'choropleth', 'density']);
 
 /**

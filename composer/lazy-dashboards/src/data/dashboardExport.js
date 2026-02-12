@@ -1130,7 +1130,8 @@ const VizPanel = ({ panel, dataProvider, datasetBinding, semanticLayer }) => {
   });
   const isEmpty = !loading && !error && (!data || data.length === 0);
   const status = loading ? "loading" : error ? "error" : "ready";
-  const isKpiPanel = panel?.vizType === "kpi";
+  const isKpiPanel =
+    panel?.vizType === "kpi" || panel?.vizType === "kpiVariant";
 
   if (isFilterBar) {
     return (

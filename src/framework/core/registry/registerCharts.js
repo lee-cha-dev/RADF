@@ -14,6 +14,7 @@ import BarChartPanel from '../viz/charts/BarChartPanel.jsx';
 import BarWithConditionalColoringPanel from '../viz/charts/BarWithConditionalColoringPanel.jsx';
 import BulletChart from '../viz/charts/BulletChart.jsx';
 import KpiPanel from '../viz/charts/KpiPanel.jsx';
+import KpiVariant from '../viz/charts/KpiVariant.jsx';
 import PieChartPanel from '../viz/charts/PieChartPanel.jsx';
 import ScatterChartPanel from '../viz/charts/ScatterChartPanel.jsx';
 import ComposedChartPanel from '../viz/charts/ComposedChartPanel.jsx';
@@ -34,6 +35,7 @@ const registerCharts = () => {
   registerViz('barWithConditionalColoring', BarWithConditionalColoringPanel);
   registerViz('bulletChart', BulletChart);
   registerViz('kpi', KpiPanel);
+  registerViz('kpiVariant', KpiVariant);
   registerViz('pie', PieChartPanel);
   registerViz('scatter', ScatterChartPanel);
   registerViz('composed', ComposedChartPanel);

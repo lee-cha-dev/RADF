@@ -142,6 +142,7 @@ const createWidgetId = () =>
 
 const DEFAULT_LAYOUTS_BY_TYPE = {
   kpi: { w: 4, h: 1 },
+  kpiVariant: { w: 4, h: 1 },
   bar: { w: 6, h: 2 },
   barWithConditionalColoring: { w: 6, h: 2 },
   line: { w: 6, h: 2 },
