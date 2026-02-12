@@ -10,6 +10,26 @@
   position: relative;
 }
 
+.ladf-panel--chromeless {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.ladf-panel--chromeless::before {
+  content: none;
+}
+
+.ladf-panel--chromeless .ladf-panel__body {
+  padding: 0;
+  align-items: stretch;
+  justify-content: stretch;
+}
+
+.ladf-panel--chromeless .ladf-panel__content {
+  height: 100%;
+}
+
 .ladf-panel::before {
   content: '';
   position: absolute;

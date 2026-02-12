@@ -116,11 +116,11 @@ const subtypePresets = {
     count: { format: 'number', decimals: 0 },
   },
   accent: {
-    standard: { valueTone: 'success' },
-    percentage: { format: 'percent', decimals: 1, valueTone: 'success' },
-    decimal: { format: 'number', decimals: 2, valueTone: 'success' },
-    ratio: { format: 'number', decimals: 0, valueTone: 'success' },
-    amount: { format: 'currency', decimals: 0, valueTone: 'success' },
+    standard: {},
+    percentage: { format: 'percent', decimals: 1 },
+    decimal: { format: 'number', decimals: 2 },
+    ratio: { format: 'number', decimals: 0 },
+    amount: { format: 'currency', decimals: 0 },
   },
   gradient: {
     standard: {},
@@ -132,16 +132,36 @@ const subtypePresets = {
   icon: {
     standard: { icon: 'users' },
     rating: { icon: 'star', format: 'number', decimals: 1 },
-    alert: { icon: 'alert', valueTone: 'danger' },
-    capacity: { icon: 'box', valueTone: 'warning' },
-    velocity: { icon: 'spark', valueTone: 'success' },
+    alert: { icon: 'alert', valueTone: 'danger', iconTone: 'danger' },
+    capacity: { icon: 'box', valueTone: 'warning', iconTone: 'warning' },
+    velocity: { icon: 'spark', valueTone: 'success', iconTone: 'success' },
   },
   compact: {
-    standard: { badgeText: '+12% vs last month', badgeTone: 'success' },
-    growth: { badgeText: '+28% growth', badgeTone: 'success' },
-    minimal: { badgeText: 'All systems operational', badgeTone: 'success' },
-    score: { badgeText: 'No change', badgeTone: 'warning' },
-    efficiency: { badgeText: '-8% reduction', badgeTone: 'success' },
+    standard: {
+      badgeText: '+12% vs last month',
+      badgeTone: 'success',
+      badgeIcon: 'check',
+    },
+    growth: {
+      badgeText: '+28% growth',
+      badgeTone: 'success',
+      badgeIcon: 'trend-up',
+    },
+    minimal: {
+      badgeText: 'All systems operational',
+      badgeTone: 'success',
+      badgeIcon: 'check',
+    },
+    score: {
+      badgeText: 'No change',
+      badgeTone: 'warning',
+      badgeIcon: 'minus',
+    },
+    efficiency: {
+      badgeText: '-8% reduction',
+      badgeTone: 'success',
+      badgeIcon: 'trend-down',
+    },
   },
 };
 
@@ -153,31 +173,30 @@ const applySubtypePreset = (variant, subtype, viewModel) => {
   const presets = subtypePresets[lowerVariant] || {};
   const preset = presets[lowerSubtype] || presets.standard || {};
   const next = { ...viewModel };
-  if (!viewModel.format && preset.format) next.format = preset.format;
+  if (preset.format) next.format = preset.format;
   if (!viewModel.icon && preset.icon) next.icon = preset.icon;
   if (!viewModel.badgeText && preset.badgeText) next.badgeText = preset.badgeText;
+  if (!viewModel.badgeIcon && preset.badgeIcon) next.badgeIcon = preset.badgeIcon;
   if (viewModel.badgeTone === 'neutral' && preset.badgeTone) next.badgeTone = preset.badgeTone;
   if (viewModel.valueTone === undefined && preset.valueTone) next.valueTone = preset.valueTone;
-  if (viewModel.decimals === 0 && typeof preset.decimals === 'number') next.decimals = preset.decimals;
+  if (viewModel.iconTone === undefined && preset.iconTone) next.iconTone = preset.iconTone;
+  if (typeof preset.decimals === 'number') next.decimals = preset.decimals;
   return next;
 };
 
-const normalizeOptions = (options, panelConfig) => {
-  const panelHasHeader = Boolean(panelConfig?.title || panelConfig?.subtitle);
-  return {
-    variant: normalizeVariant(options?.variant),
-    subtype: normalizeSubtype(options?.subtype),
-    format: options?.format || 'number',
-    currency: options?.currency || 'USD',
-    decimals: clampDecimals(options?.decimals, 0),
-    label: options?.label || '',
-    caption: options?.caption || '',
-    badgeText: options?.badgeText || '',
-    badgeTone: normalizeBadgeTone(options?.badgeTone),
-    icon: options?.icon || '',
-    panelHasHeader,
-  };
-};
+const normalizeOptions = (options) => ({
+  variant: normalizeVariant(options?.variant),
+  subtype: normalizeSubtype(options?.subtype),
+  format: options?.format,
+  currency: options?.currency || 'USD',
+  decimals: Number.isFinite(options?.decimals) ? options.decimals : null,
+  label: options?.label || '',
+  caption: options?.caption || '',
+  badgeText: options?.badgeText || '',
+  badgeTone: normalizeBadgeTone(options?.badgeTone),
+  badgeIcon: options?.badgeIcon || '',
+  icon: options?.icon || '',
+});
 
 const resolveIconNode = (iconKey) => {
   const icons = {
@@ -283,6 +302,63 @@ const resolveIconNode = (iconKey) => {
         />
       </svg>
     ),
+    check: (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <polyline
+          points="20 6 9 17 4 12"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="3"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    ),
+    minus: (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <line x1="3" y1="12" x2="21" y2="12" stroke="currentColor" strokeWidth="2" />
+      </svg>
+    ),
+    'trend-up': (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <polyline
+          points="23 6 13.5 15.5 8.5 10.5 1 18"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <polyline
+          points="17 6 23 6 23 12"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    ),
+    'trend-down': (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <polyline
+          points="23 18 13.5 8.5 8.5 13.5 1 6"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <polyline
+          points="17 18 23 18 23 12"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    ),
   };
   return icons[iconKey] || (
     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -303,7 +379,6 @@ class BaseKpiVariant {
       this.viewModel.subtype
         ? `ladf-kpi--subtype-${String(this.viewModel.subtype).toLowerCase().replace(/[^a-z0-9]+/g, '-')}`
         : null,
-      this.viewModel.panelHasHeader ? 'ladf-kpi--embedded' : null,
     ];
     return classes.filter(Boolean).join(' ');
   }
@@ -315,10 +390,10 @@ class BaseKpiVariant {
     return <div className="ladf-kpi__label">{this.viewModel.label}</div>;
   }
 
-    renderValue() {
-      const toneClass = this.viewModel.valueTone ? `ladf-kpi__value--${this.viewModel.valueTone}` : '';
-      return <div className={`ladf-kpi__value ${toneClass}`.trim()}>{this.viewModel.formattedValue}</div>;
-    }
+  renderValue() {
+    const toneClass = this.viewModel.valueTone ? `ladf-kpi__value--${this.viewModel.valueTone}` : '';
+    return <div className={`ladf-kpi__value ${toneClass}`.trim()}>{this.viewModel.formattedValue}</div>;
+  }
 
   renderCaption() {
     if (!this.viewModel.caption) {
@@ -357,9 +432,10 @@ class IconKpiVariant extends BaseKpiVariant {
     const label = this.viewModel.label ? (
       <div className="ladf-kpi__label">{this.viewModel.label}</div>
     ) : null;
+    const toneClass = this.viewModel.iconTone ? `ladf-kpi__icon--${this.viewModel.iconTone}` : '';
     return (
       <div className="ladf-kpi__header">
-        <div className="ladf-kpi__icon">{iconNode}</div>
+        <div className={`ladf-kpi__icon ${toneClass}`.trim()}>{iconNode}</div>
         {label}
       </div>
     );
@@ -381,29 +457,37 @@ class CompactKpiVariant extends BaseKpiVariant {
     if (!this.viewModel.badgeText) {
       return null;
     }
+    const iconNode = this.viewModel.badgeIcon ? resolveIconNode(this.viewModel.badgeIcon) : null;
     return (
       <div className={`ladf-kpi__badge ladf-kpi__badge--${this.viewModel.badgeTone}`}>
+        {iconNode ? <span className="ladf-kpi__badge-icon">{iconNode}</span> : null}
         {this.viewModel.badgeText}
       </div>
     );
+  }
+
+  renderFooter() {
+    const badge = this.renderBadge();
+    if (!badge) {
+      return null;
+    }
+    return <div className="ladf-kpi__footer">{badge}</div>;
   }
 
   renderCaption() {
     if (!this.viewModel.caption) {
       return null;
     }
-    return <div className="ladf-kpi__caption ladf-kpi__caption--compact">{this.viewModel.caption}</div>;
+    return <div className="ladf-kpi__caption">{this.viewModel.caption}</div>;
   }
 
   renderContent() {
     return (
       <>
         {this.renderLabel()}
-        <div className="ladf-kpi__value-row">
-          {this.renderValue()}
-          {this.renderBadge()}
-        </div>
+        {this.renderValue()}
         {this.renderCaption()}
+        {this.renderFooter()}
       </>
     );
   }
@@ -432,20 +516,18 @@ const resolveVariantRenderer = (variantId) =>
  */
 function KpiPanel({ data = [], encodings = {}, options = {}, panelConfig = null }) {
   const viewModel = useMemo(() => {
-    const normalized = normalizeOptions(options, panelConfig);
+    const normalized = normalizeOptions(options);
     const valueKey = resolveValueKey(encodings, data);
     const rawValue = valueKey ? data?.[0]?.[valueKey] : null;
-    const label = options?.label || encodings?.label || encodings?.value || '';
-    const caption = options?.caption || '';
+    const label = options?.label || panelConfig?.title || encodings?.label || encodings?.value || '';
+    const caption = options?.caption || panelConfig?.subtitle || '';
 
     const hydrated = applySubtypePreset(normalized.variant, normalized.subtype, {
       ...normalized,
       valueKey,
       rawValue,
-      formattedValue: formatKpiValue(rawValue, normalized),
       label,
       caption,
-      valueTone: normalized.valueTone,
     });
 
     return {

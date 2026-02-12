@@ -14,6 +14,8 @@ import PanelBody from './PanelBody.jsx';
  * @property {string} [subtitle] - Secondary title displayed below the main title.
  * @property {React.ReactNode} [actions] - Action elements rendered in the header.
  * @property {string} [className] - Optional class appended to the panel container.
+ * @property {boolean} [hideHeader] - Hide the panel header entirely.
+ * @property {boolean} [chromeless] - Remove panel chrome for embedded content.
  * @property {'ready' | 'loading' | 'error' | 'empty'} [status] - Current panel state.
  * @property {Error | string | null} [error] - Error used for the error state message.
  * @property {boolean} [isEmpty] - Force the empty state regardless of status.
@@ -37,6 +39,8 @@ function Panel({
   subtitle,
   actions,
   className,
+  hideHeader = false,
+  chromeless = false,
   status,
   error,
   isEmpty,
@@ -44,10 +48,18 @@ function Panel({
   footer,
   children,
 }) {
-  const panelClassName = ['ladf-panel', className].filter(Boolean).join(' ');
+  const panelClassName = [
+    'ladf-panel',
+    chromeless ? 'ladf-panel--chromeless' : null,
+    className,
+  ]
+    .filter(Boolean)
+    .join(' ');
   return (
     <section className={panelClassName}>
-      <PanelHeader title={title} subtitle={subtitle} actions={actions} />
+      {hideHeader ? null : (
+        <PanelHeader title={title} subtitle={subtitle} actions={actions} />
+      )}
       <PanelBody
         status={status}
         error={error}

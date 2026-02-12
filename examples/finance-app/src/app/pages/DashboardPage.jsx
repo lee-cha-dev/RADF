@@ -338,6 +338,8 @@ const VizPanel = ({ panelConfig }) => {
     [brushState?.endIndex, brushState?.startIndex, brushZoomEnabled, panelConfig.options]
   );
 
+  const isKpiPanel = panelConfig.vizType === 'kpi';
+
   return (
     <Panel
       title={panelConfig.title}
@@ -348,6 +350,8 @@ const VizPanel = ({ panelConfig }) => {
       isEmpty={isEmpty}
       emptyMessage="No data returned for this panel."
       footer={panelFooter}
+      hideHeader={isKpiPanel}
+      chromeless={isKpiPanel}
     >
       <VizRenderer
         panelConfig={panelConfig}

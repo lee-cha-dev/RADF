@@ -71,7 +71,7 @@
       "enum": [],
       "control": "text",
       "status": "supported",
-      "notes": "Optional KPI label; auto hides when panel title exists.",
+      "notes": "Label text shown above the value; defaults to the panel title when unset.",
       "source": "src/framework/core/viz/charts/KpiPanel.jsx"
     },
     {

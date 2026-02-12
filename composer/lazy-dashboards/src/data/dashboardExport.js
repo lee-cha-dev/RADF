@@ -1130,6 +1130,7 @@ const VizPanel = ({ panel, dataProvider, datasetBinding, semanticLayer }) => {
   });
   const isEmpty = !loading && !error && (!data || data.length === 0);
   const status = loading ? "loading" : error ? "error" : "ready";
+  const isKpiPanel = panel?.vizType === "kpi";
 
   if (isFilterBar) {
     return (
@@ -1147,6 +1148,8 @@ ${filterBarBlock}
       error={error}
       isEmpty={isEmpty}
       emptyMessage="No data returned for this panel."
+      hideHeader={isKpiPanel}
+      chromeless={isKpiPanel}
     >
       <VizRenderer
         panelConfig={panel}

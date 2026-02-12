@@ -255,6 +255,7 @@ const GridCanvas = ({
     });
     const isEmpty = !loading && !error && (!data || data.length === 0);
     const status = loading ? 'loading' : error ? 'error' : 'ready';
+    const isKpiPanel = panelConfig.vizType === 'kpi';
 
     return (
       <Panel
@@ -264,6 +265,8 @@ const GridCanvas = ({
         error={error}
         isEmpty={isEmpty}
         emptyMessage="No data returned for this panel."
+        hideHeader={isKpiPanel}
+        chromeless={isKpiPanel}
       >
         <VizRenderer
           panelConfig={panelConfig}
