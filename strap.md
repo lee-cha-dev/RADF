@@ -19,7 +19,7 @@ Most open source projects **never get this far**. You have this on week 3.5.
 ```
 consumer-app/      ← Minimal integration
 finance-app/       ← Real-world use case
-lazy-dashboards/   ← The composer itself
+lazy-dashboards (separate repo)   ← The composer itself
 ```
 
 Three working examples. Most frameworks launch with ZERO.

@@ -57,9 +57,10 @@ export default MyNewViz;
 ---
 
 ### Lazy Dashboards (Composer)
+Paths below are relative to the Lazy Dashboards repo root.
 
 1) Add manifest entry
-- Update `composer/lazy-dashboards/src/authoring/vizManifest.js`
+- Update `lazy-dashboards/src/authoring/vizManifest.js`
 - Define encodings and options so the editor can render the form.
 
 Example manifest entry:
@@ -88,32 +89,32 @@ myNewViz: {
 ```
 
 2) Add option coverage entries
-- Update `composer/lazy-dashboards/src/authoring/optionCoverageMatrix.json`
+- Update `lazy-dashboards/src/authoring/optionCoverageMatrix.json`
 - Include every supported option path for the viz.
 - This keeps `manifestValidation` green.
 
 3) Default layout sizing
-- Update `composer/lazy-dashboards/src/authoring/authoringModel.js`
+- Update `lazy-dashboards/src/authoring/authoringModel.js`
 - Add to `DEFAULT_LAYOUTS_BY_TYPE`:
   - `myNewViz: { w: 4, h: 2 }`
 
 4) Template bindings (optional but recommended)
-- Update `composer/lazy-dashboards/src/data/dashboardTemplates.js`
+- Update `lazy-dashboards/src/data/dashboardTemplates.js`
   - `applyBindingsToWidget` should set sensible defaults for new viz encodings.
   - Add template preview blocks if you want it to show in template previews.
 
 5) Editor UX (only if special behavior)
 - If the viz should hide the panel header or be chromeless:
-  - `composer/lazy-dashboards/src/components/editor/GridCanvas.jsx`
-  - `composer/lazy-dashboards/src/data/dashboardExport.js`
+  - `lazy-dashboards/src/components/editor/GridCanvas.jsx`
+  - `lazy-dashboards/src/data/dashboardExport.js`
 
 6) Validation
 - Required encodings are validated automatically via the manifest:
-  - `composer/lazy-dashboards/src/authoring/validation.js`
+  - `lazy-dashboards/src/authoring/validation.js`
 
 7) Tests (recommended)
 - Manifest coverage test:
-  - `composer/lazy-dashboards/src/__tests__/manifestValidation.test.js`
+  - `lazy-dashboards/src/__tests__/manifestValidation.test.js`
 - Add or update compiler/editor tests if needed.
 
 ---

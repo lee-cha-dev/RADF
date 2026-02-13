@@ -20,7 +20,6 @@ export default defineConfig({
     exclude: ['tests/**'],
     include: [
       'src/framework/__tests__/**/*.test.{js,jsx}',
-      'composer/lazy-dashboards/src/**/__tests__/**/*.test.{js,jsx}',
     ],
   },
 });

@@ -1,7 +1,8 @@
 # Viz Catalog and Authoring Guidance
 
 This catalog summarizes LADF viz types and how to author them. Option support is
-authoritative in `composer/lazy-dashboards/src/authoring/optionCoverageMatrix.json`.
+authoritative in `lazy-dashboards/src/authoring/optionCoverageMatrix.json`.
+Paths to Lazy Dashboards files are relative to the Lazy Dashboards repo root.
 
 ## Authoring Rules (One Page)
 - Use the vizType string exactly as documented below.
@@ -29,7 +30,7 @@ Options (supported): `options.tooltip`, `options.stacked`, `options.stackedKeys`
 `options.legendMode`, `options.legendPosition`.
 Options (planned): `options.xAxis.enabled`, `options.yAxis.enabled`,
 `options.xAxis.tickRotation`, `options.yAxis.tickFormatter`.
-Option coverage: `composer/lazy-dashboards/src/authoring/optionCoverageMatrix.json`
+Option coverage: `lazy-dashboards/src/authoring/optionCoverageMatrix.json`
 (vizType `bar`).
 
 ## line (vizType: line)
@@ -41,7 +42,7 @@ Options (supported): `options.tooltip`, `options.brush.enabled`,
 `options.legend`, `options.legendMode`, `options.legendPosition`.
 Options (planned): `options.xAxis.enabled`, `options.yAxis.enabled`,
 `options.xAxis.tickRotation`, `options.yAxis.tickFormatter`.
-Option coverage: `composer/lazy-dashboards/src/authoring/optionCoverageMatrix.json`
+Option coverage: `lazy-dashboards/src/authoring/optionCoverageMatrix.json`
 (vizType `line`).
 
 ## area (vizType: area)
@@ -53,7 +54,7 @@ Options (supported): `options.tooltip`, `options.brush.enabled`,
 `options.legend`, `options.legendMode`, `options.legendPosition`.
 Options (planned): `options.xAxis.enabled`, `options.yAxis.enabled`,
 `options.xAxis.tickRotation`, `options.yAxis.tickFormatter`.
-Option coverage: `composer/lazy-dashboards/src/authoring/optionCoverageMatrix.json`
+Option coverage: `lazy-dashboards/src/authoring/optionCoverageMatrix.json`
 (vizType `area`).
 
 ## barWithConditionalColoring (vizType: barWithConditionalColoring)
@@ -66,7 +67,7 @@ Options (supported): `options.tooltip`.
 Options (deferred): `options.colorFn`, `options.legendItems`.
 Options (planned): `options.xAxis.enabled`, `options.yAxis.enabled`,
 `options.xAxis.tickRotation`, `options.yAxis.tickFormatter`.
-Option coverage: `composer/lazy-dashboards/src/authoring/optionCoverageMatrix.json`
+Option coverage: `lazy-dashboards/src/authoring/optionCoverageMatrix.json`
 (vizType `barWithConditionalColoring`).
 
 ## bulletChart (vizType: bulletChart)
@@ -85,7 +86,7 @@ Options (supported): `options.orientation`, `options.colorBy`,
 `options.headerTitles.percentTitle`.
 Options (deferred): `options.thresholdMarkers.valueKey`,
 `options.thresholdMarkers.enabled`, `options.thresholdMarkers.label`.
-Option coverage: `composer/lazy-dashboards/src/authoring/optionCoverageMatrix.json`
+Option coverage: `lazy-dashboards/src/authoring/optionCoverageMatrix.json`
 (vizType `bulletChart`).
 
 ## kpi (vizType: kpi)
@@ -94,7 +95,7 @@ Required data shape: Single row with a numeric value.
 Encodings: `encodings.value` or `encodings.y` (value), `encodings.label` (optional).
 Options (supported): `options.format`, `options.currency`, `options.label`,
 `options.caption`.
-Option coverage: `composer/lazy-dashboards/src/authoring/optionCoverageMatrix.json`
+Option coverage: `lazy-dashboards/src/authoring/optionCoverageMatrix.json`
 (vizType `kpi`).
 
 ## pie (vizType: pie)
@@ -103,7 +104,7 @@ Required data shape: Rows with a category field and a numeric value.
 Encodings: `encodings.category` (category), `encodings.value` (value).
 Options (supported): `options.tooltip`, `options.legend`, `options.legendMode`,
 `options.legendPosition`, `options.donut`, `options.labels`.
-Option coverage: `composer/lazy-dashboards/src/authoring/optionCoverageMatrix.json`
+Option coverage: `lazy-dashboards/src/authoring/optionCoverageMatrix.json`
 (vizType `pie`).
 
 ## scatter (vizType: scatter)
@@ -115,7 +116,7 @@ Options (supported): `options.tooltip`, `options.legend`, `options.legendMode`,
 `options.legendPosition`, `options.pointSize`.
 Options (planned): `options.seriesKeys`, `options.xAxis.enabled`, `options.yAxis.enabled`,
 `options.xAxis.tickRotation`, `options.yAxis.tickFormatter`.
-Option coverage: `composer/lazy-dashboards/src/authoring/optionCoverageMatrix.json`
+Option coverage: `lazy-dashboards/src/authoring/optionCoverageMatrix.json`
 (vizType `scatter`).
 
 ## composed (vizType: composed)
@@ -126,7 +127,7 @@ Options (supported): `options.tooltip`, `options.legend`, `options.legendMode`,
 `options.legendPosition`, `options.seriesKeys`, `options.barKeys`, `options.lineKeys`.
 Options (planned): `options.xAxis.enabled`, `options.yAxis.enabled`,
 `options.xAxis.tickRotation`, `options.yAxis.tickFormatter`.
-Option coverage: `composer/lazy-dashboards/src/authoring/optionCoverageMatrix.json`
+Option coverage: `lazy-dashboards/src/authoring/optionCoverageMatrix.json`
 (vizType `composed`).
 
 ## radar (vizType: radar)
@@ -135,7 +136,7 @@ Required data shape: Rows with a category field and one or more numeric measures
 Encodings: `encodings.x` (category), `encodings.y` (measure or array).
 Options (supported): `options.tooltip`, `options.legend`, `options.legendMode`,
 `options.legendPosition`, `options.seriesKeys`, `options.fillOpacity`.
-Option coverage: `composer/lazy-dashboards/src/authoring/optionCoverageMatrix.json`
+Option coverage: `lazy-dashboards/src/authoring/optionCoverageMatrix.json`
 (vizType `radar`).
 
 ## treemap (vizType: treemap)
@@ -146,7 +147,7 @@ Encodings: `encodings.category` or `encodings.x` (category), `encodings.value` o
 `encodings.y` (value).
 Options (supported): `options.tooltip`, `options.legend`, `options.legendMode`,
 `options.legendPosition`, `options.colorBy`, `options.labels`.
-Option coverage: `composer/lazy-dashboards/src/authoring/optionCoverageMatrix.json`
+Option coverage: `lazy-dashboards/src/authoring/optionCoverageMatrix.json`
 (vizType `treemap`).
 
 ## funnel (vizType: funnel)
@@ -156,7 +157,7 @@ Encodings: `encodings.category` or `encodings.x` (stage name),
 `encodings.value` or `encodings.y` (value).
 Options (supported): `options.tooltip`, `options.legend`, `options.legendMode`,
 `options.legendPosition`, `options.labelMode`, `options.sort`.
-Option coverage: `composer/lazy-dashboards/src/authoring/optionCoverageMatrix.json`
+Option coverage: `lazy-dashboards/src/authoring/optionCoverageMatrix.json`
 (vizType `funnel`).
 
 ## sankey (vizType: sankey)
@@ -166,7 +167,7 @@ source and target nodes and provide a numeric value.
 Encodings: None (data is structured).
 Options (supported): `options.tooltip`, `options.legend`, `options.legendMode`,
 `options.legendPosition`, `options.colorBy`.
-Option coverage: `composer/lazy-dashboards/src/authoring/optionCoverageMatrix.json`
+Option coverage: `lazy-dashboards/src/authoring/optionCoverageMatrix.json`
 (vizType `sankey`).
 
 ## radialBar (vizType: radialBar)
@@ -177,7 +178,7 @@ Encodings: `encodings.category` or `encodings.x` (category),
 Options (supported): `options.tooltip`, `options.legend`, `options.legendMode`,
 `options.legendPosition`, `options.seriesKeys`, `options.innerRadius`,
 `options.outerRadius`, `options.labels`.
-Option coverage: `composer/lazy-dashboards/src/authoring/optionCoverageMatrix.json`
+Option coverage: `lazy-dashboards/src/authoring/optionCoverageMatrix.json`
 (vizType `radialBar`).
 
 ## filterBar (vizType: filterBar)
@@ -186,5 +187,5 @@ Required data shape: Filter definitions are provided by the host app.
 Encodings: None.
 Options (supported): `options.allowMultiSelect`, `options.showSearch`,
 `options.showClear`, `options.layout`.
-Option coverage: `composer/lazy-dashboards/src/authoring/optionCoverageMatrix.json`
+Option coverage: `lazy-dashboards/src/authoring/optionCoverageMatrix.json`
 (vizType `filterBar`).

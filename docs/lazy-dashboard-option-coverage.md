@@ -2,6 +2,7 @@
 
 This table tracks LADF option parity for Lazy Dashboards. "Supported" options are editable
 in the visual editor. "Deferred" options are preserved but only editable via Expert mode.
+Lazy Dashboards source paths are relative to the Lazy Dashboards repo root.
 
 | Viz | Option Path | Type | Default | Enum | Control | Status | Notes | Source |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -49,7 +50,7 @@ in the visual editor. "Deferred" options are preserved but only editable via Exp
 | bulletChart | options.headerTitles.percentTitle | string | "" |  | text | supported | Header label for percent column. | src/framework/core/viz/charts/BulletChart.jsx |
 | bulletChart | options.thresholdMarkers.valueKey | string | "" |  | text | deferred | Legacy marker key preserved for backward compatibility. | src/framework/core/viz/charts/BulletChart.jsx |
 | bulletChart | options.thresholdMarkers.label | string | "" |  | text | deferred | Legacy marker label preserved for backward compatibility. | src/framework/core/viz/charts/BulletChart.jsx |
-| filterBar | options.allowMultiSelect | boolean | true |  | toggle | supported | Allow multi-select filters. | examples/lazy-dashboards/src/components/LazyFilterBar.jsx |
-| filterBar | options.showSearch | boolean | true |  | toggle | supported | Show search input on filter selections. | examples/lazy-dashboards/src/components/LazyFilterBar.jsx |
-| filterBar | options.showClear | boolean | true |  | toggle | supported | Show clear button for filters. | examples/lazy-dashboards/src/components/LazyFilterBar.jsx |
-| filterBar | options.layout | enum | inline | inline\|stacked | select | supported | Layout of filter bar controls. | examples/lazy-dashboards/src/components/LazyFilterBar.jsx |
+| filterBar | options.allowMultiSelect | boolean | true |  | toggle | supported | Allow multi-select filters. | lazy-dashboards/src/components/LazyFilterBar.jsx |
+| filterBar | options.showSearch | boolean | true |  | toggle | supported | Show search input on filter selections. | lazy-dashboards/src/components/LazyFilterBar.jsx |
+| filterBar | options.showClear | boolean | true |  | toggle | supported | Show clear button for filters. | lazy-dashboards/src/components/LazyFilterBar.jsx |
+| filterBar | options.layout | enum | inline | inline\|stacked | select | supported | Layout of filter bar controls. | lazy-dashboards/src/components/LazyFilterBar.jsx |
