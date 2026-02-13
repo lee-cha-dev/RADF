@@ -13,7 +13,7 @@
 .ladf-panel--chromeless {
   background: transparent;
   border-color: transparent;
-  box-shadow: none;
+  box-shadow: var(--ladf-shadow-med);
 }
 
 .ladf-panel--chromeless::before {

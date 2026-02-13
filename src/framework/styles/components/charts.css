@@ -232,7 +232,6 @@
   border-radius: var(--ladf-radius-lg);
   background: var(--ladf-panel-gradient, var(--ladf-color-surface));
   border: 1px solid var(--ladf-border-subtle, var(--ladf-color-border));
-  box-shadow: var(--ladf-shadow-low);
   min-height: 140px;
   justify-content: center;
 }
