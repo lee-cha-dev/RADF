@@ -48,6 +48,22 @@ describe('KpiPanel', () => {
     expect(getByText(/1h 1m 1s/)).toBeInTheDocument();
   });
 
+  it('applies subtype formatting by default and respects explicit format overrides', () => {
+    const { getByText, rerender } = render(
+      <KpiPanel data={data} encodings={{ value: 'percent' }} options={{ subtype: 'percentage' }} />
+    );
+    expect(getByText(/42(\.|,)?0%/)).toBeInTheDocument();
+
+    rerender(
+      <KpiPanel
+        data={data}
+        encodings={{ value: 'percent' }}
+        options={{ subtype: 'currency', format: 'percent', decimals: 1 }}
+      />
+    );
+    expect(getByText(/42(\.|,)?0%/)).toBeInTheDocument();
+  });
+
   it('ignores badge text on non-compact variants and renders it for compact', () => {
     const { queryByText, rerender } = render(
       <KpiPanel

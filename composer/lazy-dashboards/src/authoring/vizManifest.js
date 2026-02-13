@@ -73,6 +73,40 @@ const SERIES_OPTIONS = {
   },
 };
 
+const KPI_GENERAL_SUBVARIANTS = [
+  'Standard',
+  'Currency',
+  'Large Value',
+  'Integer',
+  'Count',
+  'Percentage',
+  'Decimal Percentage',
+  'Decimal',
+  'Ratio',
+  'Amount',
+  'Time',
+  'Negative',
+  'Duration',
+  'Index',
+];
+
+const KPI_ICON_SUBVARIANTS = ['Rating', 'Alert', 'Capacity', 'Velocity'];
+const KPI_COMPACT_SUBVARIANTS = ['Growth', 'Minimal', 'Score', 'Efficiency'];
+
+const KPI_SUBTYPE_OPTIONS = [
+  ...KPI_GENERAL_SUBVARIANTS,
+  ...KPI_ICON_SUBVARIANTS,
+  ...KPI_COMPACT_SUBVARIANTS,
+];
+
+const KPI_SUBVARIANT_BY_VARIANT = {
+  clean: [...KPI_GENERAL_SUBVARIANTS],
+  accent: [...KPI_GENERAL_SUBVARIANTS],
+  gradient: [...KPI_GENERAL_SUBVARIANTS],
+  icon: [...KPI_GENERAL_SUBVARIANTS, ...KPI_ICON_SUBVARIANTS],
+  compact: [...KPI_GENERAL_SUBVARIANTS, ...KPI_COMPACT_SUBVARIANTS],
+};
+
 const VIZ_CAPABILITIES = {
   version: VIZ_MANIFEST_VERSION,
   viz: {
@@ -117,35 +151,13 @@ const VIZ_CAPABILITIES = {
           type: 'enum',
           label: 'Subtype',
           default: 'Standard',
-          options: [
-            'Standard',
-            'Currency',
-            'Large Value',
-            'Integer',
-            'Count',
-            'Percentage',
-            'Decimal',
-            'Ratio',
-            'Amount',
-            'Time',
-            'Negative',
-            'Duration',
-            'Index',
-            'Rating',
-            'Alert',
-            'Capacity',
-            'Velocity',
-            'Growth',
-            'Minimal',
-            'Score',
-            'Efficiency',
-          ],
+          options: KPI_SUBTYPE_OPTIONS,
           help: 'Sample-aligned subtype presets',
         },
         format: {
           type: 'enum',
           label: 'Number format',
-          options: ['number', 'currency', 'percent', 'compact', 'duration', 'custom'],
+          options: ['number', 'currency', 'percent', 'compact', 'duration', 'hours', 'ratio', 'custom'],
           default: 'number',
         },
         currency: {
@@ -224,37 +236,15 @@ const VIZ_CAPABILITIES = {
           type: 'enum',
           label: 'Subvariant',
           default: 'Standard',
-          options: [
-            'Standard',
-            'Currency',
-            'Large Value',
-            'Integer',
-            'Count',
-            'Percentage',
-            'Decimal',
-            'Ratio',
-            'Amount',
-            'Time',
-            'Negative',
-            'Duration',
-            'Index',
-            'Rating',
-            'Alert',
-            'Capacity',
-            'Velocity',
-            'Growth',
-            'Minimal',
-            'Score',
-            'Efficiency',
-          ],
+          options: KPI_SUBTYPE_OPTIONS,
           optionsByOption: {
             option: 'variant',
             map: {
-              clean: ['Standard', 'Currency', 'Large Value', 'Integer', 'Count'],
-              accent: ['Standard', 'Percentage', 'Decimal', 'Ratio', 'Amount'],
-              gradient: ['Standard', 'Time', 'Negative', 'Duration', 'Index'],
-              icon: ['Standard', 'Rating', 'Alert', 'Capacity', 'Velocity'],
-              compact: ['Standard', 'Growth', 'Minimal', 'Score', 'Efficiency'],
+              clean: KPI_SUBVARIANT_BY_VARIANT.clean,
+              accent: KPI_SUBVARIANT_BY_VARIANT.accent,
+              gradient: KPI_SUBVARIANT_BY_VARIANT.gradient,
+              icon: KPI_SUBVARIANT_BY_VARIANT.icon,
+              compact: KPI_SUBVARIANT_BY_VARIANT.compact,
             },
           },
           help: 'Preset formatting per variant category.',

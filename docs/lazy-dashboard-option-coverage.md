@@ -5,7 +5,7 @@ in the visual editor. "Deferred" options are preserved but only editable via Exp
 
 | Viz | Option Path | Type | Default | Enum | Control | Status | Notes | Source |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| kpi | options.format | enum | number | number\|currency\|percent\|integer | select | supported | Formats KPI value output. | src/framework/core/viz/charts/KpiPanel.jsx |
+| kpi | options.format | enum | number | number\|currency\|percent\|compact\|duration\|hours\|ratio\|custom | select | supported | Formats KPI value output. | src/framework/core/viz/charts/KpiPanel.jsx |
 | kpi | options.currency | string | USD |  | text | supported | Currency code when format is currency. | src/framework/core/viz/charts/KpiPanel.jsx |
 | kpi | options.label | string | "" |  | text | supported | Overrides label displayed above KPI. | src/framework/core/viz/charts/KpiPanel.jsx |
 | kpi | options.caption | string | "" |  | text | supported | Optional caption under KPI value. | src/framework/core/viz/charts/KpiPanel.jsx |

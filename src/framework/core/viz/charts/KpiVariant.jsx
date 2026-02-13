@@ -8,6 +8,7 @@ const VALID_VARIANTS = new Set(['clean', 'accent', 'gradient', 'icon', 'compact'
 const VALID_BADGE_TONES = new Set(['neutral', 'success', 'warning', 'danger']);
 const VALID_TONES = new Set(['success', 'warning', 'danger']);
 const KPI_VARIANT_REGISTRY = new Map();
+const DEFAULT_CURRENCY_COMPACT_THRESHOLD = 1000000;
 
 const clampDecimals = (value, fallback = 0) =>
   Number.isFinite(value) && value >= 0 ? value : fallback;
@@ -162,7 +163,7 @@ const formatKpiValue = (value, options) => {
   if (format === 'ratio') {
     return formatRatio(value, options);
   }
-  if (format === 'hours') {
+  if (format === 'hours' || format === 'time') {
     return formatHours(value, decimals);
   }
   const numericValue = typeof value === 'number' ? value : Number(value);
@@ -171,12 +172,23 @@ const formatKpiValue = (value, options) => {
     return String(value);
   }
   if (format === 'currency') {
-    return numericValue.toLocaleString(undefined, {
+    const compactThreshold = Number.isFinite(options.compactThreshold)
+      ? options.compactThreshold
+      : DEFAULT_CURRENCY_COMPACT_THRESHOLD;
+    const shouldCompact =
+      options.compact === true ||
+      (options.compact === 'auto' && Math.abs(numericValue) >= compactThreshold);
+    const formatterOptions = {
       style: 'currency',
       currency: options.currency || 'USD',
       minimumFractionDigits: decimals,
       maximumFractionDigits: decimals,
-    });
+    };
+    if (shouldCompact) {
+      formatterOptions.notation = 'compact';
+      formatterOptions.compactDisplay = 'short';
+    }
+    return numericValue.toLocaleString(undefined, formatterOptions);
   }
   if (format === 'percent') {
     return `${(numericValue * 100).toLocaleString(undefined, {
@@ -209,28 +221,29 @@ const formatKpiValue = (value, options) => {
   });
 };
 
-const subvariantPresets = {
-  clean: {
-    standard: {},
-    currency: { format: 'currency', decimals: 0 },
-    'large-value': { format: 'compact', decimals: 1 },
-    integer: { format: 'number', decimals: 0 },
-    count: { format: 'number', decimals: 0 },
+const GENERAL_SUBVARIANT_PRESETS = {
+  standard: {},
+  currency: {
+    format: 'currency',
+    compact: 'auto',
+    compactThreshold: DEFAULT_CURRENCY_COMPACT_THRESHOLD,
+    decimals: 0,
   },
-  accent: {
-    standard: {},
-    percentage: { format: 'percent', decimals: 1 },
-    decimal: { format: 'number', decimals: 2 },
-    ratio: { format: 'ratio' },
-    amount: { format: 'currency', decimals: 0 },
-  },
-  gradient: {
-    standard: {},
-    time: { format: 'hours', decimals: 1 },
-    negative: { valueTone: 'danger' },
-    duration: { format: 'duration', decimals: 0 },
-    index: { format: 'number', decimals: 0 },
-  },
+  'large-value': { format: 'compact', decimals: 1 },
+  integer: { format: 'number', decimals: 0 },
+  count: { format: 'number', decimals: 0 },
+  percentage: { format: 'percent', decimals: 1 },
+  'decimal-percentage': { format: 'percent', decimals: 2 },
+  decimal: { format: 'number', decimals: 2 },
+  ratio: { format: 'ratio' },
+  amount: { format: 'currency', decimals: 0 },
+  time: { format: 'hours', decimals: 1 },
+  negative: { valueTone: 'danger' },
+  duration: { format: 'duration', decimals: 0 },
+  index: { format: 'number', decimals: 0 },
+};
+
+const VARIANT_SUBVARIANT_PRESETS = {
   icon: {
     standard: { icon: 'users' },
     rating: { icon: 'star', format: 'number', decimals: 1 },
@@ -267,21 +280,43 @@ const subvariantPresets = {
   },
 };
 
+const VARIANT_BASE_PRESETS = {
+  icon: { icon: 'users' },
+  compact: {
+    badgeText: '+12% vs last month',
+    badgeTone: 'success',
+    badgeIcon: 'check',
+  },
+};
+
 const applySubvariantPreset = (variant, subvariant, viewModel) => {
   const lowerVariant = (variant || '').toLowerCase();
   const lowerSubvariant = (subvariant || '').toLowerCase();
-  const presets = subvariantPresets[lowerVariant] || {};
+  const presets = {
+    ...GENERAL_SUBVARIANT_PRESETS,
+    ...(VARIANT_SUBVARIANT_PRESETS[lowerVariant] || {}),
+  };
   const preset = presets[lowerSubvariant] || presets.standard || {};
+  const mergedPreset = {
+    ...(VARIANT_BASE_PRESETS[lowerVariant] || {}),
+    ...preset,
+  };
   const next = { ...viewModel };
-  if (!viewModel.format && preset.format) next.format = preset.format;
-  if (!viewModel.icon && preset.icon) next.icon = preset.icon;
-  if (!viewModel.badgeText && preset.badgeText) next.badgeText = preset.badgeText;
-  if (!viewModel.badgeIcon && preset.badgeIcon) next.badgeIcon = preset.badgeIcon;
-  if (viewModel.badgeTone === 'neutral' && preset.badgeTone) next.badgeTone = preset.badgeTone;
-  if (viewModel.valueTone == null && preset.valueTone) next.valueTone = preset.valueTone;
-  if (viewModel.iconTone == null && preset.iconTone) next.iconTone = preset.iconTone;
-  if (typeof preset.decimals === 'number' && viewModel.decimals == null) {
-    next.decimals = preset.decimals;
+  if (!viewModel.format && mergedPreset.format) next.format = mergedPreset.format;
+  if (viewModel.compact == null && mergedPreset.compact != null) next.compact = mergedPreset.compact;
+  if (viewModel.compactThreshold == null && mergedPreset.compactThreshold != null) {
+    next.compactThreshold = mergedPreset.compactThreshold;
+  }
+  if (!viewModel.icon && mergedPreset.icon) next.icon = mergedPreset.icon;
+  if (!viewModel.badgeText && mergedPreset.badgeText) next.badgeText = mergedPreset.badgeText;
+  if (!viewModel.badgeIcon && mergedPreset.badgeIcon) next.badgeIcon = mergedPreset.badgeIcon;
+  if (viewModel.badgeTone === 'neutral' && mergedPreset.badgeTone) {
+    next.badgeTone = mergedPreset.badgeTone;
+  }
+  if (viewModel.valueTone == null && mergedPreset.valueTone) next.valueTone = mergedPreset.valueTone;
+  if (viewModel.iconTone == null && mergedPreset.iconTone) next.iconTone = mergedPreset.iconTone;
+  if (typeof mergedPreset.decimals === 'number' && viewModel.decimals == null) {
+    next.decimals = mergedPreset.decimals;
   }
   return next;
 };
@@ -292,6 +327,9 @@ const normalizeOptions = (options) => ({
   format: options?.format,
   currency: options?.currency || 'USD',
   decimals: Number.isFinite(options?.decimals) ? options.decimals : null,
+  compact: options?.compact ?? null,
+  compactThreshold: Number.isFinite(options?.compactThreshold) ? options.compactThreshold : null,
+  ratioDenominator: options?.ratioDenominator ?? null,
   title: options?.title || options?.label || '',
   subtitle: options?.subtitle || options?.caption || '',
   badgeText: options?.badgeText || '',

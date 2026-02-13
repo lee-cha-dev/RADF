@@ -6,7 +6,9 @@ import React, { useMemo } from 'react';
 
 const VALID_VARIANTS = new Set(['clean', 'accent', 'gradient', 'icon', 'compact']);
 const VALID_BADGE_TONES = new Set(['neutral', 'success', 'warning', 'danger']);
+const VALID_TONES = new Set(['success', 'warning', 'danger']);
 const KPI_VARIANT_REGISTRY = new Map();
+const DEFAULT_CURRENCY_COMPACT_THRESHOLD = 1000000;
 
 const clampDecimals = (value, fallback = 0) =>
   Number.isFinite(value) && value >= 0 ? value : fallback;
@@ -47,11 +49,58 @@ const formatDuration = (value, decimals) => {
   return `${sign}${parts.join(' ')}`.trim();
 };
 
+const formatRatio = (value, options) => {
+  if (Array.isArray(value) && value.length >= 2) {
+    return `${value[0]}:${value[1]}`;
+  }
+  if (value && typeof value === 'object') {
+    const numerator =
+      value.numerator ?? value.n ?? value.left ?? value.a ?? value.top ?? value[0];
+    const denominator =
+      value.denominator ?? value.d ?? value.right ?? value.b ?? value.bottom ?? value[1];
+    if (numerator != null && denominator != null) {
+      return `${numerator}:${denominator}`;
+    }
+  }
+  if (typeof value === 'string') {
+    return value;
+  }
+  const numerator = typeof value === 'number' ? value : Number(value);
+  const denominator =
+    options?.ratioDenominator != null ? Number(options.ratioDenominator) : null;
+  if (Number.isFinite(numerator) && Number.isFinite(denominator)) {
+    return `${numerator}:${denominator}`;
+  }
+  if (Number.isFinite(numerator)) {
+    return numerator.toLocaleString(undefined, { maximumFractionDigits: 0 });
+  }
+  return value == null ? '--' : String(value);
+};
+
+const formatHours = (value, decimals) => {
+  const numericValue = typeof value === 'number' ? value : Number(value);
+  if (!Number.isFinite(numericValue)) {
+    return value == null ? '--' : String(value);
+  }
+  const safeDecimals = Math.min(6, clampDecimals(decimals, 1));
+  const formatted = numericValue.toLocaleString(undefined, {
+    minimumFractionDigits: safeDecimals,
+    maximumFractionDigits: safeDecimals,
+  });
+  return `${formatted}h`;
+};
+
 const formatKpiValue = (value, options) => {
   const format = options.format || 'number';
   const decimals = clampDecimals(options.decimals, 0);
   if (value == null || value === '') {
     return '--';
+  }
+  if (format === 'ratio') {
+    return formatRatio(value, options);
+  }
+  if (format === 'hours' || format === 'time') {
+    return formatHours(value, decimals);
   }
   const numericValue = typeof value === 'number' ? value : Number(value);
   const isNumeric = Number.isFinite(numericValue);
@@ -59,12 +108,23 @@ const formatKpiValue = (value, options) => {
     return String(value);
   }
   if (format === 'currency') {
-    return numericValue.toLocaleString(undefined, {
+    const compactThreshold = Number.isFinite(options.compactThreshold)
+      ? options.compactThreshold
+      : DEFAULT_CURRENCY_COMPACT_THRESHOLD;
+    const shouldCompact =
+      options.compact === true ||
+      (options.compact === 'auto' && Math.abs(numericValue) >= compactThreshold);
+    const formatterOptions = {
       style: 'currency',
       currency: options.currency || 'USD',
       minimumFractionDigits: decimals,
       maximumFractionDigits: decimals,
-    });
+    };
+    if (shouldCompact) {
+      formatterOptions.notation = 'compact';
+      formatterOptions.compactDisplay = 'short';
+    }
+    return numericValue.toLocaleString(undefined, formatterOptions);
   }
   if (format === 'percent') {
     return `${(numericValue * 100).toLocaleString(undefined, {
@@ -107,28 +167,34 @@ const normalizeBadgeTone = (tone) => {
   return VALID_BADGE_TONES.has(key) ? key : 'neutral';
 };
 
-const subtypePresets = {
-  clean: {
-    standard: {},
-    currency: { format: 'currency' },
-    'large value': { format: 'compact', decimals: 1 },
-    integer: { format: 'number', decimals: 0 },
-    count: { format: 'number', decimals: 0 },
+const normalizeTone = (tone) => {
+  const key = typeof tone === 'string' ? tone.toLowerCase() : tone;
+  return VALID_TONES.has(key) ? key : undefined;
+};
+
+const GENERAL_SUBTYPE_PRESETS = {
+  standard: {},
+  currency: {
+    format: 'currency',
+    compact: 'auto',
+    compactThreshold: DEFAULT_CURRENCY_COMPACT_THRESHOLD,
+    decimals: 0,
   },
-  accent: {
-    standard: {},
-    percentage: { format: 'percent', decimals: 1 },
-    decimal: { format: 'number', decimals: 2 },
-    ratio: { format: 'number', decimals: 0 },
-    amount: { format: 'currency', decimals: 0 },
-  },
-  gradient: {
-    standard: {},
-    time: { format: 'number', decimals: 1 },
-    negative: { valueTone: 'danger' },
-    duration: { format: 'duration', decimals: 0 },
-    index: { format: 'number', decimals: 0 },
-  },
+  'large-value': { format: 'compact', decimals: 1 },
+  integer: { format: 'number', decimals: 0 },
+  count: { format: 'number', decimals: 0 },
+  percentage: { format: 'percent', decimals: 1 },
+  'decimal-percentage': { format: 'percent', decimals: 2 },
+  decimal: { format: 'number', decimals: 2 },
+  ratio: { format: 'ratio' },
+  amount: { format: 'currency', decimals: 0 },
+  time: { format: 'hours', decimals: 1 },
+  negative: { valueTone: 'danger' },
+  duration: { format: 'duration', decimals: 0 },
+  index: { format: 'number', decimals: 0 },
+};
+
+const VARIANT_SUBTYPE_PRESETS = {
   icon: {
     standard: { icon: 'users' },
     rating: { icon: 'star', format: 'number', decimals: 1 },
@@ -165,37 +231,72 @@ const subtypePresets = {
   },
 };
 
-const normalizeSubtype = (subtype) => String(subtype || 'Standard').trim();
+const VARIANT_BASE_PRESETS = {
+  icon: { icon: 'users' },
+  compact: {
+    badgeText: '+12% vs last month',
+    badgeTone: 'success',
+    badgeIcon: 'check',
+  },
+};
+
+const normalizeSubtype = (subtype) => {
+  if (subtype == null) {
+    return 'standard';
+  }
+  const key = String(subtype).trim().toLowerCase();
+  return key ? key.replace(/[^a-z0-9]+/g, '-') : 'standard';
+};
 
 const applySubtypePreset = (variant, subtype, viewModel) => {
   const lowerVariant = (variant || '').toLowerCase();
   const lowerSubtype = (subtype || '').toLowerCase();
-  const presets = subtypePresets[lowerVariant] || {};
+  const presets = {
+    ...GENERAL_SUBTYPE_PRESETS,
+    ...(VARIANT_SUBTYPE_PRESETS[lowerVariant] || {}),
+  };
   const preset = presets[lowerSubtype] || presets.standard || {};
+  const mergedPreset = {
+    ...(VARIANT_BASE_PRESETS[lowerVariant] || {}),
+    ...preset,
+  };
   const next = { ...viewModel };
-  if (preset.format) next.format = preset.format;
-  if (!viewModel.icon && preset.icon) next.icon = preset.icon;
-  if (!viewModel.badgeText && preset.badgeText) next.badgeText = preset.badgeText;
-  if (!viewModel.badgeIcon && preset.badgeIcon) next.badgeIcon = preset.badgeIcon;
-  if (viewModel.badgeTone === 'neutral' && preset.badgeTone) next.badgeTone = preset.badgeTone;
-  if (viewModel.valueTone === undefined && preset.valueTone) next.valueTone = preset.valueTone;
-  if (viewModel.iconTone === undefined && preset.iconTone) next.iconTone = preset.iconTone;
-  if (typeof preset.decimals === 'number') next.decimals = preset.decimals;
+  if (!viewModel.format && mergedPreset.format) next.format = mergedPreset.format;
+  if (viewModel.compact == null && mergedPreset.compact != null) next.compact = mergedPreset.compact;
+  if (viewModel.compactThreshold == null && mergedPreset.compactThreshold != null) {
+    next.compactThreshold = mergedPreset.compactThreshold;
+  }
+  if (!viewModel.icon && mergedPreset.icon) next.icon = mergedPreset.icon;
+  if (!viewModel.badgeText && mergedPreset.badgeText) next.badgeText = mergedPreset.badgeText;
+  if (!viewModel.badgeIcon && mergedPreset.badgeIcon) next.badgeIcon = mergedPreset.badgeIcon;
+  if (viewModel.badgeTone === 'neutral' && mergedPreset.badgeTone) {
+    next.badgeTone = mergedPreset.badgeTone;
+  }
+  if (viewModel.valueTone == null && mergedPreset.valueTone) next.valueTone = mergedPreset.valueTone;
+  if (viewModel.iconTone == null && mergedPreset.iconTone) next.iconTone = mergedPreset.iconTone;
+  if (typeof mergedPreset.decimals === 'number' && viewModel.decimals == null) {
+    next.decimals = mergedPreset.decimals;
+  }
   return next;
 };
 
 const normalizeOptions = (options) => ({
   variant: normalizeVariant(options?.variant),
-  subtype: normalizeSubtype(options?.subtype),
+  subtype: normalizeSubtype(options?.subtype ?? options?.subvariant),
   format: options?.format,
   currency: options?.currency || 'USD',
   decimals: Number.isFinite(options?.decimals) ? options.decimals : null,
+  compact: options?.compact ?? null,
+  compactThreshold: Number.isFinite(options?.compactThreshold) ? options.compactThreshold : null,
+  ratioDenominator: options?.ratioDenominator ?? null,
   label: options?.label || '',
   caption: options?.caption || '',
   badgeText: options?.badgeText || '',
   badgeTone: normalizeBadgeTone(options?.badgeTone),
   badgeIcon: options?.badgeIcon || '',
   icon: options?.icon || '',
+  valueTone: normalizeTone(options?.valueTone),
+  iconTone: normalizeTone(options?.iconTone),
 });
 
 const resolveIconNode = (iconKey) => {

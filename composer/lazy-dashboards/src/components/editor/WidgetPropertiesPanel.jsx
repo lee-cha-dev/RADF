@@ -53,6 +53,62 @@ const resolveSelectValue = (schema, optionValue, options) => {
   return selectOptions[0] ?? '';
 };
 
+const DEFAULT_CURRENCY_COMPACT_THRESHOLD = 1000000;
+
+const KPI_SUBVARIANT_FORMAT_PRESETS = {
+  standard: { format: 'number', decimals: 0, compact: null, compactThreshold: null },
+  currency: {
+    format: 'currency',
+    decimals: 0,
+    compact: 'auto',
+    compactThreshold: DEFAULT_CURRENCY_COMPACT_THRESHOLD,
+  },
+  amount: {
+    format: 'currency',
+    decimals: 0,
+    compact: null,
+    compactThreshold: null,
+  },
+  'large-value': { format: 'compact', decimals: 1 },
+  integer: { format: 'number', decimals: 0 },
+  count: { format: 'number', decimals: 0 },
+  percentage: { format: 'percent', decimals: 1 },
+  'decimal-percentage': { format: 'percent', decimals: 2 },
+  decimal: { format: 'number', decimals: 2 },
+  ratio: { format: 'ratio' },
+  time: { format: 'hours', decimals: 1 },
+  duration: { format: 'duration', decimals: 0 },
+  index: { format: 'number', decimals: 0 },
+  rating: { format: 'number', decimals: 1 },
+};
+
+const normalizeSubvariantKey = (value) =>
+  String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-');
+
+const buildKpiSubtypePatch = (value) => {
+  const preset = KPI_SUBVARIANT_FORMAT_PRESETS[normalizeSubvariantKey(value)];
+  if (!preset) {
+    return null;
+  }
+  const patch = {};
+  if (preset.format !== undefined) {
+    patch.format = preset.format;
+  }
+  if (typeof preset.decimals === 'number') {
+    patch.decimals = preset.decimals;
+  }
+  if (Object.prototype.hasOwnProperty.call(preset, 'compact')) {
+    patch.compact = preset.compact;
+  }
+  if (Object.prototype.hasOwnProperty.call(preset, 'compactThreshold')) {
+    patch.compactThreshold = preset.compactThreshold;
+  }
+  return patch;
+};
+
 /**
  * @typedef {Object} WidgetPropertiesPanelProps
  * @property {{ widgets: Object[] }} authoringModel
@@ -218,7 +274,16 @@ const WidgetPropertiesPanel = ({
   };
 
   const handleOptionChange = (widgetId, optionKey, schema, value) => {
-    const patch = buildOptionPatch(schema, optionKey, value);
+    let patch = buildOptionPatch(schema, optionKey, value);
+    const isKpiSubtypeChange =
+      (activeWidget?.vizType === 'kpi' && optionKey === 'subtype') ||
+      (activeWidget?.vizType === 'kpiVariant' && optionKey === 'subvariant');
+    if (isKpiSubtypeChange) {
+      const subtypePatch = buildKpiSubtypePatch(value);
+      if (subtypePatch) {
+        patch = mergeDeep(patch, subtypePatch);
+      }
+    }
     updateAuthoringModel((current) =>
       updateWidgetInModel(current, widgetId, {
         options: patch,
