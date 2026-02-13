@@ -70,9 +70,12 @@ const resolveValueKey = (encodings, data) => {
   return null;
 };
 
-const resolveLabel = (options, encodings, data) => {
+const resolveLabel = (options, encodings, data, panelConfig) => {
   if (options?.title || options?.label) {
     return options.title || options.label;
+  }
+  if (panelConfig?.title) {
+    return panelConfig.title;
   }
   const labelKey = encodings?.label;
   if (labelKey && data?.length && data[0]?.[labelKey] != null) {
@@ -84,7 +87,8 @@ const resolveLabel = (options, encodings, data) => {
   return '';
 };
 
-const resolveCaption = (options) => options?.subtitle || options?.caption || '';
+const resolveCaption = (options, panelConfig) =>
+  options?.subtitle || options?.caption || panelConfig?.subtitle || '';
 
 const formatDuration = (value, decimals) => {
   const safeDecimals = Math.min(6, clampDecimals(decimals, 0));
@@ -564,9 +568,10 @@ const resolveVariantRenderer = (variantId) =>
  * @param {Array<Object>} [props.data] - KPI data rows.
  * @param {Object} [props.encodings] - Encoding map (value/label).
  * @param {Object} [props.options] - KPI options (variant, subvariant, formatting).
+ * @param {Object} [props.panelConfig] - Parent panel metadata (title/subtitle defaults).
  * @returns {JSX.Element} KPI visualization.
  */
-function KpiVariant({ data = [], encodings = {}, options = {} }) {
+function KpiVariant({ data = [], encodings = {}, options = {}, panelConfig = null }) {
   const viewModel = useMemo(() => {
     const normalized = normalizeOptions(options);
     const valueKey = resolveValueKey(encodings, data);
@@ -576,8 +581,8 @@ function KpiVariant({ data = [], encodings = {}, options = {} }) {
         : valueKey
         ? data?.[0]?.[valueKey]
         : null;
-    const label = resolveLabel(normalized, encodings, data);
-    const caption = resolveCaption(normalized);
+    const label = resolveLabel(normalized, encodings, data, panelConfig);
+    const caption = resolveCaption(normalized, panelConfig);
 
     const hydrated = applySubvariantPreset(normalized.variant, normalized.subvariant, {
       ...normalized,
@@ -591,7 +596,7 @@ function KpiVariant({ data = [], encodings = {}, options = {} }) {
       ...hydrated,
       formattedValue: formatKpiValue(rawValue, hydrated),
     };
-  }, [data, encodings, options]);
+  }, [data, encodings, options, panelConfig]);
 
   const VariantRenderer = resolveVariantRenderer(viewModel.variant);
   const instance = useMemo(() => new VariantRenderer(viewModel), [VariantRenderer, viewModel]);
